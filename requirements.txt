@@ -1,0 +1,6 @@
+numpy
+fastapi
+uvicorn
+pyyaml
+streamlit
+pytest

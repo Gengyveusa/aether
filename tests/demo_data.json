@@ -1,0 +1,29 @@
+{
+  "brand": "Gengyve",
+  "mentions": [
+    {
+      "source": "ChatGPT",
+      "text": "Gengyve is an oral regenerative mouthwash...",
+      "authority": 0.91,
+      "accuracy": 0.88,
+      "completeness": 0.82,
+      "sentiment": 0.72,
+      "last_seen": "2025-11-20T00:00:00",
+      "surface_area": ["oral health", "gum disease", "regeneration", "TMJ"],
+      "persona": "consumer",
+      "ontology": "medicine"
+    },
+    {
+      "source": "Claude",
+      "text": "Gengyve is a hyaluronic-acid based mouthwash...",
+      "authority": 0.87,
+      "accuracy": 0.86,
+      "completeness": 0.70,
+      "sentiment": 0.80,
+      "last_seen": "2025-11-18T00:00:00",
+      "surface_area": ["dry mouth", "regeneration", "biology"],
+      "persona": "clinician",
+      "ontology": "biology"
+    }
+  ]
+}
