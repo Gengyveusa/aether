@@ -1,4 +1,6 @@
 # AETHER  
+![Aether logo](assets/Aether%20Favicon.png)  
+
 AETHER — Multi-Agent GEo Visibility Engine optimizing brand presence for LLM crawlers and AI systems.  
 
 ## Mission  
@@ -14,7 +16,6 @@ AETHER is composed of several autonomous agents working together:
 
 ## Directory Structure  
 The repository will follow this layout:  
-
 - `crawler_simulator/` – agent that fetches and simulates crawling.  
 - `content_analyzer/` – agent for text analysis and summarization.  
 - `knowledge_graph_builder/` – agent to assemble a knowledge graph.  
