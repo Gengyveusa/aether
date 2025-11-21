@@ -31,7 +31,6 @@ def compute_presence_score(data):
 
     return float(np.clip(presence, 0, 1))
 
-
 # ---------------------------
 # QUALITY METRICS
 # ---------------------------
@@ -54,13 +53,14 @@ def compute_quality_score(data):
 
     return float(np.clip(quality, 0, 1))
 
-
 # ---------------------------
 # DIVERSITY METRICS
 # ---------------------------
 
 def entropy(values):
-    vals, counts = np.unique(values, return_counts=True)
+    # Convert values to strings to handle non-homogeneous sequences
+    string_vals = [str(v) for v in values]
+    vals, counts = np.unique(string_vals, return_counts=True)
     probs = counts / counts.sum()
     return -np.sum(probs * np.log2(probs + 1e-9))
 
