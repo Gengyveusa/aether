@@ -1,0 +1,20 @@
+presence: 0.40
+quality: 0.35
+diversity: 0.25
+
+presence_weights:
+  frequency: 0.4
+  systems: 0.3
+  surfaces: 0.2
+  recency: 0.1
+
+quality_weights:
+  accuracy: 0.35
+  authority: 0.35
+  completeness: 0.25
+  redundancy: -0.05
+
+diversity_weights:
+  topics: 0.40
+  personas: 0.35
+  ontologies: 0.25
