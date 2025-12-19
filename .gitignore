@@ -201,6 +201,18 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
+# Node / TypeScript (monorepo)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# Build outputs (TS packages/apps)
+**/dist/
+apps/gateway/schema.gql
+
 # Marimo
 marimo/_static/
 marimo/_lsp/

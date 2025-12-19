@@ -1,0 +1,279 @@
+{
+  "$ref": "#/definitions/Entity",
+  "definitions": {
+    "Entity": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": {
+              "type": "string",
+              "const": "brand"
+            },
+            "slug": {
+              "type": "string",
+              "minLength": 1
+            },
+            "displayName": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": {
+              "type": "string",
+              "default": ""
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updatedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "websiteUrl": {
+              "type": "string",
+              "format": "uri"
+            },
+            "primaryTopics": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "targetAudiences": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            }
+          },
+          "required": [
+            "id",
+            "type",
+            "slug",
+            "displayName",
+            "createdAt",
+            "updatedAt",
+            "websiteUrl"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/id"
+            },
+            "type": {
+              "type": "string",
+              "const": "person"
+            },
+            "slug": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/slug"
+            },
+            "displayName": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/displayName"
+            },
+            "description": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/description"
+            },
+            "createdAt": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/createdAt"
+            },
+            "updatedAt": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/updatedAt"
+            },
+            "roles": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "affiliatedBrandIds": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            }
+          },
+          "required": [
+            "id",
+            "type",
+            "slug",
+            "displayName",
+            "createdAt",
+            "updatedAt"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/id"
+            },
+            "type": {
+              "type": "string",
+              "const": "product"
+            },
+            "slug": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/slug"
+            },
+            "displayName": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/displayName"
+            },
+            "description": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/description"
+            },
+            "createdAt": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/createdAt"
+            },
+            "updatedAt": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/updatedAt"
+            },
+            "brandId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "categories": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            }
+          },
+          "required": [
+            "id",
+            "type",
+            "slug",
+            "displayName",
+            "createdAt",
+            "updatedAt",
+            "brandId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/id"
+            },
+            "type": {
+              "type": "string",
+              "const": "story"
+            },
+            "slug": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/slug"
+            },
+            "displayName": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/displayName"
+            },
+            "description": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/description"
+            },
+            "createdAt": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/createdAt"
+            },
+            "updatedAt": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/updatedAt"
+            },
+            "brandId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "personIds": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            }
+          },
+          "required": [
+            "id",
+            "type",
+            "slug",
+            "displayName",
+            "createdAt",
+            "updatedAt"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/id"
+            },
+            "type": {
+              "type": "string",
+              "const": "proof"
+            },
+            "slug": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/slug"
+            },
+            "displayName": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/displayName"
+            },
+            "description": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/description"
+            },
+            "createdAt": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/createdAt"
+            },
+            "updatedAt": {
+              "$ref": "#/definitions/Entity/anyOf/0/properties/updatedAt"
+            },
+            "sourceUrl": {
+              "type": "string",
+              "format": "uri"
+            },
+            "sourceType": {
+              "type": "string",
+              "enum": [
+                "owned",
+                "earned",
+                "third_party"
+              ]
+            },
+            "publishedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "snippet": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "type",
+            "slug",
+            "displayName",
+            "createdAt",
+            "updatedAt",
+            "sourceUrl",
+            "sourceType"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

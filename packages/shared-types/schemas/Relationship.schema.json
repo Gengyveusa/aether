@@ -1,0 +1,58 @@
+{
+  "$ref": "#/definitions/Relationship",
+  "definitions": {
+    "Relationship": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fromEntityId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "toEntityId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "founded_by",
+            "endorses",
+            "competes_with",
+            "powered_by",
+            "appears_in",
+            "referenced_by"
+          ]
+        },
+        "proofIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "fromEntityId",
+        "toEntityId",
+        "type",
+        "createdAt",
+        "updatedAt"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
