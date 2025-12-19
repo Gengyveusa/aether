@@ -1,9 +1,15 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from typing import Any, Dict, Optional
 from jsonschema import Draft7Validator
 from .schema_loader import load_schema
 import uuid
 from datetime import datetime, timezone
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from .db.session import get_db_session
+from . import crud
+from .schemas import SourceDocumentCreate
 
 app = FastAPI(title="Aether Graph Service", version="0.0.0")
 
@@ -15,11 +21,6 @@ CANONICAL_CONTENT_SCHEMA = load_schema("CanonicalContent")
 entity_validator = Draft7Validator(ENTITY_SCHEMA)
 relationship_validator = Draft7Validator(RELATIONSHIP_SCHEMA)
 canonical_content_validator = Draft7Validator(CANONICAL_CONTENT_SCHEMA)
-
-# TODO: replace with real DB/graph store
-ENTITIES: Dict[str, Dict[str, Any]] = {}
-RELATIONSHIPS: Dict[str, Dict[str, Any]] = {}
-CANONICAL_CONTENT: Dict[str, Dict[str, Any]] = {}
 
 
 def now_iso() -> str:
@@ -38,9 +39,14 @@ def health():
 
 
 @app.post("/entities")
-def create_entity(payload: Dict[str, Any]):
+async def create_entity(payload: Dict[str, Any], session: AsyncSession = Depends(get_db_session)):
     # Assign server-side fields if omitted.
-    entity_id = payload.get("id") or f"ent_{uuid.uuid4().hex}"
+    try:
+        entity_id = payload.get("id") or str(uuid.uuid4())
+        uuid.UUID(entity_id)  # ensure UUID
+    except ValueError:
+        raise HTTPException(status_code=400, detail="id must be a UUID string")
+
     payload["id"] = entity_id
 
     ts = now_iso()
@@ -49,37 +55,82 @@ def create_entity(payload: Dict[str, Any]):
 
     validate_or_400(entity_validator, payload)
 
-    ENTITIES[entity_id] = payload
-    return payload
+    try:
+        created = await crud.create_entity(session, payload)
+    except IntegrityError:
+        # slug unique constraint, etc.
+        await session.rollback()
+        raise HTTPException(status_code=409, detail="Entity already exists (slug conflict)")
+    return created
 
 
 @app.get("/entities/{id}")
-def get_entity(id: str):
-    entity = ENTITIES.get(id)
+async def get_entity(id: str, session: AsyncSession = Depends(get_db_session)):
+    entity = await crud.get_entity(session, id)
     if not entity:
         raise HTTPException(status_code=404, detail="Entity not found")
     return entity
 
 
 @app.put("/canonical-content/{entityId}")
-def put_canonical_content(entityId: str, payload: Dict[str, Any]):
+async def put_canonical_content(entityId: str, payload: Dict[str, Any], session: AsyncSession = Depends(get_db_session)):
     # Ensure entityId consistency
     payload["entityId"] = payload.get("entityId") or entityId
     if payload["entityId"] != entityId:
         raise HTTPException(status_code=400, detail="entityId in body must match path entityId")
 
     validate_or_400(canonical_content_validator, payload)
+    # Ensure referenced entity exists
+    entity = await crud.get_entity(session, entityId)
+    if not entity:
+        raise HTTPException(status_code=404, detail="Entity not found")
 
-    CANONICAL_CONTENT[entityId] = payload
-    return payload
+    stored = await crud.upsert_canonical_content(session, entityId, payload)
+    return stored
 
 
 @app.get("/canonical-content/{entityId}")
-def get_canonical_content(entityId: str):
-    content = CANONICAL_CONTENT.get(entityId)
+async def get_canonical_content(entityId: str, session: AsyncSession = Depends(get_db_session)):
+    content = await crud.get_canonical_content(session, entityId)
     if not content:
         raise HTTPException(status_code=404, detail="CanonicalContent not found")
     return content
+
+
+@app.post("/source-documents")
+async def create_source_document(req: SourceDocumentCreate, session: AsyncSession = Depends(get_db_session)):
+    # Validate brand existence and type
+    entity = await crud.get_entity(session, req.brandId)
+    if not entity:
+        raise HTTPException(status_code=404, detail="Brand not found")
+    if entity.get("type") != "brand":
+        raise HTTPException(status_code=400, detail="brandId must reference an entity of type 'brand'")
+
+    ingested_at = datetime.now(timezone.utc)
+    try:
+        doc = await crud.create_source_document(
+            session,
+            brand_id=req.brandId,
+            url=req.url,
+            content=req.content,
+            content_type=req.contentType or "text/html",
+            ingested_at=ingested_at,
+        )
+    except IntegrityError:
+        await session.rollback()
+        # brand+url unique
+        raise HTTPException(status_code=409, detail="Source document already exists for this brand+url")
+    return doc
+
+
+@app.get("/source-documents")
+async def list_source_documents(brandId: str, session: AsyncSession = Depends(get_db_session)):
+    try:
+        uuid.UUID(brandId)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="brandId must be a UUID string")
+    docs = await crud.list_source_documents(session, brandId)
+    return {"sourceDocuments": docs}
 
 
 @app.post("/relationships")
