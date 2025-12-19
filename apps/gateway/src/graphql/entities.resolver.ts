@@ -8,17 +8,21 @@ export class EntitiesResolver {
   constructor(private readonly entitiesService: EntitiesService) {}
 
   @Query(() => EntityUnion, { nullable: true })
-  entity(@Args("id") id: string) {
-    return this.entitiesService.getEntityById(id) ?? null;
+  async entity(@Args("id") id: string) {
+    return (await this.entitiesService.getEntityById(id)) ?? null;
   }
 
   @Query(() => [EntityUnion])
-  entities(@Args("type", { nullable: true }) type?: string, @Args("search", { nullable: true }) search?: string) {
-    return this.entitiesService.listEntities({ type, search });
+  async entities(
+    @Args("type", { nullable: true }) _type?: string,
+    @Args("search", { nullable: true }) _search?: string
+  ) {
+    // TODO: implement filters via graph-service endpoint
+    return await this.entitiesService.listEntities();
   }
 
   @Query(() => CanonicalContentGql, { nullable: true })
-  canonicalContent(@Args("entityId") entityId: string) {
-    return this.entitiesService.getCanonicalContent(entityId) ?? null;
+  async canonicalContent(@Args("entityId") entityId: string) {
+    return (await this.entitiesService.getCanonicalContent(entityId)) ?? null;
   }
 }

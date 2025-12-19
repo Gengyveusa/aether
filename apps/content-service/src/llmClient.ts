@@ -1,9 +1,10 @@
 export interface LlmClient {
-  generateText(prompt: string, opts?: { model?: string }): Promise<{ text: string }>;
+  generateText(prompt: string): Promise<string>;
 }
 
-export class StubLlmClient implements LlmClient {
-  async generateText(prompt: string): Promise<{ text: string }> {
-    return { text: `STUB_RESPONSE: ${prompt.slice(0, 120)}` };
+export const llmClient: LlmClient = {
+  async generateText(prompt: string): Promise<string> {
+    // For now, return a deterministic placeholder using the prompt
+    return `STUBBED: ${prompt.slice(0, 120)}`;
   }
-}
+};

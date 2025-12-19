@@ -17,6 +17,10 @@
     "typecheck": "npm run typecheck:packages && npm run typecheck:apps",
     "typecheck:packages": "npm -w @aether/shared-utils run typecheck && npm -w @aether/shared-types run typecheck",
     "typecheck:apps": "npm -w @aether/gateway run typecheck && npm -w @aether/rag-service run typecheck && npm -w @aether/content-service run typecheck && npm -w @aether/observability-service run typecheck",
-    "schemas": "npm -w @aether/shared-types run generate-schemas"
+    "schemas": "npm -w @aether/shared-types run generate-schemas",
+    "dev:gateway": "npm -w @aether/gateway run dev",
+    "dev:content": "npm -w @aether/content-service run dev",
+    "dev:rag": "npm -w @aether/rag-service run dev",
+    "dev:observability": "npm -w @aether/observability-service run dev"
   }
 }
