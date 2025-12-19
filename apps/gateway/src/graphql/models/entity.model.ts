@@ -1,4 +1,5 @@
 import { Field, ID, InterfaceType, ObjectType, createUnionType } from "@nestjs/graphql";
+import { SourceDocumentGql } from "./sourceDocument.model.js";
 
 @InterfaceType()
 export abstract class EntityBaseGql {
@@ -34,6 +35,9 @@ export class BrandGql extends EntityBaseGql {
 
   @Field(() => [String])
   targetAudiences!: string[];
+
+  @Field(() => [SourceDocumentGql])
+  sourceDocuments!: SourceDocumentGql[];
 }
 
 @ObjectType({ implements: () => EntityBaseGql })

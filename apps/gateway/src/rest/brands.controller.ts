@@ -1,8 +1,9 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { z } from "zod";
 import { BrandSchema, type Brand } from "@aether/shared-types";
 import { GraphServiceClient } from "../clients/graphServiceClient.js";
 import { ContentServiceClient } from "../clients/contentServiceClient.js";
+import { IngestionServiceClient } from "../clients/ingestionServiceClient.js";
 
 const BrandCreateSchema = BrandSchema.omit({
   id: true,
@@ -18,7 +19,8 @@ const BrandCreateSchema = BrandSchema.omit({
 export class BrandsController {
   constructor(
     private readonly graph: GraphServiceClient,
-    private readonly content: ContentServiceClient
+    private readonly content: ContentServiceClient,
+    private readonly ingestion: IngestionServiceClient
   ) {}
 
   @Post("/brands")
@@ -41,5 +43,42 @@ export class BrandsController {
 
     const brand = BrandSchema.parse(created) as Brand;
     return { brand, hasCanonicalContent: true };
+  }
+
+  @Post("/brands/:id/ingest")
+  async ingestBrand(@Param("id") brandId: string, @Body() body: unknown) {
+    const BodySchema = z.object({ url: z.string().url().optional() });
+    const parsedBody = BodySchema.safeParse(body ?? {});
+    if (!parsedBody.success) {
+      return { error: "Invalid request", details: parsedBody.error.flatten() };
+    }
+
+    let url = parsedBody.data.url;
+    if (!url) {
+      const entity = await this.graph.getEntity(brandId);
+      if (!entity) return { error: "Brand not found" };
+      if (entity.type !== "brand") return { error: "Entity is not a brand" };
+      url = (entity as any).websiteUrl as string | undefined;
+    }
+
+    if (!url) {
+      return { error: "No URL provided and brand.websiteUrl missing" };
+    }
+
+    return await this.ingestion.ingestUrl({ brandId, url });
+  }
+
+  @Get("/brands/:id/source-documents")
+  async listSourceDocuments(@Param("id") brandId: string) {
+    const docs = await this.graph.listSourceDocuments(brandId);
+    // Avoid returning full content from gateway listing
+    return {
+      sourceDocuments: docs.map((d) => ({
+        id: d.id,
+        url: d.url,
+        ingestedAt: d.ingestedAt,
+        contentType: d.contentType ?? null
+      }))
+    };
   }
 }

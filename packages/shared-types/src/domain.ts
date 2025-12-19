@@ -108,3 +108,13 @@ export const CanonicalContentSchema = z.object({
   comparisons: z.array(CanonicalComparisonSchema).optional()
 });
 export type CanonicalContent = z.infer<typeof CanonicalContentSchema>;
+
+export const SourceDocumentSchema = z.object({
+  id: z.string().min(1),
+  brandId: z.string().min(1),
+  url: z.string().url(),
+  content: z.string().optional(),
+  contentType: z.string().optional(),
+  ingestedAt: z.string().datetime()
+});
+export type SourceDocument = z.infer<typeof SourceDocumentSchema>;

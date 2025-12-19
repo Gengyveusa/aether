@@ -1,7 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Optional
-import uuid
+import os
+import httpx
 
 app = FastAPI(title="Aether Ingestion Service", version="0.0.0")
 
@@ -23,10 +24,40 @@ def health():
 
 
 @app.post("/ingest/url")
-def ingest_url(req: IngestUrlRequest):
-    # TODO: enqueue ingestion job
-    job_id = f"job_{uuid.uuid4().hex}"
-    return {"jobId": job_id}
+async def ingest_url(req: IngestUrlRequest):
+    graph_base = (os.environ.get("GRAPH_SERVICE_URL") or "http://localhost:8001").rstrip("/")
+
+    timeout = httpx.Timeout(20.0, connect=10.0)
+    async with httpx.AsyncClient(timeout=timeout, follow_redirects=True) as client:
+        # Fetch HTML
+        try:
+            resp = await client.get(req.url, headers={"user-agent": "AetherIngestion/0.0.0"})
+        except httpx.HTTPError as e:
+            raise HTTPException(status_code=502, detail=f"Failed to fetch URL: {e}")
+
+        if resp.status_code >= 400:
+            raise HTTPException(status_code=502, detail=f"Upstream returned {resp.status_code}")
+
+        html = resp.text
+
+        # Persist as source document in graph-service
+        try:
+            store = await client.post(
+                f"{graph_base}/source-documents",
+                json={
+                    "brandId": req.brandId,
+                    "url": req.url,
+                    "content": html,
+                    "contentType": "text/html",
+                },
+            )
+        except httpx.HTTPError as e:
+            raise HTTPException(status_code=502, detail=f"Failed to store source document: {e}")
+
+        if store.status_code >= 400:
+            raise HTTPException(status_code=store.status_code, detail=store.text)
+
+    return {"status": "ok", "brandId": req.brandId, "url": req.url}
 
 
 @app.post("/ingest/raw")

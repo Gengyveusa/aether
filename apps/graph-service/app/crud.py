@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .db.models import CanonicalContentRow, EntityRow, SourceDocumentRow
+from .db.models import CanonicalContentRow, EntityRow, RelationshipRow, SourceDocumentRow
 
 
 def parse_iso_datetime(value: str) -> datetime:
@@ -115,6 +115,16 @@ async def list_source_documents(session: AsyncSession, brand_id: str) -> list[di
     rows = res.scalars().all()
     return [row_to_source_document(r, include_content=False) for r in rows]
 
+async def list_source_documents_with_content(session: AsyncSession, brand_id: str) -> list[dict[str, Any]]:
+    bid = uuid.UUID(brand_id)
+    res = await session.execute(
+        select(SourceDocumentRow)
+        .where(SourceDocumentRow.brand_id == bid)
+        .order_by(SourceDocumentRow.ingested_at.desc())
+    )
+    rows = res.scalars().all()
+    return [row_to_source_document(r, include_content=True) for r in rows]
+
 
 def row_to_entity(row: EntityRow) -> dict[str, Any]:
     base = {
@@ -128,6 +138,17 @@ def row_to_entity(row: EntityRow) -> dict[str, Any]:
     }
     return {**base, **(row.data or {})}
 
+def row_to_relationship(row: RelationshipRow) -> dict[str, Any]:
+    return {
+        "id": str(row.id),
+        "fromEntityId": str(row.from_entity_id),
+        "toEntityId": str(row.to_entity_id),
+        "type": row.type,
+        "proofIds": row.proof_ids or [],
+        "createdAt": row.created_at.isoformat(),
+        "updatedAt": row.updated_at.isoformat(),
+    }
+
 
 def row_to_source_document(row: SourceDocumentRow, *, include_content: bool) -> dict[str, Any]:
     doc: dict[str, Any] = {
@@ -140,3 +161,39 @@ def row_to_source_document(row: SourceDocumentRow, *, include_content: bool) -> 
     if include_content:
         doc["content"] = row.content
     return doc
+
+
+async def create_relationship(session: AsyncSession, rel: dict[str, Any]) -> dict[str, Any]:
+    rel_id = uuid.UUID(rel["id"]) if rel.get("id") else uuid.uuid4()
+    row = RelationshipRow(
+        id=rel_id,
+        from_entity_id=uuid.UUID(rel["fromEntityId"]),
+        to_entity_id=uuid.UUID(rel["toEntityId"]),
+        type=rel["type"],
+        proof_ids=rel.get("proofIds", []),
+        created_at=parse_iso_datetime(rel["createdAt"]).astimezone(timezone.utc),
+        updated_at=parse_iso_datetime(rel["updatedAt"]).astimezone(timezone.utc),
+    )
+    session.add(row)
+    await session.commit()
+    await session.refresh(row)
+    return row_to_relationship(row)
+
+
+async def list_relationships(
+    session: AsyncSession,
+    *,
+    from_entity_id: Optional[str] = None,
+    to_entity_id: Optional[str] = None,
+    rel_type: Optional[str] = None,
+) -> list[dict[str, Any]]:
+    stmt = select(RelationshipRow)
+    if from_entity_id:
+        stmt = stmt.where(RelationshipRow.from_entity_id == uuid.UUID(from_entity_id))
+    if to_entity_id:
+        stmt = stmt.where(RelationshipRow.to_entity_id == uuid.UUID(to_entity_id))
+    if rel_type:
+        stmt = stmt.where(RelationshipRow.type == rel_type)
+    res = await session.execute(stmt)
+    rows = res.scalars().all()
+    return [row_to_relationship(r) for r in rows]

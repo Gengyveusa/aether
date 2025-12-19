@@ -15,7 +15,8 @@
   "dependencies": {
     "@aether/shared-types": "0.0.0",
     "@aether/shared-utils": "0.0.0",
-    "fastify": "^5.2.1"
+    "fastify": "^5.2.1",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

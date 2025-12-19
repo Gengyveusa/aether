@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .db.session import get_db_session
 from . import crud
 from .schemas import SourceDocumentCreate
+from . import graph_api
 
 app = FastAPI(title="Aether Graph Service", version="0.0.0")
 
@@ -134,28 +135,89 @@ async def list_source_documents(brandId: str, session: AsyncSession = Depends(ge
 
 
 @app.post("/relationships")
-def create_relationship(payload: Dict[str, Any]):
+async def create_relationship(payload: Dict[str, Any], session: AsyncSession = Depends(get_db_session)):
+    # Assign server-side fields if omitted.
+    try:
+        rel_id = payload.get("id") or str(uuid.uuid4())
+        uuid.UUID(rel_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="id must be a UUID string")
+    payload["id"] = rel_id
+
+    ts = now_iso()
+    payload["createdAt"] = payload.get("createdAt") or ts
+    payload["updatedAt"] = ts
+    payload["proofIds"] = payload.get("proofIds") or []
+
     validate_or_400(relationship_validator, payload)
 
-    rel_id = payload.get("id") or f"rel_{uuid.uuid4().hex}"
-    payload["id"] = rel_id
-    RELATIONSHIPS[rel_id] = payload
-    return payload
+    # Ensure referenced entities exist
+    if not await crud.get_entity(session, payload["fromEntityId"]):
+        raise HTTPException(status_code=404, detail="fromEntityId not found")
+    if not await crud.get_entity(session, payload["toEntityId"]):
+        raise HTTPException(status_code=404, detail="toEntityId not found")
+
+    try:
+        created = await crud.create_relationship(session, payload)
+    except IntegrityError:
+        await session.rollback()
+        raise HTTPException(status_code=409, detail="Relationship already exists")
+    return created
 
 
 @app.get("/relationships")
-def list_relationships(
+async def list_relationships(
     fromEntityId: Optional[str] = None,
     toEntityId: Optional[str] = None,
     type: Optional[str] = None,
+    session: AsyncSession = Depends(get_db_session),
 ):
-    items = list(RELATIONSHIPS.values())
+    for v, name in ((fromEntityId, "fromEntityId"), (toEntityId, "toEntityId")):
+        if v:
+            try:
+                uuid.UUID(v)
+            except ValueError:
+                raise HTTPException(status_code=400, detail=f"{name} must be a UUID string")
 
-    if fromEntityId:
-        items = [r for r in items if r.get("fromEntityId") == fromEntityId]
-    if toEntityId:
-        items = [r for r in items if r.get("toEntityId") == toEntityId]
-    if type:
-        items = [r for r in items if r.get("type") == type]
+    rels = await crud.list_relationships(
+        session,
+        from_entity_id=fromEntityId,
+        to_entity_id=toEntityId,
+        rel_type=type,
+    )
+    return {"relationships": rels}
 
-    return {"relationships": items}
+
+@app.get("/graph/entities/{id}/neighbors")
+async def get_entity_neighbors(
+    id: str,
+    relationshipTypes: Optional[str] = None,
+    session: AsyncSession = Depends(get_db_session),
+):
+    try:
+        entity = await graph_api.get_entity(session, id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail="Entity not found")
+
+    rel_types: Optional[list[str]] = None
+    if relationshipTypes:
+        rel_types = [t for t in (s.strip() for s in relationshipTypes.split(",")) if t]
+
+    neighbors = await graph_api.get_neighbors(session, id, relationship_types=rel_types)
+    return {"entity": entity, "neighbors": neighbors}
+
+
+@app.get("/indexing/entity-bundle/{entityId}")
+async def get_indexing_entity_bundle(entityId: str, session: AsyncSession = Depends(get_db_session)):
+    entity = await crud.get_entity(session, entityId)
+    if not entity:
+        raise HTTPException(status_code=404, detail="Entity not found")
+
+    canonical = await crud.get_canonical_content(session, entityId)
+    source_docs: list[dict[str, Any]] = []
+
+    # Source documents are currently linked to Brand entities.
+    if entity.get("type") == "brand":
+        source_docs = await crud.list_source_documents_with_content(session, entityId)
+
+    return {"entity": entity, "canonicalContent": canonical, "sourceDocuments": source_docs}

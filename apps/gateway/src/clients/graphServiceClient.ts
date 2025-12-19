@@ -1,4 +1,11 @@
-import { CanonicalContentSchema, EntitySchema, type CanonicalContent, type Entity } from "@aether/shared-types";
+import {
+  CanonicalContentSchema,
+  EntitySchema,
+  SourceDocumentSchema,
+  type CanonicalContent,
+  type Entity,
+  type SourceDocument
+} from "@aether/shared-types";
 
 function baseUrlFromEnv(name: string, fallback: string) {
   return (process.env[name] ?? fallback).replace(/\/$/, "");
@@ -59,5 +66,15 @@ export class GraphServiceClient {
       );
     }
     return CanonicalContentSchema.parse(json);
+  }
+
+  async listSourceDocuments(brandId: string): Promise<SourceDocument[]> {
+    const res = await fetch(`${this.baseUrl}/source-documents?brandId=${encodeURIComponent(brandId)}`);
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(`graph-service GET /source-documents failed (${res.status}): ${JSON.stringify(json)}`);
+    }
+    const docs = (json as any).sourceDocuments as unknown;
+    return SourceDocumentSchema.array().parse(docs);
   }
 }

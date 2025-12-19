@@ -8,7 +8,8 @@ import {
   ProductSchema,
   ProofSchema,
   RelationshipSchema,
-  StorySchema
+  StorySchema,
+  SourceDocumentSchema
 } from "./domain.js";
 
 export const entityBaseJsonSchema = zodToJsonSchema(EntityBaseSchema, { name: "EntityBase" });
@@ -22,6 +23,7 @@ export const relationshipJsonSchema = zodToJsonSchema(RelationshipSchema, { name
 export const canonicalContentJsonSchema = zodToJsonSchema(CanonicalContentSchema, {
   name: "CanonicalContent"
 });
+export const sourceDocumentJsonSchema = zodToJsonSchema(SourceDocumentSchema, { name: "SourceDocument" });
 
 export const allJsonSchemas = {
   EntityBase: entityBaseJsonSchema,
@@ -32,5 +34,6 @@ export const allJsonSchemas = {
   Proof: proofJsonSchema,
   Entity: entityJsonSchema,
   Relationship: relationshipJsonSchema,
-  CanonicalContent: canonicalContentJsonSchema
+  CanonicalContent: canonicalContentJsonSchema,
+  SourceDocument: sourceDocumentJsonSchema
 } as const;

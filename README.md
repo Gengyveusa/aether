@@ -35,35 +35,53 @@ Current end-to-end flow (in-memory):
 
 ### Ports
 - **gateway**: `3001`
+- **rag-service**: `3002`
 - **content-service**: `3003`
 - **graph-service**: `8001`
+- **ingestion-service**: `8002`
 
 ### Env vars
 - **gateway**
   - `GRAPH_SERVICE_URL` (default: `http://localhost:8001`)
   - `CONTENT_SERVICE_URL` (default: `http://localhost:3003`)
+  - `INGESTION_SERVICE_URL` (default: `http://localhost:8002`)
+  - `RAG_SERVICE_URL` (default: `http://localhost:3002`)
 - **content-service**
   - `GRAPH_SERVICE_URL` (default: `http://localhost:8001`)
+- **rag-service**
+  - `GRAPH_SERVICE_URL` (default: `http://localhost:8001`)
+- **graph-service**
+  - `GRAPH_DB_URL` (default: `postgresql+asyncpg://postgres:postgres@localhost:5432/aether`)
 
 ### Dev commands
+
+Postgres (docker):
+
+```bash
+docker compose up -d postgres
+```
 
 TypeScript services (works with `npm` or `pnpm` at repo root):
 - `npm run dev:gateway`
 - `npm run dev:content`
+- `npm run dev:rag`
 
 Python services:
 - Graph service:
 
 ```bash
 python3 -m pip install -r apps/graph-service/requirements.txt
-python3 -m uvicorn app.main:app --reload --port 8001 --host 0.0.0.0
+cd apps/graph-service
+GRAPH_DB_URL='postgresql+asyncpg://postgres:postgres@localhost:5432/aether' python3 -m app.db.init_db
+GRAPH_DB_URL='postgresql+asyncpg://postgres:postgres@localhost:5432/aether' python3 -m uvicorn app.main:app --reload --port 8001 --host 0.0.0.0
 ```
 
-- Ingestion service (stub):
+- Ingestion service:
 
 ```bash
 python3 -m pip install -r apps/ingestion-service/requirements.txt
-python3 -m uvicorn app.main:app --reload --port 8002 --host 0.0.0.0
+cd apps/ingestion-service
+GRAPH_SERVICE_URL='http://localhost:8001' python3 -m uvicorn app.main:app --reload --port 8002 --host 0.0.0.0
 ```
 
 ### Example: hit the vertical slice
@@ -93,4 +111,23 @@ curl -sS http://localhost:3001/entities/<ENTITY_ID>
 
 ```bash
 curl -sS http://localhost:3001/canonical-content/<ENTITY_ID>
+```
+
+4) Ingest website HTML (gateway):
+
+```bash
+curl -sS -X POST http://localhost:3001/brands/<ENTITY_ID>/ingest -H 'content-type: application/json' -d '{}'
+```
+
+5) List source documents (gateway):
+
+```bash
+curl -sS http://localhost:3001/brands/<ENTITY_ID>/source-documents
+```
+
+6) Index for RAG + ask a question (gateway):
+
+```bash
+curl -sS -X POST http://localhost:3001/entities/<ENTITY_ID>/index
+curl -sS -X POST http://localhost:3001/entities/<ENTITY_ID>/answer -H 'content-type: application/json' -d '{\"query\":\"What does this brand do?\"}'
 ```
