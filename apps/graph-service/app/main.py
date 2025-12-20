@@ -73,6 +73,28 @@ async def get_entity(id: str, backend: GraphBackend = Depends(get_graph_backend_
     return entity
 
 
+@app.get("/entities")
+async def list_entities(
+    type: Optional[str] = None,
+    brandId: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0,
+    backend: GraphBackend = Depends(get_graph_backend_dep),
+):
+    if brandId:
+        try:
+            uuid.UUID(brandId)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="brandId must be a UUID string")
+    if limit < 1 or limit > 200:
+        raise HTTPException(status_code=400, detail="limit must be between 1 and 200")
+    if offset < 0:
+        raise HTTPException(status_code=400, detail="offset must be >= 0")
+
+    items = await backend.list_entities(entity_type=type, brand_id=brandId, limit=limit, offset=offset)
+    return {"entities": items}
+
+
 @app.put("/canonical-content/{entityId}")
 async def put_canonical_content(entityId: str, payload: Dict[str, Any], backend: GraphBackend = Depends(get_graph_backend_dep)):
     # Ensure entityId consistency
@@ -221,7 +243,11 @@ def default_brand_policy() -> Dict[str, Any]:
 
 
 @app.get("/brand-policies/{brandId}")
-async def get_brand_policy(brandId: str, backend: GraphBackend = Depends(get_graph_backend_dep)):
+async def get_brand_policy(
+    brandId: str,
+    includeDefault: bool = True,
+    backend: GraphBackend = Depends(get_graph_backend_dep),
+):
     entity = await backend.get_entity(brandId)
     if not entity:
         raise HTTPException(status_code=404, detail="Brand not found")
@@ -229,7 +255,11 @@ async def get_brand_policy(brandId: str, backend: GraphBackend = Depends(get_gra
         raise HTTPException(status_code=400, detail="brandId must reference an entity of type 'brand'")
 
     policy = await backend.get_brand_policy(brandId)
-    return policy or default_brand_policy()
+    if policy:
+        return policy
+    if includeDefault:
+        return default_brand_policy()
+    raise HTTPException(status_code=404, detail="BrandPolicy not found")
 
 
 @app.put("/brand-policies/{brandId}")

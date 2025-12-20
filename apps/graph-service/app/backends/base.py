@@ -8,6 +8,15 @@ class GraphBackend(Protocol):
 
     async def get_entity(self, entity_id: str) -> Optional[dict[str, Any]]: ...
 
+    async def list_entities(
+        self,
+        *,
+        entity_type: Optional[str] = None,
+        brand_id: Optional[str] = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> list[dict[str, Any]]: ...
+
     async def upsert_canonical_content(self, entity_id: str, data: dict[str, Any]) -> dict[str, Any]: ...
 
     async def get_canonical_content(self, entity_id: str) -> Optional[dict[str, Any]]: ...

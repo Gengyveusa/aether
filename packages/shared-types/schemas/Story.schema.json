@@ -32,9 +32,11 @@
           "type": "string",
           "format": "date-time"
         },
-        "brandId": {
-          "type": "string",
-          "minLength": 1
+        "brandIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "personIds": {
           "type": "array",

@@ -187,9 +187,11 @@
             "updatedAt": {
               "$ref": "#/definitions/Entity/anyOf/0/properties/updatedAt"
             },
-            "brandId": {
-              "type": "string",
-              "minLength": 1
+            "brandIds": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             },
             "personIds": {
               "type": "array",

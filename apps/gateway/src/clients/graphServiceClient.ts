@@ -1,3 +1,4 @@
+import { config } from "@aether/shared-utils";
 import {
   CanonicalContentSchema,
   BrandPolicySchema,
@@ -9,15 +10,11 @@ import {
   type SourceDocument
 } from "@aether/shared-types";
 
-function baseUrlFromEnv(name: string, fallback: string) {
-  return (process.env[name] ?? fallback).replace(/\/$/, "");
-}
-
 export class GraphServiceClient {
   private readonly baseUrl: string;
 
   constructor(opts?: { baseUrl?: string }) {
-    this.baseUrl = (opts?.baseUrl ?? baseUrlFromEnv("GRAPH_SERVICE_URL", "http://localhost:8001")).replace(/\/$/, "");
+    this.baseUrl = (opts?.baseUrl ?? config.graphService.baseUrl).replace(/\/$/, "");
   }
 
   async createEntity(payload: unknown): Promise<Entity> {
@@ -41,6 +38,22 @@ export class GraphServiceClient {
       throw new Error(`graph-service GET /entities/${id} failed (${res.status}): ${JSON.stringify(json)}`);
     }
     return EntitySchema.parse(json);
+  }
+
+  async listEntities(opts?: { type?: string; brandId?: string; limit?: number; offset?: number }): Promise<Entity[]> {
+    const qs = new URLSearchParams();
+    if (opts?.type) qs.set("type", opts.type);
+    if (opts?.brandId) qs.set("brandId", opts.brandId);
+    if (opts?.limit != null) qs.set("limit", String(opts.limit));
+    if (opts?.offset != null) qs.set("offset", String(opts.offset));
+
+    const res = await fetch(`${this.baseUrl}/entities?${qs.toString()}`);
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(`graph-service GET /entities failed (${res.status}): ${JSON.stringify(json)}`);
+    }
+    const items = (json as any).entities as unknown;
+    return EntitySchema.array().parse(items);
   }
 
   async putCanonicalContent(entityId: string, content: CanonicalContent): Promise<CanonicalContent> {
@@ -81,10 +94,20 @@ export class GraphServiceClient {
   }
 
   async getBrandPolicy(brandId: string): Promise<BrandPolicy> {
-    const res = await fetch(`${this.baseUrl}/brand-policies/${encodeURIComponent(brandId)}`);
+    const res = await fetch(`${this.baseUrl}/brand-policies/${encodeURIComponent(brandId)}?includeDefault=true`);
     const json = await res.json().catch(() => ({}));
     if (!res.ok) {
       throw new Error(`graph-service GET /brand-policies failed (${res.status}): ${JSON.stringify(json)}`);
+    }
+    return BrandPolicySchema.parse(json);
+  }
+
+  async getBrandPolicyIfExists(brandId: string): Promise<BrandPolicy | null> {
+    const res = await fetch(`${this.baseUrl}/brand-policies/${encodeURIComponent(brandId)}?includeDefault=false`);
+    if (res.status === 404) return null;
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(`graph-service GET /brand-policies (raw) failed (${res.status}): ${JSON.stringify(json)}`);
     }
     return BrandPolicySchema.parse(json);
   }

@@ -5,6 +5,7 @@ import {
   BrandPolicySchema,
   AiVisibilityProbeConfigSchema,
   AiVisibilityProbeResultSchema,
+  AiVisibilityScorecardSchema,
   EntityBaseSchema,
   EntitySchema,
   PersonSchema,
@@ -34,6 +35,9 @@ export const aiVisibilityProbeConfigJsonSchema = zodToJsonSchema(AiVisibilityPro
 export const aiVisibilityProbeResultJsonSchema = zodToJsonSchema(AiVisibilityProbeResultSchema, {
   name: "AiVisibilityProbeResult"
 });
+export const aiVisibilityScorecardJsonSchema = zodToJsonSchema(AiVisibilityScorecardSchema, {
+  name: "AiVisibilityScorecard"
+});
 
 export const allJsonSchemas = {
   EntityBase: entityBaseJsonSchema,
@@ -48,5 +52,6 @@ export const allJsonSchemas = {
   SourceDocument: sourceDocumentJsonSchema,
   BrandPolicy: brandPolicyJsonSchema,
   AiVisibilityProbeConfig: aiVisibilityProbeConfigJsonSchema,
-  AiVisibilityProbeResult: aiVisibilityProbeResultJsonSchema
+  AiVisibilityProbeResult: aiVisibilityProbeResultJsonSchema,
+  AiVisibilityScorecard: aiVisibilityScorecardJsonSchema
 } as const;

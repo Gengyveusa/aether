@@ -38,7 +38,7 @@ export type Product = z.infer<typeof ProductSchema>;
 
 export const StorySchema = EntityBaseSchema.extend({
   type: z.literal("story"),
-  brandId: z.string().min(1).optional(),
+  brandIds: z.array(z.string()).optional(),
   personIds: z.array(z.string()).optional(),
   tags: z.array(z.string()).default([])
 });
@@ -64,6 +64,24 @@ export const EntitySchema = z.discriminatedUnion("type", [
   ProofSchema
 ]);
 export type Entity = z.infer<typeof EntitySchema>;
+
+export type AnyEntity = Brand | Person | Product | Story | Proof;
+
+export function isBrandEntity(e: Entity): e is Brand {
+  return e.type === "brand";
+}
+export function isPersonEntity(e: Entity): e is Person {
+  return e.type === "person";
+}
+export function isProductEntity(e: Entity): e is Product {
+  return e.type === "product";
+}
+export function isStoryEntity(e: Entity): e is Story {
+  return e.type === "story";
+}
+export function isProofEntity(e: Entity): e is Proof {
+  return e.type === "proof";
+}
 
 export const RelationshipTypeSchema = z.enum([
   "founded_by",
@@ -163,3 +181,12 @@ export const AiVisibilityProbeResultSchema = z.object({
   sentiment: SentimentSchema
 });
 export type AiVisibilityProbeResult = z.infer<typeof AiVisibilityProbeResultSchema>;
+
+export const AiVisibilityScorecardSchema = z.object({
+  entityId: z.string().min(1),
+  computedAt: z.string().datetime(),
+  coverage: z.number().min(0).max(1),
+  sentimentScore: z.number().min(-1).max(1),
+  descriptionConsistency: z.number().min(0).max(1)
+});
+export type AiVisibilityScorecard = z.infer<typeof AiVisibilityScorecardSchema>;

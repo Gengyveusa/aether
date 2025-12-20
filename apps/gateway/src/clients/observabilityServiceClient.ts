@@ -1,4 +1,4 @@
-import type { AiVisibilityProbeConfig, AiVisibilityProbeResult } from "@aether/shared-types";
+import type { AiVisibilityProbeConfig, AiVisibilityProbeResult, AiVisibilityScorecard } from "@aether/shared-types";
 import { config } from "@aether/shared-utils";
 
 export class ObservabilityServiceClient {
@@ -41,5 +41,28 @@ export class ObservabilityServiceClient {
       throw new Error(`observability-service GET /probes/results failed (${res.status}): ${JSON.stringify(json)}`);
     }
     return json as { results: AiVisibilityProbeResult[] };
+  }
+
+  async computeScorecard(entityId: string): Promise<AiVisibilityScorecard> {
+    const res = await fetch(`${this.baseUrl}/scorecards/compute`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ entityId })
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(`observability-service POST /scorecards/compute failed (${res.status}): ${JSON.stringify(json)}`);
+    }
+    return json as AiVisibilityScorecard;
+  }
+
+  async getScorecard(entityId: string): Promise<AiVisibilityScorecard | null> {
+    const res = await fetch(`${this.baseUrl}/scorecards/${encodeURIComponent(entityId)}`);
+    if (res.status === 404) return null;
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(`observability-service GET /scorecards failed (${res.status}): ${JSON.stringify(json)}`);
+    }
+    return json as AiVisibilityScorecard;
   }
 }

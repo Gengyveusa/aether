@@ -5,6 +5,8 @@ import { config, logger } from "@aether/shared-utils";
 import {
   AiVisibilityProbeConfigSchema,
   AiVisibilityProbeResultSchema,
+  AiVisibilityScorecardSchema,
+  type AiVisibilityScorecard,
   SentimentSchema,
   type AiVisibilityProbeConfig,
   type AiVisibilityProbeResult
@@ -17,6 +19,27 @@ export function buildApp() {
   // In-memory storage (swap to DB later)
   const probeConfigs = new Map<string, AiVisibilityProbeConfig>();
   const probeResults: AiVisibilityProbeResult[] = [];
+  const scorecards = new Map<string, AiVisibilityScorecard>();
+
+  function tokenize(s: string): Set<string> {
+    return new Set(
+      s
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, " ")
+        .split(/\s+/)
+        .filter(Boolean)
+    );
+  }
+
+  function jaccard(a: string, b: string): number {
+    const A = tokenize(a);
+    const B = tokenize(b);
+    if (A.size === 0 || B.size === 0) return 0;
+    let inter = 0;
+    for (const t of A) if (B.has(t)) inter += 1;
+    const union = A.size + B.size - inter;
+    return union === 0 ? 0 : inter / union;
+  }
 
 function hashToInt(input: string): number {
   const h = createHash("sha256").update(input).digest();
@@ -104,6 +127,59 @@ app.get("/probes/results", async (req, reply) => {
   const results = probeResults.filter((r) => r.brandId === brandId);
   return { results };
 });
+
+  app.post("/scorecards/compute", async (req, reply) => {
+    const BodySchema = z.object({ entityId: z.string().min(1) });
+    const parsed = BodySchema.safeParse(req.body);
+    if (!parsed.success) {
+      return reply.status(400).send({ error: "Invalid request", details: parsed.error.flatten() });
+    }
+
+    const entityId = parsed.data.entityId;
+    const results = probeResults.filter((r) => r.brandId === entityId);
+
+    const coverage = results.length ? results.filter((r) => r.mentionsBrand).length / results.length : 0;
+    const sentimentScore = results.length
+      ? results
+          .map((r) => (r.sentiment === "positive" ? 1 : r.sentiment === "negative" ? -1 : 0))
+          .reduce((a, b) => a + b, 0 as number) / results.length
+      : 0;
+
+    // Fetch canonical content from graph-service
+    const graphBase = config.graphService.baseUrl;
+    let aboutShort = "";
+    try {
+      const res = await fetch(`${graphBase}/canonical-content/${encodeURIComponent(entityId)}`);
+      if (res.ok) {
+        const json = await res.json();
+        aboutShort = String((json as any).aboutShort ?? "");
+      }
+    } catch {
+      // ignore, keep empty
+    }
+
+    const descriptionConsistency = results.length && aboutShort
+      ? results.map((r) => jaccard(r.descriptionSnippet, aboutShort)).reduce((a, b) => a + b, 0) / results.length
+      : 0;
+
+    const scorecard = AiVisibilityScorecardSchema.parse({
+      entityId,
+      computedAt: new Date().toISOString(),
+      coverage,
+      sentimentScore,
+      descriptionConsistency
+    });
+
+    scorecards.set(entityId, scorecard);
+    return scorecard;
+  });
+
+  app.get("/scorecards/:entityId", async (req, reply) => {
+    const entityId = (req.params as any).entityId as string;
+    const sc = scorecards.get(entityId);
+    if (!sc) return reply.status(404).send({ error: "Scorecard not found" });
+    return sc;
+  });
 
   return app;
 }

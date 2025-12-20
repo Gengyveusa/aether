@@ -12,8 +12,12 @@ export class EntitiesService {
   }
 
   // NOTE: graph-service doesn't expose listing yet. This keeps the API stable for now.
-  async listEntities(): Promise<Entity[]> {
-    return [];
+  async listEntities(opts?: { type?: string; search?: string; brandId?: string }): Promise<Entity[]> {
+    // TODO: implement server-side search in graph-service.
+    const items = await this.graph.listEntities({ type: opts?.type, brandId: opts?.brandId, limit: 200, offset: 0 });
+    const q = opts?.search?.trim().toLowerCase();
+    if (!q) return items;
+    return items.filter((e) => `${e.displayName} ${e.slug} ${e.description}`.toLowerCase().includes(q));
   }
 
   async getCanonicalContent(entityId: string): Promise<CanonicalContent | undefined> {

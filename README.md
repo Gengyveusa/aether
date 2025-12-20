@@ -161,6 +161,19 @@ curl -sS -X POST http://localhost:3001/entities/<ENTITY_ID>/index
 curl -sS -X POST http://localhost:3001/entities/<ENTITY_ID>/answer -H 'content-type: application/json' -d '{\"query\":\"What does this brand do?\"}'
 ```
 
+9) Run onboarding workflow (gateway):
+
+```bash
+curl -sS -X POST http://localhost:3001/entities/<ENTITY_ID>/onboard
+```
+
+10) Run probes and compute scorecard (gateway):
+
+```bash
+curl -sS -X POST http://localhost:3001/entities/<ENTITY_ID>/probes/run-and-score -H 'content-type: application/json' -d '{}'
+curl -sS http://localhost:3001/entities/<ENTITY_ID>/scorecard
+```
+
 7) Set brand policy and see policy violations (gateway):
 
 ```bash

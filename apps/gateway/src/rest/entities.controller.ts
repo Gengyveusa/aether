@@ -14,11 +14,12 @@ export class EntitiesController {
 
   @Get("/entities")
   async listEntities(
-    @Query("type") _type?: string,
+    @Query("type") type?: string,
     @Query("slug") _slug?: string,
-    @Query("search") _search?: string
+    @Query("search") search?: string,
+    @Query("brandId") brandId?: string
   ) {
     // TODO: implement list/filters via graph-service endpoint
-    return this.entities.listEntities();
+    return this.entities.listEntities({ type, search, brandId });
   }
 }

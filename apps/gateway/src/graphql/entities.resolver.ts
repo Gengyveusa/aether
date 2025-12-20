@@ -17,8 +17,7 @@ export class EntitiesResolver {
     @Args("type", { nullable: true }) _type?: string,
     @Args("search", { nullable: true }) _search?: string
   ) {
-    // TODO: implement filters via graph-service endpoint
-    return await this.entitiesService.listEntities();
+    return await this.entitiesService.listEntities({ type: _type, search: _search });
   }
 
   @Query(() => CanonicalContentGql, { nullable: true })

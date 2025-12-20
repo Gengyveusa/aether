@@ -19,6 +19,16 @@ class PostgresGraphBackend:
     async def get_entity(self, entity_id: str) -> Optional[dict[str, Any]]:
         return await crud.get_entity(self._session, entity_id)
 
+    async def list_entities(
+        self,
+        *,
+        entity_type: Optional[str] = None,
+        brand_id: Optional[str] = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> list[dict[str, Any]]:
+        return await crud.list_entities(self._session, entity_type=entity_type, brand_id=brand_id, limit=limit, offset=offset)
+
     async def upsert_canonical_content(self, entity_id: str, data: dict[str, Any]) -> dict[str, Any]:
         return await crud.upsert_canonical_content(self._session, entity_id, data)
 

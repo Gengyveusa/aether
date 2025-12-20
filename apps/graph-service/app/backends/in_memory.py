@@ -20,6 +20,33 @@ class InMemoryGraphBackend:
     async def get_entity(self, entity_id: str) -> Optional[dict[str, Any]]:
         return self.entities.get(entity_id)
 
+    async def list_entities(
+        self,
+        *,
+        entity_type: Optional[str] = None,
+        brand_id: Optional[str] = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> list[dict[str, Any]]:
+        items = list(self.entities.values())
+        if entity_type:
+            items = [e for e in items if e.get("type") == entity_type]
+        if brand_id:
+            def matches_brand(e: dict[str, Any]) -> bool:
+                t = e.get("type")
+                if t == "brand":
+                    return e.get("id") == brand_id
+                if t == "product":
+                    return e.get("brandId") == brand_id
+                if t == "person":
+                    return brand_id in (e.get("affiliatedBrandIds") or [])
+                if t == "story":
+                    return brand_id in (e.get("brandIds") or [])
+                return False
+            items = [e for e in items if matches_brand(e)]
+
+        return items[offset : offset + limit]
+
     async def upsert_canonical_content(self, entity_id: str, data: dict[str, Any]) -> dict[str, Any]:
         self.canonical[entity_id] = data
         return data

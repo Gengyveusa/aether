@@ -52,6 +52,35 @@ async def get_entity(session: AsyncSession, entity_id: str) -> Optional[dict[str
     return row_to_entity(row)
 
 
+async def list_entities(
+    session: AsyncSession,
+    *,
+    entity_type: Optional[str] = None,
+    brand_id: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0,
+) -> list[dict[str, Any]]:
+    stmt = select(EntityRow)
+
+    if entity_type:
+        stmt = stmt.where(EntityRow.type == entity_type)
+
+    if brand_id:
+        # Filter by brand association based on entity type.
+        bid = uuid.UUID(brand_id)
+        stmt = stmt.where(
+            ((EntityRow.type == "brand") & (EntityRow.id == bid))
+            | ((EntityRow.type == "product") & (EntityRow.data["brandId"].astext == brand_id))
+            | ((EntityRow.type == "person") & (EntityRow.data["affiliatedBrandIds"].contains([brand_id])))
+            | ((EntityRow.type == "story") & (EntityRow.data["brandIds"].contains([brand_id])))
+        )
+
+    stmt = stmt.order_by(EntityRow.updated_at.desc()).limit(limit).offset(offset)
+    res = await session.execute(stmt)
+    rows = res.scalars().all()
+    return [row_to_entity(r) for r in rows]
+
+
 async def upsert_canonical_content(session: AsyncSession, entity_id: str, data: dict[str, Any]) -> dict[str, Any]:
     uid = uuid.UUID(entity_id)
     now = datetime.now(timezone.utc)
