@@ -24,6 +24,8 @@ function getUrlEnv(name: string, defaultValue: string): string {
 
 export type LlmProviderKind = "stub" | "vertex";
 export type EmbeddingsProviderKind = "stub" | "vertex";
+export type VectorBackendKind = "in_memory" | "qdrant";
+export type GraphBackendKind = "postgres" | "neo4j" | "in_memory";
 
 export const config = {
   gateway: {
@@ -46,16 +48,24 @@ export const config = {
   },
   llm: {
     provider: (process.env.LLM_PROVIDER ?? "stub") as LlmProviderKind,
-    model: process.env.LLM_MODEL ?? "stub-model"
+    model: process.env.LLM_MODEL ?? "stub-model",
+    projectId: process.env.LLM_PROJECT_ID ?? process.env.VERTEX_PROJECT_ID,
+    location: process.env.LLM_LOCATION ?? process.env.VERTEX_LOCATION
   },
   embeddings: {
     provider: (process.env.EMBEDDINGS_PROVIDER ?? "stub") as EmbeddingsProviderKind,
-    model: process.env.EMBEDDINGS_MODEL ?? "stub-embeddings"
+    model: process.env.EMBEDDINGS_MODEL ?? "stub-embeddings",
+    projectId: process.env.EMBEDDINGS_PROJECT_ID ?? process.env.VERTEX_PROJECT_ID,
+    location: process.env.EMBEDDINGS_LOCATION ?? process.env.VERTEX_LOCATION
   },
   vector: {
-    backend: process.env.VECTOR_BACKEND ?? "in_memory"
+    backend: (process.env.VECTOR_BACKEND ?? "in_memory") as VectorBackendKind,
+    qdrantUrl: process.env.QDRANT_URL ?? "http://localhost:6333",
+    collectionName: process.env.QDRANT_COLLECTION ?? "aether-entities",
+    // Default aligns with StubEmbeddingProvider dims; can be overridden for real embedding sizes.
+    vectorSize: getNumberEnv("QDRANT_VECTOR_SIZE", 64)
   },
   graph: {
-    backend: process.env.GRAPH_BACKEND ?? "postgres"
+    backend: (process.env.GRAPH_BACKEND ?? "postgres") as GraphBackendKind
   }
 } as const;

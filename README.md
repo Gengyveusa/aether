@@ -51,9 +51,15 @@ Current end-to-end flow (in-memory):
 - **shared (Node services)**
   - `LLM_PROVIDER` = `stub` | `vertex` (default: `stub`)
   - `LLM_MODEL` (default: `stub-model`)
+  - `VERTEX_PROJECT_ID` / `VERTEX_LOCATION` (used by Vertex providers)
+  - `LLM_PROJECT_ID` / `LLM_LOCATION` (optional overrides)
   - `EMBEDDINGS_PROVIDER` = `stub` | `vertex` (default: `stub`)
   - `EMBEDDINGS_MODEL` (default: `stub-embeddings`)
+  - `EMBEDDINGS_PROJECT_ID` / `EMBEDDINGS_LOCATION` (optional overrides)
   - `VECTOR_BACKEND` = `in_memory` | `qdrant` (default: `in_memory`)
+  - `QDRANT_URL` (default: `http://localhost:6333`)
+  - `QDRANT_COLLECTION` (default: `aether-entities`)
+  - `QDRANT_VECTOR_SIZE` (default: `64`)
   - `GRAPH_BACKEND` = `postgres` | `neo4j` | `in_memory` (default: `postgres`)
 - **content-service**
   - `GRAPH_SERVICE_URL` (default: `http://localhost:8001`)

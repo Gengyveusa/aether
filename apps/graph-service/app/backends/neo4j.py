@@ -4,9 +4,27 @@ from typing import Any, Optional
 
 
 class Neo4jGraphBackend:
-    # TODO: implement Neo4j driver integration.
-    def __init__(self, _uri: str, _user: str, _password: str):
-        pass
+    """Neo4j graph backend (skeleton).
+
+    Intended mapping (docstring pseudo-queries; not executed yet):
+
+    - Entity nodes:
+      MERGE (e:Entity {id: $id}) SET e.type=$type, e.slug=$slug, e.displayName=$displayName, e.description=$description, e.createdAt=$createdAt, e.updatedAt=$updatedAt, e.data=$data
+
+    - Relationship edges:
+      MATCH (a:Entity {id:$from}), (b:Entity {id:$to})
+      MERGE (a)-[r:REL {id:$id, type:$type}]->(b)
+      SET r.proofIds=$proofIds, r.createdAt=$createdAt, r.updatedAt=$updatedAt
+
+    - Neighbors:
+      MATCH (e:Entity {id:$id})-[r:REL]-(n:Entity) RETURN r,e,n
+    """
+
+    def __init__(self, uri: str, user: str, password: str):
+        self.uri = uri
+        self.user = user
+        self.password = password
+        # TODO: initialize neo4j.AsyncGraphDatabase driver here.
 
     async def create_entity(self, _payload: dict[str, Any]) -> dict[str, Any]:
         raise NotImplementedError

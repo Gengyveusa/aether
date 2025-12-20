@@ -36,9 +36,11 @@ async def get_graph_backend_dep(session: AsyncSession | None = Depends(maybe_get
         return _in_memory_singleton
 
     if kind == "neo4j":
-        uri = os.environ.get("NEO4J_URI", "bolt://localhost:7687")
-        user = os.environ.get("NEO4J_USER", "neo4j")
-        password = os.environ.get("NEO4J_PASSWORD", "neo4j")
+        uri = os.environ.get("NEO4J_URI")
+        user = os.environ.get("NEO4J_USER")
+        password = os.environ.get("NEO4J_PASSWORD")
+        if not uri or not user or not password:
+            raise RuntimeError("GRAPH_BACKEND=neo4j requires NEO4J_URI, NEO4J_USER, and NEO4J_PASSWORD")
         return Neo4jGraphBackend(uri, user, password)
 
     # default postgres

@@ -6,13 +6,21 @@ import type { VectorBackend } from "./vectorBackend.js";
 
 export function createVectorBackend(): VectorBackend {
   const backend = config.vector.backend;
+  const embeddingProvider = createEmbeddingProvider();
   if (backend === "qdrant") {
-    // TODO: move to shared config once we actually integrate Qdrant.
-    const url = process.env.QDRANT_URL ?? "http://localhost:6333";
-    const collection = process.env.QDRANT_COLLECTION ?? "aether";
-    return new QdrantVectorBackend({ url, collection });
+    const url = config.vector.qdrantUrl;
+    const collection = config.vector.collectionName;
+    if (!url || !collection) {
+      throw new Error("VECTOR_BACKEND=qdrant requires QDRANT_URL and QDRANT_COLLECTION");
+    }
+    return new QdrantVectorBackend({
+      url,
+      collection,
+      embeddingProvider,
+      model: config.embeddings.model,
+      vectorSize: config.vector.vectorSize
+    });
   }
 
-  const embeddingProvider = createEmbeddingProvider();
   return new InMemoryVectorBackend({ embeddingProvider, model: config.embeddings.model });
 }

@@ -108,7 +108,12 @@ export async function start() {
   const port = Number(process.env.PORT ?? 3003);
   const host = process.env.HOST ?? "0.0.0.0";
   await app.listen({ port, host });
-  logger.info("content-service listening", { port, host });
+  logger.info("content-service listening", {
+    port,
+    host,
+    llmProvider: config.llm.provider,
+    llmModel: config.llm.model
+  });
 }
 
 const isMain = process.argv[1] === fileURLToPath(import.meta.url);
