@@ -10,8 +10,10 @@ import { GraphServiceClient } from "../clients/graphServiceClient.js";
 import { ContentServiceClient } from "../clients/contentServiceClient.js";
 import { IngestionServiceClient } from "../clients/ingestionServiceClient.js";
 import { RagServiceClient } from "../clients/ragServiceClient.js";
+import { ObservabilityServiceClient } from "../clients/observabilityServiceClient.js";
 import { BrandFieldsResolver } from "../graphql/brandFields.resolver.js";
 import { RagResolver } from "../graphql/rag.resolver.js";
+import { PolicyAndProbesResolver } from "../graphql/policyAndProbes.resolver.js";
 
 @Module({
   controllers: [BrandsController, EntitiesController, CanonicalContentController, EntitiesRagController],
@@ -20,10 +22,12 @@ import { RagResolver } from "../graphql/rag.resolver.js";
     ContentServiceClient,
     IngestionServiceClient,
     RagServiceClient,
+    ObservabilityServiceClient,
     EntitiesService,
     EntitiesResolver,
     BrandFieldsResolver,
-    RagResolver
+    RagResolver,
+    PolicyAndProbesResolver
   ]
 })
 export class EntitiesModule {}

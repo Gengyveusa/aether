@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .db.models import CanonicalContentRow, EntityRow, RelationshipRow, SourceDocumentRow
+from .db.models import BrandPolicyRow, CanonicalContentRow, EntityRow, RelationshipRow, SourceDocumentRow
 
 
 def parse_iso_datetime(value: str) -> datetime:
@@ -197,3 +197,52 @@ async def list_relationships(
     res = await session.execute(stmt)
     rows = res.scalars().all()
     return [row_to_relationship(r) for r in rows]
+
+
+def row_to_brand_policy(row: BrandPolicyRow) -> dict[str, Any]:
+    return {
+        "allowedClaims": row.allowed_claims or {},
+        "forbiddenPhrases": row.forbidden_phrases or [],
+        "regulatedTopics": row.regulated_topics or [],
+    }
+
+
+async def get_brand_policy(session: AsyncSession, brand_id: str) -> Optional[dict[str, Any]]:
+    try:
+        bid = uuid.UUID(brand_id)
+    except ValueError:
+        return None
+
+    res = await session.execute(select(BrandPolicyRow).where(BrandPolicyRow.brand_id == bid))
+    row = res.scalar_one_or_none()
+    return row_to_brand_policy(row) if row else None
+
+
+async def upsert_brand_policy(session: AsyncSession, brand_id: str, policy: dict[str, Any]) -> dict[str, Any]:
+    bid = uuid.UUID(brand_id)
+    now = datetime.now(timezone.utc)
+
+    stmt = insert(BrandPolicyRow).values(
+        brand_id=bid,
+        allowed_claims=policy.get("allowedClaims") or {},
+        forbidden_phrases=policy.get("forbiddenPhrases") or [],
+        regulated_topics=policy.get("regulatedTopics") or [],
+        created_at=now,
+        updated_at=now,
+    )
+    stmt = stmt.on_conflict_do_update(
+        constraint="uq_brand_policies_brand_id",
+        set_={
+            "allowed_claims": policy.get("allowedClaims") or {},
+            "forbidden_phrases": policy.get("forbiddenPhrases") or [],
+            "regulated_topics": policy.get("regulatedTopics") or [],
+            "updated_at": now,
+        },
+    )
+
+    await session.execute(stmt)
+    await session.commit()
+
+    res = await session.execute(select(BrandPolicyRow).where(BrandPolicyRow.brand_id == bid))
+    row = res.scalar_one()
+    return row_to_brand_policy(row)

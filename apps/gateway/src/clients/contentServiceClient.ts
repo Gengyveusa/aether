@@ -1,5 +1,7 @@
 import { CanonicalContentSchema, EntitySchema, type CanonicalContent, type Entity } from "@aether/shared-types";
 
+export type PolicyViolation = { field: string; phrase: string; reason: string };
+
 function baseUrlFromEnv(name: string, fallback: string) {
   return (process.env[name] ?? fallback).replace(/\/$/, "");
 }
@@ -11,7 +13,7 @@ export class ContentServiceClient {
     this.baseUrl = (opts?.baseUrl ?? baseUrlFromEnv("CONTENT_SERVICE_URL", "http://localhost:3003")).replace(/\/$/, "");
   }
 
-  async generateCanonicalContent(entity: Entity): Promise<CanonicalContent> {
+  async generateCanonicalContent(entity: Entity): Promise<{ canonicalContent: CanonicalContent; policyViolations: PolicyViolation[] }> {
     const res = await fetch(`${this.baseUrl}/generate/canonical-content`, {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -29,6 +31,7 @@ export class ContentServiceClient {
     if (canonical.entityId !== parsed.id) {
       throw new Error("content-service returned canonicalContent with mismatched entityId");
     }
-    return canonical;
+    const policyViolations = (json as any).policyViolations ?? [];
+    return { canonicalContent: canonical, policyViolations };
   }
 }

@@ -118,3 +118,48 @@ export const SourceDocumentSchema = z.object({
   ingestedAt: z.string().datetime()
 });
 export type SourceDocument = z.infer<typeof SourceDocumentSchema>;
+
+export const AllowedClaimsSchema = z
+  .object({
+    canUseSuperlatives: z.boolean().default(false),
+    allowedSuperlatives: z.array(z.string()).default([]),
+    allowedComparisons: z.array(z.string()).default([])
+  })
+  .default({
+    canUseSuperlatives: false,
+    allowedSuperlatives: [],
+    allowedComparisons: []
+  });
+export type AllowedClaims = z.infer<typeof AllowedClaimsSchema>;
+
+export const BrandPolicySchema = z.object({
+  allowedClaims: AllowedClaimsSchema,
+  forbiddenPhrases: z.array(z.string()).default([]),
+  regulatedTopics: z.array(z.string()).default([])
+});
+export type BrandPolicy = z.infer<typeof BrandPolicySchema>;
+
+export const AiVisibilityProbeConfigSchema = z.object({
+  id: z.string().min(1),
+  brandId: z.string().min(1),
+  questions: z.array(z.string()).min(1),
+  targetModels: z.array(z.string()).min(1)
+});
+export type AiVisibilityProbeConfig = z.infer<typeof AiVisibilityProbeConfigSchema>;
+
+export const SentimentSchema = z.enum(["positive", "neutral", "negative"]);
+export type Sentiment = z.infer<typeof SentimentSchema>;
+
+export const AiVisibilityProbeResultSchema = z.object({
+  id: z.string().min(1),
+  probeConfigId: z.string().min(1),
+  brandId: z.string().min(1),
+  runAt: z.string().datetime(),
+  modelId: z.string().min(1),
+  question: z.string().min(1),
+  rawAnswer: z.string().min(1),
+  mentionsBrand: z.boolean(),
+  descriptionSnippet: z.string().min(1),
+  sentiment: SentimentSchema
+});
+export type AiVisibilityProbeResult = z.infer<typeof AiVisibilityProbeResultSchema>;

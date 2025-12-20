@@ -1,0 +1,40 @@
+{
+  "$ref": "#/definitions/AiVisibilityProbeConfig",
+  "definitions": {
+    "AiVisibilityProbeConfig": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "brandId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "targetModels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "id",
+        "brandId",
+        "questions",
+        "targetModels"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

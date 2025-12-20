@@ -2,6 +2,9 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import {
   BrandSchema,
   CanonicalContentSchema,
+  BrandPolicySchema,
+  AiVisibilityProbeConfigSchema,
+  AiVisibilityProbeResultSchema,
   EntityBaseSchema,
   EntitySchema,
   PersonSchema,
@@ -24,6 +27,13 @@ export const canonicalContentJsonSchema = zodToJsonSchema(CanonicalContentSchema
   name: "CanonicalContent"
 });
 export const sourceDocumentJsonSchema = zodToJsonSchema(SourceDocumentSchema, { name: "SourceDocument" });
+export const brandPolicyJsonSchema = zodToJsonSchema(BrandPolicySchema, { name: "BrandPolicy" });
+export const aiVisibilityProbeConfigJsonSchema = zodToJsonSchema(AiVisibilityProbeConfigSchema, {
+  name: "AiVisibilityProbeConfig"
+});
+export const aiVisibilityProbeResultJsonSchema = zodToJsonSchema(AiVisibilityProbeResultSchema, {
+  name: "AiVisibilityProbeResult"
+});
 
 export const allJsonSchemas = {
   EntityBase: entityBaseJsonSchema,
@@ -35,5 +45,8 @@ export const allJsonSchemas = {
   Entity: entityJsonSchema,
   Relationship: relationshipJsonSchema,
   CanonicalContent: canonicalContentJsonSchema,
-  SourceDocument: sourceDocumentJsonSchema
+  SourceDocument: sourceDocumentJsonSchema,
+  BrandPolicy: brandPolicyJsonSchema,
+  AiVisibilityProbeConfig: aiVisibilityProbeConfigJsonSchema,
+  AiVisibilityProbeResult: aiVisibilityProbeResultJsonSchema
 } as const;

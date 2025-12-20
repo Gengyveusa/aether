@@ -18,10 +18,12 @@ app = FastAPI(title="Aether Graph Service", version="0.0.0")
 ENTITY_SCHEMA = load_schema("Entity")
 RELATIONSHIP_SCHEMA = load_schema("Relationship")
 CANONICAL_CONTENT_SCHEMA = load_schema("CanonicalContent")
+BRAND_POLICY_SCHEMA = load_schema("BrandPolicy")
 
 entity_validator = Draft7Validator(ENTITY_SCHEMA)
 relationship_validator = Draft7Validator(RELATIONSHIP_SCHEMA)
 canonical_content_validator = Draft7Validator(CANONICAL_CONTENT_SCHEMA)
+brand_policy_validator = Draft7Validator(BRAND_POLICY_SCHEMA)
 
 
 def now_iso() -> str:
@@ -221,3 +223,37 @@ async def get_indexing_entity_bundle(entityId: str, session: AsyncSession = Depe
         source_docs = await crud.list_source_documents_with_content(session, entityId)
 
     return {"entity": entity, "canonicalContent": canonical, "sourceDocuments": source_docs}
+
+
+def default_brand_policy() -> Dict[str, Any]:
+    # Keep defaults aligned with shared-types BrandPolicy defaults.
+    return {
+        "allowedClaims": {"canUseSuperlatives": False, "allowedSuperlatives": [], "allowedComparisons": []},
+        "forbiddenPhrases": [],
+        "regulatedTopics": [],
+    }
+
+
+@app.get("/brand-policies/{brandId}")
+async def get_brand_policy(brandId: str, session: AsyncSession = Depends(get_db_session)):
+    entity = await crud.get_entity(session, brandId)
+    if not entity:
+        raise HTTPException(status_code=404, detail="Brand not found")
+    if entity.get("type") != "brand":
+        raise HTTPException(status_code=400, detail="brandId must reference an entity of type 'brand'")
+
+    policy = await crud.get_brand_policy(session, brandId)
+    return policy or default_brand_policy()
+
+
+@app.put("/brand-policies/{brandId}")
+async def put_brand_policy(brandId: str, payload: Dict[str, Any], session: AsyncSession = Depends(get_db_session)):
+    entity = await crud.get_entity(session, brandId)
+    if not entity:
+        raise HTTPException(status_code=404, detail="Brand not found")
+    if entity.get("type") != "brand":
+        raise HTTPException(status_code=400, detail="brandId must reference an entity of type 'brand'")
+
+    validate_or_400(brand_policy_validator, payload)
+    stored = await crud.upsert_brand_policy(session, brandId, payload)
+    return stored

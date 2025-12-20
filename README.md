@@ -39,6 +39,7 @@ Current end-to-end flow (in-memory):
 - **content-service**: `3003`
 - **graph-service**: `8001`
 - **ingestion-service**: `8002`
+- **observability-service**: `3004`
 
 ### Env vars
 - **gateway**
@@ -46,12 +47,17 @@ Current end-to-end flow (in-memory):
   - `CONTENT_SERVICE_URL` (default: `http://localhost:3003`)
   - `INGESTION_SERVICE_URL` (default: `http://localhost:8002`)
   - `RAG_SERVICE_URL` (default: `http://localhost:3002`)
+  - `OBSERVABILITY_SERVICE_URL` (default: `http://localhost:3004`)
 - **content-service**
   - `GRAPH_SERVICE_URL` (default: `http://localhost:8001`)
 - **rag-service**
   - `GRAPH_SERVICE_URL` (default: `http://localhost:8001`)
 - **graph-service**
   - `GRAPH_DB_URL` (default: `postgresql+asyncpg://postgres:postgres@localhost:5432/aether`)
+- **ingestion-service**
+  - `GRAPH_SERVICE_URL` (default: `http://localhost:8001`)
+- **observability-service**
+  - (none yet; in-memory only)
 
 ### Dev commands
 
@@ -65,6 +71,7 @@ TypeScript services (works with `npm` or `pnpm` at repo root):
 - `npm run dev:gateway`
 - `npm run dev:content`
 - `npm run dev:rag`
+- `npm run dev:observability`
 
 Python services:
 - Graph service:
@@ -130,4 +137,27 @@ curl -sS http://localhost:3001/brands/<ENTITY_ID>/source-documents
 ```bash
 curl -sS -X POST http://localhost:3001/entities/<ENTITY_ID>/index
 curl -sS -X POST http://localhost:3001/entities/<ENTITY_ID>/answer -H 'content-type: application/json' -d '{\"query\":\"What does this brand do?\"}'
+```
+
+7) Set brand policy and see policy violations (gateway):
+
+```bash
+curl -sS -X PUT http://localhost:3001/brands/<ENTITY_ID>/policy \\
+  -H 'content-type: application/json' \\
+  -d '{\n+    \"allowedClaims\": {\"canUseSuperlatives\": false, \"allowedSuperlatives\": [], \"allowedComparisons\": []},\n+    \"forbiddenPhrases\": [\"best ever\"],\n+    \"regulatedTopics\": [\"financial returns\"]\n+  }'
+```
+
+Then regenerate canonical content via content-service:
+
+```bash
+curl -sS -X POST http://localhost:3003/refresh/canonical-content \\
+  -H 'content-type: application/json' \\
+  -d '{\"entityId\":\"<ENTITY_ID>\"}'
+```
+
+8) Create and run AI visibility probes (gateway):
+
+```bash
+curl -sS -X POST http://localhost:3001/brands/<ENTITY_ID>/probes/run -H 'content-type: application/json' -d '{}'
+curl -sS http://localhost:3001/brands/<ENTITY_ID>/probes/results
 ```

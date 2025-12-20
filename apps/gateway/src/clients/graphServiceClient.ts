@@ -1,8 +1,10 @@
 import {
   CanonicalContentSchema,
+  BrandPolicySchema,
   EntitySchema,
   SourceDocumentSchema,
   type CanonicalContent,
+  type BrandPolicy,
   type Entity,
   type SourceDocument
 } from "@aether/shared-types";
@@ -76,5 +78,27 @@ export class GraphServiceClient {
     }
     const docs = (json as any).sourceDocuments as unknown;
     return SourceDocumentSchema.array().parse(docs);
+  }
+
+  async getBrandPolicy(brandId: string): Promise<BrandPolicy> {
+    const res = await fetch(`${this.baseUrl}/brand-policies/${encodeURIComponent(brandId)}`);
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(`graph-service GET /brand-policies failed (${res.status}): ${JSON.stringify(json)}`);
+    }
+    return BrandPolicySchema.parse(json);
+  }
+
+  async putBrandPolicy(brandId: string, policy: BrandPolicy): Promise<BrandPolicy> {
+    const res = await fetch(`${this.baseUrl}/brand-policies/${encodeURIComponent(brandId)}`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(policy)
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(`graph-service PUT /brand-policies failed (${res.status}): ${JSON.stringify(json)}`);
+    }
+    return BrandPolicySchema.parse(json);
   }
 }
