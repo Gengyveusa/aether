@@ -1,10 +1,11 @@
 import { BrandPolicySchema, EntitySchema, type BrandPolicy, type Entity } from "@aether/shared-types";
+import { config } from "@aether/shared-utils";
 
 export class GraphServiceClient {
   private readonly baseUrl: string;
 
   constructor() {
-    this.baseUrl = (process.env.GRAPH_SERVICE_URL ?? "http://localhost:8001").replace(/\/$/, "");
+    this.baseUrl = config.graphService.baseUrl;
   }
 
   async getEntity(entityId: string): Promise<Entity> {

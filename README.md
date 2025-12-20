@@ -48,6 +48,13 @@ Current end-to-end flow (in-memory):
   - `INGESTION_SERVICE_URL` (default: `http://localhost:8002`)
   - `RAG_SERVICE_URL` (default: `http://localhost:3002`)
   - `OBSERVABILITY_SERVICE_URL` (default: `http://localhost:3004`)
+- **shared (Node services)**
+  - `LLM_PROVIDER` = `stub` | `vertex` (default: `stub`)
+  - `LLM_MODEL` (default: `stub-model`)
+  - `EMBEDDINGS_PROVIDER` = `stub` | `vertex` (default: `stub`)
+  - `EMBEDDINGS_MODEL` (default: `stub-embeddings`)
+  - `VECTOR_BACKEND` = `in_memory` | `qdrant` (default: `in_memory`)
+  - `GRAPH_BACKEND` = `postgres` | `neo4j` | `in_memory` (default: `postgres`)
 - **content-service**
   - `GRAPH_SERVICE_URL` (default: `http://localhost:8001`)
 - **rag-service**
@@ -72,6 +79,7 @@ TypeScript services (works with `npm` or `pnpm` at repo root):
 - `npm run dev:content`
 - `npm run dev:rag`
 - `npm run dev:observability`
+- `npm run dev` (runs all Node services together)
 
 Python services:
 - Graph service:
@@ -89,6 +97,14 @@ GRAPH_DB_URL='postgresql+asyncpg://postgres:postgres@localhost:5432/aether' pyth
 python3 -m pip install -r apps/ingestion-service/requirements.txt
 cd apps/ingestion-service
 GRAPH_SERVICE_URL='http://localhost:8001' python3 -m uvicorn app.main:app --reload --port 8002 --host 0.0.0.0
+```
+
+Or using `make`:
+
+```bash
+make dev-graph
+make dev-ingestion
+make test-python
 ```
 
 ### Example: hit the vertical slice

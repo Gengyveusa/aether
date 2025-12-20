@@ -21,6 +21,16 @@
     "dev:gateway": "npm -w @aether/gateway run dev",
     "dev:content": "npm -w @aether/content-service run dev",
     "dev:rag": "npm -w @aether/rag-service run dev",
-    "dev:observability": "npm -w @aether/observability-service run dev"
+    "dev:observability": "npm -w @aether/observability-service run dev",
+    "dev": "concurrently -k \"npm run dev:gateway\" \"npm run dev:rag\" \"npm run dev:content\" \"npm run dev:observability\"",
+    "test:node": "npm run build:packages && npm run build:apps && vitest run",
+    "test:python": "python3 -m pytest -q",
+    "test": "npm run test:node && npm run test:python"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "concurrently": "^9.1.2",
+    "supertest": "^7.1.4",
+    "vitest": "^4.0.16"
   }
 }

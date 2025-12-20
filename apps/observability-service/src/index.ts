@@ -1,7 +1,7 @@
 import Fastify from "fastify";
 import { randomUUID, createHash } from "node:crypto";
 import { z } from "zod";
-import { logger } from "@aether/shared-utils";
+import { config, logger } from "@aether/shared-utils";
 import {
   AiVisibilityProbeConfigSchema,
   AiVisibilityProbeResultSchema,
@@ -9,12 +9,14 @@ import {
   type AiVisibilityProbeConfig,
   type AiVisibilityProbeResult
 } from "@aether/shared-types";
+import { fileURLToPath } from "node:url";
 
-const app = Fastify({ logger: false });
+export function buildApp() {
+  const app = Fastify({ logger: false });
 
-// In-memory storage (swap to DB later)
-const probeConfigs = new Map<string, AiVisibilityProbeConfig>();
-const probeResults: AiVisibilityProbeResult[] = [];
+  // In-memory storage (swap to DB later)
+  const probeConfigs = new Map<string, AiVisibilityProbeConfig>();
+  const probeResults: AiVisibilityProbeResult[] = [];
 
 function hashToInt(input: string): number {
   const h = createHash("sha256").update(input).digest();
@@ -103,13 +105,21 @@ app.get("/probes/results", async (req, reply) => {
   return { results };
 });
 
-const port = Number(process.env.PORT ?? 3004);
-const host = process.env.HOST ?? "0.0.0.0";
+  return app;
+}
 
-app
-  .listen({ port, host })
-  .then(() => logger.info("observability-service listening", { port, host }))
-  .catch((err) => {
+export async function start() {
+  const app = buildApp();
+  const port = Number(process.env.PORT ?? new URL(config.observabilityService.baseUrl).port ?? 3004);
+  const host = process.env.HOST ?? "0.0.0.0";
+  await app.listen({ port, host });
+  logger.info("observability-service listening", { port, host });
+}
+
+const isMain = process.argv[1] === fileURLToPath(import.meta.url);
+if (isMain) {
+  start().catch((err) => {
     logger.error("observability-service failed to start", { err: String(err) });
     process.exit(1);
   });
+}

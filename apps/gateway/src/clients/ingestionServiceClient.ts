@@ -1,8 +1,10 @@
+import { config } from "@aether/shared-utils";
+
 export class IngestionServiceClient {
   private readonly baseUrl: string;
 
   constructor(opts?: { baseUrl?: string }) {
-    this.baseUrl = (opts?.baseUrl ?? (process.env.INGESTION_SERVICE_URL ?? "http://localhost:8002")).replace(/\/$/, "");
+    this.baseUrl = (opts?.baseUrl ?? config.ingestionService.baseUrl).replace(/\/$/, "");
   }
 
   async ingestUrl(input: { brandId: string; url: string }): Promise<{ status: string; brandId: string; url: string }> {

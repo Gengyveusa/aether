@@ -9,6 +9,7 @@ import { ObservabilityServiceClient } from "../clients/observabilityServiceClien
 
 const BrandCreateSchema = BrandSchema.omit({
   id: true,
+  type: true,
   createdAt: true,
   updatedAt: true
 }).extend({

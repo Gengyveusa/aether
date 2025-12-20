@@ -5,15 +5,21 @@ import { join } from "node:path";
 
 import { EntitiesModule } from "./entities.module.js";
 
+const enableGraphql = process.env.DISABLE_GRAPHQL !== "true";
+
 @Module({
   imports: [
-    GraphQLModule.forRoot<ApolloDriverConfig>({
-      driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), "apps/gateway/schema.gql"),
-      sortSchema: true,
-      playground: true,
-      path: "/graphql"
-    }),
+    ...(enableGraphql
+      ? [
+          GraphQLModule.forRoot<ApolloDriverConfig>({
+            driver: ApolloDriver,
+            autoSchemaFile: join(process.cwd(), "apps/gateway/schema.gql"),
+            sortSchema: true,
+            playground: true,
+            path: "/graphql"
+          })
+        ]
+      : []),
     EntitiesModule
   ]
 })

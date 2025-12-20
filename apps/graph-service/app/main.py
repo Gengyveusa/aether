@@ -5,9 +5,8 @@ from .schema_loader import load_schema
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from .db.session import get_db_session
+from .backends.factory import get_graph_backend_dep
+from .backends.base import GraphBackend
 from . import crud
 from .schemas import SourceDocumentCreate
 from . import graph_api
@@ -42,7 +41,7 @@ def health():
 
 
 @app.post("/entities")
-async def create_entity(payload: Dict[str, Any], session: AsyncSession = Depends(get_db_session)):
+async def create_entity(payload: Dict[str, Any], backend: GraphBackend = Depends(get_graph_backend_dep)):
     # Assign server-side fields if omitted.
     try:
         entity_id = payload.get("id") or str(uuid.uuid4())
@@ -59,24 +58,23 @@ async def create_entity(payload: Dict[str, Any], session: AsyncSession = Depends
     validate_or_400(entity_validator, payload)
 
     try:
-        created = await crud.create_entity(session, payload)
+        created = await backend.create_entity(payload)
     except IntegrityError:
         # slug unique constraint, etc.
-        await session.rollback()
         raise HTTPException(status_code=409, detail="Entity already exists (slug conflict)")
     return created
 
 
 @app.get("/entities/{id}")
-async def get_entity(id: str, session: AsyncSession = Depends(get_db_session)):
-    entity = await crud.get_entity(session, id)
+async def get_entity(id: str, backend: GraphBackend = Depends(get_graph_backend_dep)):
+    entity = await backend.get_entity(id)
     if not entity:
         raise HTTPException(status_code=404, detail="Entity not found")
     return entity
 
 
 @app.put("/canonical-content/{entityId}")
-async def put_canonical_content(entityId: str, payload: Dict[str, Any], session: AsyncSession = Depends(get_db_session)):
+async def put_canonical_content(entityId: str, payload: Dict[str, Any], backend: GraphBackend = Depends(get_graph_backend_dep)):
     # Ensure entityId consistency
     payload["entityId"] = payload.get("entityId") or entityId
     if payload["entityId"] != entityId:
@@ -84,60 +82,51 @@ async def put_canonical_content(entityId: str, payload: Dict[str, Any], session:
 
     validate_or_400(canonical_content_validator, payload)
     # Ensure referenced entity exists
-    entity = await crud.get_entity(session, entityId)
+    entity = await backend.get_entity(entityId)
     if not entity:
         raise HTTPException(status_code=404, detail="Entity not found")
 
-    stored = await crud.upsert_canonical_content(session, entityId, payload)
+    stored = await backend.upsert_canonical_content(entityId, payload)
     return stored
 
 
 @app.get("/canonical-content/{entityId}")
-async def get_canonical_content(entityId: str, session: AsyncSession = Depends(get_db_session)):
-    content = await crud.get_canonical_content(session, entityId)
+async def get_canonical_content(entityId: str, backend: GraphBackend = Depends(get_graph_backend_dep)):
+    content = await backend.get_canonical_content(entityId)
     if not content:
         raise HTTPException(status_code=404, detail="CanonicalContent not found")
     return content
 
 
 @app.post("/source-documents")
-async def create_source_document(req: SourceDocumentCreate, session: AsyncSession = Depends(get_db_session)):
+async def create_source_document(req: SourceDocumentCreate, backend: GraphBackend = Depends(get_graph_backend_dep)):
     # Validate brand existence and type
-    entity = await crud.get_entity(session, req.brandId)
+    entity = await backend.get_entity(req.brandId)
     if not entity:
         raise HTTPException(status_code=404, detail="Brand not found")
     if entity.get("type") != "brand":
         raise HTTPException(status_code=400, detail="brandId must reference an entity of type 'brand'")
 
-    ingested_at = datetime.now(timezone.utc)
     try:
-        doc = await crud.create_source_document(
-            session,
-            brand_id=req.brandId,
-            url=req.url,
-            content=req.content,
-            content_type=req.contentType or "text/html",
-            ingested_at=ingested_at,
-        )
+        doc = await backend.create_source_document(req.model_dump())
     except IntegrityError:
-        await session.rollback()
         # brand+url unique
         raise HTTPException(status_code=409, detail="Source document already exists for this brand+url")
     return doc
 
 
 @app.get("/source-documents")
-async def list_source_documents(brandId: str, session: AsyncSession = Depends(get_db_session)):
+async def list_source_documents(brandId: str, backend: GraphBackend = Depends(get_graph_backend_dep)):
     try:
         uuid.UUID(brandId)
     except ValueError:
         raise HTTPException(status_code=400, detail="brandId must be a UUID string")
-    docs = await crud.list_source_documents(session, brandId)
+    docs = await backend.list_source_documents(brandId)
     return {"sourceDocuments": docs}
 
 
 @app.post("/relationships")
-async def create_relationship(payload: Dict[str, Any], session: AsyncSession = Depends(get_db_session)):
+async def create_relationship(payload: Dict[str, Any], backend: GraphBackend = Depends(get_graph_backend_dep)):
     # Assign server-side fields if omitted.
     try:
         rel_id = payload.get("id") or str(uuid.uuid4())
@@ -154,15 +143,14 @@ async def create_relationship(payload: Dict[str, Any], session: AsyncSession = D
     validate_or_400(relationship_validator, payload)
 
     # Ensure referenced entities exist
-    if not await crud.get_entity(session, payload["fromEntityId"]):
+    if not await backend.get_entity(payload["fromEntityId"]):
         raise HTTPException(status_code=404, detail="fromEntityId not found")
-    if not await crud.get_entity(session, payload["toEntityId"]):
+    if not await backend.get_entity(payload["toEntityId"]):
         raise HTTPException(status_code=404, detail="toEntityId not found")
 
     try:
-        created = await crud.create_relationship(session, payload)
+        created = await backend.create_relationship(payload)
     except IntegrityError:
-        await session.rollback()
         raise HTTPException(status_code=409, detail="Relationship already exists")
     return created
 
@@ -172,7 +160,7 @@ async def list_relationships(
     fromEntityId: Optional[str] = None,
     toEntityId: Optional[str] = None,
     type: Optional[str] = None,
-    session: AsyncSession = Depends(get_db_session),
+    backend: GraphBackend = Depends(get_graph_backend_dep),
 ):
     for v, name in ((fromEntityId, "fromEntityId"), (toEntityId, "toEntityId")):
         if v:
@@ -181,8 +169,7 @@ async def list_relationships(
             except ValueError:
                 raise HTTPException(status_code=400, detail=f"{name} must be a UUID string")
 
-    rels = await crud.list_relationships(
-        session,
+    rels = await backend.list_relationships(
         from_entity_id=fromEntityId,
         to_entity_id=toEntityId,
         rel_type=type,
@@ -194,33 +181,32 @@ async def list_relationships(
 async def get_entity_neighbors(
     id: str,
     relationshipTypes: Optional[str] = None,
-    session: AsyncSession = Depends(get_db_session),
+    backend: GraphBackend = Depends(get_graph_backend_dep),
 ):
-    try:
-        entity = await graph_api.get_entity(session, id)
-    except KeyError:
+    entity = await backend.get_entity(id)
+    if not entity:
         raise HTTPException(status_code=404, detail="Entity not found")
 
     rel_types: Optional[list[str]] = None
     if relationshipTypes:
         rel_types = [t for t in (s.strip() for s in relationshipTypes.split(",")) if t]
 
-    neighbors = await graph_api.get_neighbors(session, id, relationship_types=rel_types)
+    neighbors = await backend.get_neighbors(id, relationship_types=rel_types)
     return {"entity": entity, "neighbors": neighbors}
 
 
 @app.get("/indexing/entity-bundle/{entityId}")
-async def get_indexing_entity_bundle(entityId: str, session: AsyncSession = Depends(get_db_session)):
-    entity = await crud.get_entity(session, entityId)
+async def get_indexing_entity_bundle(entityId: str, backend: GraphBackend = Depends(get_graph_backend_dep)):
+    entity = await backend.get_entity(entityId)
     if not entity:
         raise HTTPException(status_code=404, detail="Entity not found")
 
-    canonical = await crud.get_canonical_content(session, entityId)
+    canonical = await backend.get_canonical_content(entityId)
     source_docs: list[dict[str, Any]] = []
 
     # Source documents are currently linked to Brand entities.
     if entity.get("type") == "brand":
-        source_docs = await crud.list_source_documents_with_content(session, entityId)
+        source_docs = await backend.list_source_documents_with_content(entityId)
 
     return {"entity": entity, "canonicalContent": canonical, "sourceDocuments": source_docs}
 
@@ -235,25 +221,25 @@ def default_brand_policy() -> Dict[str, Any]:
 
 
 @app.get("/brand-policies/{brandId}")
-async def get_brand_policy(brandId: str, session: AsyncSession = Depends(get_db_session)):
-    entity = await crud.get_entity(session, brandId)
+async def get_brand_policy(brandId: str, backend: GraphBackend = Depends(get_graph_backend_dep)):
+    entity = await backend.get_entity(brandId)
     if not entity:
         raise HTTPException(status_code=404, detail="Brand not found")
     if entity.get("type") != "brand":
         raise HTTPException(status_code=400, detail="brandId must reference an entity of type 'brand'")
 
-    policy = await crud.get_brand_policy(session, brandId)
+    policy = await backend.get_brand_policy(brandId)
     return policy or default_brand_policy()
 
 
 @app.put("/brand-policies/{brandId}")
-async def put_brand_policy(brandId: str, payload: Dict[str, Any], session: AsyncSession = Depends(get_db_session)):
-    entity = await crud.get_entity(session, brandId)
+async def put_brand_policy(brandId: str, payload: Dict[str, Any], backend: GraphBackend = Depends(get_graph_backend_dep)):
+    entity = await backend.get_entity(brandId)
     if not entity:
         raise HTTPException(status_code=404, detail="Brand not found")
     if entity.get("type") != "brand":
         raise HTTPException(status_code=400, detail="brandId must reference an entity of type 'brand'")
 
     validate_or_400(brand_policy_validator, payload)
-    stored = await crud.upsert_brand_policy(session, brandId, payload)
+    stored = await backend.upsert_brand_policy(brandId, payload)
     return stored

@@ -1,4 +1,4 @@
-import type { EmbeddingClient } from "./embeddingClient.js";
+import type { EmbeddingProvider } from "./providers/embeddingProvider.js";
 import type { VectorDoc, VectorHit, VectorStore } from "./vectorStore.js";
 
 type Stored = {
@@ -13,16 +13,18 @@ function dot(a: number[], b: number[]): number {
 }
 
 export class InMemoryVectorStore implements VectorStore {
-  private readonly embeddingClient: EmbeddingClient;
+  private readonly embeddingProvider: EmbeddingProvider;
+  private readonly model: string;
   private readonly store = new Map<string, Stored>();
 
-  constructor(embeddingClient: EmbeddingClient) {
-    this.embeddingClient = embeddingClient;
+  constructor(opts: { embeddingProvider: EmbeddingProvider; model: string }) {
+    this.embeddingProvider = opts.embeddingProvider;
+    this.model = opts.model;
   }
 
   async upsertDocuments(docs: VectorDoc[]): Promise<void> {
     if (docs.length === 0) return;
-    const embeddings = await this.embeddingClient.embed(docs.map((d) => d.text));
+    const embeddings = await this.embeddingProvider.embed({ model: this.model, texts: docs.map((d) => d.text) });
     for (let i = 0; i < docs.length; i++) {
       const doc = docs[i]!;
       const embedding = embeddings[i]!;
@@ -32,7 +34,7 @@ export class InMemoryVectorStore implements VectorStore {
 
   async search(query: string, options?: { entityId?: string; topK?: number }): Promise<VectorHit[]> {
     const topK = options?.topK ?? 5;
-    const [q] = await this.embeddingClient.embed([query]);
+    const [q] = await this.embeddingProvider.embed({ model: this.model, texts: [query] });
 
     const hits: VectorHit[] = [];
     for (const { doc, embedding } of this.store.values()) {

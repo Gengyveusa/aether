@@ -1,14 +1,15 @@
 import Fastify from "fastify";
 import { z } from "zod";
 import { logger } from "@aether/shared-utils";
-import { embeddingClient } from "./embeddingClient.js";
-import { InMemoryVectorStore } from "./inMemoryVectorStore.js";
 import type { VectorDoc } from "./vectorStore.js";
 import { EntityBundleSchema, stripHtml } from "./indexing.js";
+import { config } from "@aether/shared-utils";
+import { createVectorBackend } from "./vector/createVectorBackend.js";
+import { fileURLToPath } from "node:url";
 
-const app = Fastify({ logger: false });
-
-const vectorStore = new InMemoryVectorStore(embeddingClient);
+export function buildApp() {
+  const app = Fastify({ logger: false });
+  const vectorBackend = createVectorBackend();
 
 const SemanticSearchRequestSchema = z.object({
   query: z.string().min(1),
@@ -36,7 +37,7 @@ app.post("/semantic-search", async (req, reply) => {
 
   // entityScope can be used to constrain results to a set of entities.
   const scope = parsed.data.entityScope?.filter(Boolean) ?? [];
-  let hits = await vectorStore.search(parsed.data.query, { topK: Math.max(topK, 10) });
+  let hits = await vectorBackend.search(parsed.data.query, { topK: Math.max(topK, 10) });
   if (scope.length > 0) {
     const scopeSet = new Set(scope);
     hits = hits.filter((h) => (h.entityId ? scopeSet.has(h.entityId) : false)).slice(0, topK);
@@ -56,7 +57,7 @@ app.post("/answer", async (req, reply) => {
     return reply.status(400).send({ error: "Invalid request", details: parsed.error.flatten() });
   }
 
-  const hits = await vectorStore.search(parsed.data.query, { entityId: parsed.data.entityId, topK: parsed.data.topK ?? 5 });
+  const hits = await vectorBackend.search(parsed.data.query, { entityId: parsed.data.entityId, topK: parsed.data.topK ?? 5 });
   const answer = hits.length
     ? `Based on the indexed material: ${hits.map((h) => h.text).join(" ")}`
     : "No indexed material found for this query.";
@@ -73,7 +74,7 @@ app.post("/index/entity", async (req, reply) => {
     return reply.status(400).send({ error: "Invalid request", details: parsed.error.flatten() });
   }
 
-  const graphBase = (process.env.GRAPH_SERVICE_URL ?? "http://localhost:8001").replace(/\/$/, "");
+  const graphBase = config.graphService.baseUrl;
   const res = await fetch(`${graphBase}/indexing/entity-bundle/${encodeURIComponent(parsed.data.entityId)}`);
   if (!res.ok) {
     const txt = await res.text().catch(() => "");
@@ -129,17 +130,25 @@ app.post("/index/entity", async (req, reply) => {
     });
   }
 
-  await vectorStore.upsertDocuments(docs);
+  await vectorBackend.upsert(docs);
   return { indexedCount: docs.length };
 });
 
-const port = Number(process.env.PORT ?? 3002);
-const host = process.env.HOST ?? "0.0.0.0";
+  return app;
+}
 
-app
-  .listen({ port, host })
-  .then(() => logger.info("rag-service listening", { port, host }))
-  .catch((err) => {
+export async function start() {
+  const app = buildApp();
+  const port = Number(process.env.PORT ?? new URL(config.ragService.baseUrl).port ?? 3002);
+  const host = process.env.HOST ?? "0.0.0.0";
+  await app.listen({ port, host });
+  logger.info("rag-service listening", { port, host });
+}
+
+const isMain = process.argv[1] === fileURLToPath(import.meta.url);
+if (isMain) {
+  start().catch((err) => {
     logger.error("rag-service failed to start", { err: String(err) });
     process.exit(1);
   });
+}

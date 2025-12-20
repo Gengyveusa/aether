@@ -1,10 +1,11 @@
 import type { AiVisibilityProbeConfig, AiVisibilityProbeResult } from "@aether/shared-types";
+import { config } from "@aether/shared-utils";
 
 export class ObservabilityServiceClient {
   private readonly baseUrl: string;
 
   constructor(opts?: { baseUrl?: string }) {
-    this.baseUrl = (opts?.baseUrl ?? (process.env.OBSERVABILITY_SERVICE_URL ?? "http://localhost:3004")).replace(/\/$/, "");
+    this.baseUrl = (opts?.baseUrl ?? config.observabilityService.baseUrl).replace(/\/$/, "");
   }
 
   async createProbeConfig(input: { brandId: string; questions: string[]; targetModels: string[] }) {

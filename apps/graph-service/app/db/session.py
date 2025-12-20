@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-import os
 from typing import AsyncIterator
 
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 
+from ..config import get_graph_db_url
 
 def get_db_url() -> str:
     # Example: postgresql+asyncpg://postgres:postgres@localhost:5432/aether
-    return os.environ.get("GRAPH_DB_URL", "postgresql+asyncpg://postgres:postgres@localhost:5432/aether")
+    return get_graph_db_url()
 
 
 _engine: AsyncEngine | None = None

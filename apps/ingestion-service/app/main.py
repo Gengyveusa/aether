@@ -1,8 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Optional
-import os
 import httpx
+
+from .config import get_graph_service_url
 
 app = FastAPI(title="Aether Ingestion Service", version="0.0.0")
 
@@ -25,7 +26,7 @@ def health():
 
 @app.post("/ingest/url")
 async def ingest_url(req: IngestUrlRequest):
-    graph_base = (os.environ.get("GRAPH_SERVICE_URL") or "http://localhost:8001").rstrip("/")
+    graph_base = get_graph_service_url()
 
     timeout = httpx.Timeout(20.0, connect=10.0)
     async with httpx.AsyncClient(timeout=timeout, follow_redirects=True) as client:
