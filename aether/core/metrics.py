@@ -1,11 +1,34 @@
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timezone
 
 
-def time_decay(timestamp, lambda_=0.07):
-    if isinstance(timestamp, str):
-        timestamp = datetime.fromisoformat(timestamp)
-    days = (datetime.utcnow() - timestamp).days
+def _to_utc_datetime(value):
+    """
+    Normalize a datetime-ish value to a timezone-aware UTC datetime.
+
+    Accepts:
+    - ISO-8601 strings (supports a trailing 'Z')
+    - datetime instances (naive treated as UTC)
+    """
+    if isinstance(value, str):
+        # Support common "Z" suffix for UTC.
+        if value.endswith("Z"):
+            value = value[:-1] + "+00:00"
+        value = datetime.fromisoformat(value)
+
+    if not isinstance(value, datetime):
+        raise TypeError(f"timestamp must be str or datetime, got {type(value)!r}")
+
+    if value.tzinfo is None:
+        return value.replace(tzinfo=timezone.utc)
+
+    return value.astimezone(timezone.utc)
+
+
+def time_decay(timestamp, lambda_=0.07, now=None):
+    ts = _to_utc_datetime(timestamp)
+    now_dt = _to_utc_datetime(now) if now is not None else datetime.now(timezone.utc)
+    days = (now_dt - ts).days
     return np.exp(-lambda_ * days)
 
 # ---------------------------
