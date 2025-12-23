@@ -4,3 +4,5 @@ uvicorn
 pyyaml
 streamlit
 pytest
+httpx
+sqlalchemy

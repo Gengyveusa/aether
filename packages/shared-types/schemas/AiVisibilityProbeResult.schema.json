@@ -1,0 +1,67 @@
+{
+  "$ref": "#/definitions/AiVisibilityProbeResult",
+  "definitions": {
+    "AiVisibilityProbeResult": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "probeConfigId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "brandId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "runAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "modelId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "question": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rawAnswer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mentionsBrand": {
+          "type": "boolean"
+        },
+        "descriptionSnippet": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sentiment": {
+          "type": "string",
+          "enum": [
+            "positive",
+            "neutral",
+            "negative"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "probeConfigId",
+        "brandId",
+        "runAt",
+        "modelId",
+        "question",
+        "rawAnswer",
+        "mentionsBrand",
+        "descriptionSnippet",
+        "sentiment"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

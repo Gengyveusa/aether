@@ -1,0 +1,55 @@
+{
+  "$ref": "#/definitions/BrandPolicy",
+  "definitions": {
+    "BrandPolicy": {
+      "type": "object",
+      "properties": {
+        "allowedClaims": {
+          "type": "object",
+          "properties": {
+            "canUseSuperlatives": {
+              "type": "boolean",
+              "default": false
+            },
+            "allowedSuperlatives": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "allowedComparisons": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            }
+          },
+          "additionalProperties": false,
+          "default": {
+            "canUseSuperlatives": false,
+            "allowedSuperlatives": [],
+            "allowedComparisons": []
+          }
+        },
+        "forbiddenPhrases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "regulatedTopics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

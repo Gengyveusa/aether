@@ -1,0 +1,40 @@
+{
+  "$ref": "#/definitions/SourceDocument",
+  "definitions": {
+    "SourceDocument": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "brandId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "content": {
+          "type": "string"
+        },
+        "contentType": {
+          "type": "string"
+        },
+        "ingestedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "brandId",
+        "url",
+        "ingestedAt"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

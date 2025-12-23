@@ -1,0 +1,42 @@
+{
+  "$ref": "#/definitions/AiVisibilityScorecard",
+  "definitions": {
+    "AiVisibilityScorecard": {
+      "type": "object",
+      "properties": {
+        "entityId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "computedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "sentimentScore": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1
+        },
+        "descriptionConsistency": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "entityId",
+        "computedAt",
+        "coverage",
+        "sentimentScore",
+        "descriptionConsistency"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
