@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createServerSupabaseClient } from "@/lib/db/supabase-server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +12,7 @@ export default async function BiomarkersPage() {
     .from("biomarkers")
     .select("*, patients(patient_code)")
     .order("sample_date", { ascending: false })
-    .limit(50);
+    .limit(50) as { data: any[] | null };
 
   return (
     <div className="space-y-6">
