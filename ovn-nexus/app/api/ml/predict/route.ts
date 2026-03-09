@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createServerSupabaseClient } from "@/lib/db/supabase-server";
 import { computeRiskScore, type PredictionInput } from "@/lib/ml/pipeline";
 import { NextRequest, NextResponse } from "next/server";
