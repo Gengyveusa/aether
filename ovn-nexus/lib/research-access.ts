@@ -10,12 +10,13 @@ async function requireAdmin() {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
 
-  const { data: profile } = await supabase
+  const { data } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .single();
 
+  const profile = data as { role: string } | null;
   if (profile?.role !== "admin") throw new Error("Forbidden");
   return { supabase, user };
 }
@@ -86,11 +87,13 @@ export async function grantResearchAccessByEmail(email: string) {
     const { supabase } = await requireAdmin();
 
     // Look up the profile by email
-    const { data: profile, error: lookupError } = await supabase
+    const { data: profileData, error: lookupError } = await supabase
       .from("profiles")
       .select("id, full_name, email")
       .eq("email", email.trim().toLowerCase())
       .single();
+
+    const profile = profileData as { id: string; full_name: string; email: string } | null;
 
     if (lookupError || !profile) {
       return { error: "No registered user found with that email." };
@@ -99,7 +102,7 @@ export async function grantResearchAccessByEmail(email: string) {
     // Set research_access = true
     const { error: updateError } = await supabase
       .from("profiles")
-      .update({ research_access: true })
+      .update({ research_access: true } as any)
       .eq("id", profile.id);
 
     if (updateError) return { error: updateError.message };
@@ -127,11 +130,13 @@ export async function redeemResearchKey(keyValue: string) {
     if (!user) return { error: "Not authenticated" };
 
     // Find the key
-    const { data: accessKey, error: keyError } = await supabase
+    const { data: keyData, error: keyError } = await supabase
       .from("research_access_keys")
       .select("id, is_active, used_by")
       .eq("key", keyValue.trim())
       .single();
+
+    const accessKey = keyData as { id: string; is_active: boolean; used_by: string | null } | null;
 
     if (keyError || !accessKey) return { error: "Invalid key." };
     if (!accessKey.is_active) return { error: "This key has been deactivated." };
@@ -144,7 +149,7 @@ export async function redeemResearchKey(keyValue: string) {
         used_by: user.id,
         used_at: new Date().toISOString(),
         is_active: false,
-      })
+      } as any)
       .eq("id", accessKey.id);
 
     if (redeemError) return { error: redeemError.message };
@@ -152,7 +157,7 @@ export async function redeemResearchKey(keyValue: string) {
     // Grant research access on the profile
     const { error: profileError } = await supabase
       .from("profiles")
-      .update({ research_access: true })
+      .update({ research_access: true } as any)
       .eq("id", user.id);
 
     if (profileError) return { error: profileError.message };
