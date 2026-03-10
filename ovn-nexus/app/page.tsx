@@ -53,7 +53,7 @@ export default function HomePage() {
                 Join the Network <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
-            <a href="#education">
+                          <a href="https://omvs.io" target="_blank" rel="noopener noreferrer">
               <Button variant="outline" size="lg">Explore the Science</Button>
             </a>
           </div>
