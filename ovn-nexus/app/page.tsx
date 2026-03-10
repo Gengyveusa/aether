@@ -53,7 +53,7 @@ export default function HomePage() {
                 Join the Network <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
-                          <a href="https://omvs.io" target="_blank" rel="noopener noreferrer">
+                          <a href="/science" target="_blank" rel="noopener noreferrer">
               <Button variant="outline" size="lg">Explore the Science</Button>
             </a>
           </div>
@@ -200,12 +200,12 @@ export default function HomePage() {
 
               <div className="mt-6 flex justify-end">
                 <a
-                  href="https://omvs.io/"
+                  href="/science/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
                 >
-                  Full presentation at omvs.io <ExternalLink className="h-3 w-3" />
+                  Full presentation at Explore the Science <ExternalLink className="h-3 w-3" />
                 </a>
               </div>
             </div>
@@ -348,12 +348,12 @@ export default function HomePage() {
             </div>
             <div className="flex items-center gap-4 text-sm">
               <a
-                href="https://omvs.io/"
+                href="/science/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-primary hover:underline"
               >
-                omvs.io <ExternalLink className="h-3 w-3" />
+                Explore the Science <ExternalLink className="h-3 w-3" />
               </a>
               <Link href="/login" className="text-muted-foreground hover:text-foreground">Sign In</Link>
               <Link href="/signup" className="text-muted-foreground hover:text-foreground">Sign Up</Link>
