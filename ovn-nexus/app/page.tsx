@@ -35,7 +35,7 @@ export default function HomePage() {
         {/* ── Hero ────────────────────────────────────────────────── */}
         <section className="container py-24 text-center">
           <Badge variant="secondary" className="mb-6 text-xs uppercase tracking-wider">
-            For Dental Hygienists &amp; Dentists
+            For Dental Hygienists & Dentists
           </Badge>
           <h1 className="text-5xl font-bold tracking-tight sm:text-6xl max-w-3xl mx-auto leading-tight">
             The Mouth-Body Connection Is Real.{" "}

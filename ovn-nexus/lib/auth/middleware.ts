@@ -17,13 +17,11 @@ const RESEARCH_ROUTES = [
 const ADMIN_ROUTES = ["/admin"];
 
 export async function updateSession(request: NextRequest) {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+
   let response = NextResponse.next({
-    request: {
-      headers: new Headers({
-        ...Object.fromEntries(request.headers),
-        "x-pathname": request.nextUrl.pathname,
-      }),
-    },
+    request: { headers: requestHeaders },
   });
 
   const supabase = createServerClient(
@@ -36,26 +34,16 @@ export async function updateSession(request: NextRequest) {
         },
         set(name: string, value: string, options: CookieOptions) {
           request.cookies.set({ name, value, ...options });
-          response = NextResponse.next({
-            request: {
-              headers: new Headers({
-                ...Object.fromEntries(request.headers),
-                "x-pathname": request.nextUrl.pathname,
-              }),
-            },
-          });
+          const headers = new Headers(request.headers);
+          headers.set("x-pathname", request.nextUrl.pathname);
+          response = NextResponse.next({ request: { headers } });
           response.cookies.set({ name, value, ...options });
         },
         remove(name: string, options: CookieOptions) {
           request.cookies.set({ name, value: "", ...options });
-          response = NextResponse.next({
-            request: {
-              headers: new Headers({
-                ...Object.fromEntries(request.headers),
-                "x-pathname": request.nextUrl.pathname,
-              }),
-            },
-          });
+          const headers = new Headers(request.headers);
+          headers.set("x-pathname", request.nextUrl.pathname);
+          response = NextResponse.next({ request: { headers } });
           response.cookies.set({ name, value: "", ...options });
         },
       },

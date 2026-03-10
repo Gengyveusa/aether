@@ -98,7 +98,7 @@ export function AdminKeysClient({ initialKeys }: AdminKeysClientProps) {
         showMessage("error", result.error);
       } else {
         setGrantEmail("");
-        showMessage("success", `Research access granted to ${result.data.full_name} (${result.data.email}).`);
+        showMessage("success", `Research access granted to ${result.data?.full_name} (${result.data?.email}).`);
       }
     });
   }
