@@ -5,10 +5,14 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
 import {
   LayoutDashboard, Building2, Users, TestTubes, FlaskConical,
-  Database, FileText, Pill, Brain, Activity,
+  Database, FileText, Pill, Brain, Activity, Home, Lock, KeyRound,
 } from "lucide-react";
 
-const navigation = [
+const hubNavigation = [
+  { name: "Member Hub", href: "/hub", icon: Home },
+];
+
+const researchNavigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Clinics", href: "/clinics", icon: Building2 },
   { name: "Patients", href: "/patients", icon: Users },
@@ -21,13 +25,28 @@ const navigation = [
   { name: "Lab", href: "/dashboard/lab", icon: TestTubes },
 ];
 
-export function Sidebar() {
+const adminNavigation = [
+  { name: "Access Keys", href: "/admin/keys", icon: KeyRound },
+];
+
+interface SidebarProps {
+  hasResearchAccess?: boolean;
+  isAdmin?: boolean;
+}
+
+export function Sidebar({ hasResearchAccess = false, isAdmin = false }: SidebarProps) {
   const pathname = usePathname();
+
+  const visibleNavigation = [
+    ...hubNavigation,
+    ...(hasResearchAccess ? researchNavigation : []),
+    ...(isAdmin ? adminNavigation : []),
+  ];
 
   return (
     <div className="flex h-full w-64 flex-col border-r bg-card">
       <div className="flex h-16 items-center border-b px-6">
-        <Link href="/dashboard" className="flex items-center gap-2">
+        <Link href="/hub" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm">
             OVN
           </div>
@@ -35,7 +54,7 @@ export function Sidebar() {
         </Link>
       </div>
       <nav className="flex-1 space-y-1 px-3 py-4">
-        {navigation.map((item) => {
+        {visibleNavigation.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <Link
@@ -53,6 +72,17 @@ export function Sidebar() {
             </Link>
           );
         })}
+        {!hasResearchAccess && (
+          <div className="mt-4 rounded-md border border-dashed px-3 py-3 opacity-60">
+            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+              <Lock className="h-4 w-4 shrink-0" />
+              <div>
+                <p className="font-medium text-xs">Research Portal Locked</p>
+                <p className="text-xs">Enter your access key on the hub to unlock.</p>
+              </div>
+            </div>
+          </div>
+        )}
       </nav>
       <div className="border-t p-4">
         <p className="text-xs text-muted-foreground">

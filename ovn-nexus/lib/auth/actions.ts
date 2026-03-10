@@ -12,7 +12,7 @@ export async function signIn(formData: FormData) {
     password: formData.get("password") as string,
   });
   if (error) return { error: error.message };
-  redirect("/dashboard");
+  redirect("/hub");
 }
 
 export async function signUp(formData: FormData) {
@@ -37,7 +37,7 @@ export async function signUp(formData: FormData) {
       role,
     });
   }
-  redirect("/dashboard");
+  redirect("/hub");
 }
 
 export async function signOut() {
