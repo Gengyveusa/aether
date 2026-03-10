@@ -319,11 +319,20 @@ export default function HomePage() {
         </section>
       </main>
 
+              {/* — Living Document Banner ————————————————— */}
+        <section className="border-t border-b bg-primary/5 py-8">
+          <div className="container text-center max-w-2xl mx-auto">
+            <p className="text-sm font-medium text-primary mb-2">This Platform Is a Living Document</p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              OVN Nexus is continuously evolving, shaped by the clinicians and researchers who use it. We welcome your feedback and suggestions as we build new features to strengthen your educational experience — so you can deliver the highest standard of care to your patients.
+            </p>
+          </div>
+        </section>
+
       {/* ── Footer ──────────────────────────────────────────────── */}
       <footer id="about" className="border-t bg-muted/50 py-10">
         <div className="container">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm">
                 OVN
               </div>
