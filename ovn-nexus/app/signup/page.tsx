@@ -37,13 +37,10 @@ export default function SignUpPage() {
       return;
     }
 
-    if (data.user) {
-      await supabase.from("profiles").insert({
-        id: data.user.id,
-        email,
-        full_name: fullName,
-        role: role as "admin" | "pi" | "clinic" | "researcher" | "analyst" | "observer",
-      });
+    if (!data.user) {
+      setError("Account creation requires email confirmation. Please check your inbox and confirm your email to continue.");
+      setLoading(false);
+      return;
     }
 
     router.push("/dashboard");
