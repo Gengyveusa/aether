@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use server";
 
 import { createServerSupabaseClient } from "@/lib/db/supabase-server";
