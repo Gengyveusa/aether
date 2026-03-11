@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, AlertTriangle, FlaskConical, ArrowRight, ExternalLink } from "lucide-react";
+import { AuthNavButtons } from "@/components/auth-nav-buttons";
 
 export default function HomePage() {
   return (
@@ -20,14 +21,7 @@ export default function HomePage() {
             <a href="#community" className="text-muted-foreground hover:text-foreground transition-colors">Community</a>
             <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">About</a>
           </nav>
-          <div className="flex items-center gap-3">
-            <Link href="/login">
-              <Button variant="ghost" size="sm">Sign In</Button>
-            </Link>
-            <Link href="/signup">
-              <Button size="sm">Get Started</Button>
-            </Link>
-          </div>
+          <AuthNavButtons />
         </div>
       </header>
 

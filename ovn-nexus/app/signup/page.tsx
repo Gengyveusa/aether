@@ -43,7 +43,7 @@ export default function SignUpPage() {
       return;
     }
 
-    router.push("/hub");
+    router.push("/");
   }
 
   return (
