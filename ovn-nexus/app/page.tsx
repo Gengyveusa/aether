@@ -16,7 +16,7 @@ export default function HomePage() {
             <span className="text-xl font-bold">Nexus</span>
           </div>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-            <a href="#education" className="text-muted-foreground hover:text-foreground transition-colors">Education</a>
+            <Link href="/education" className="text-muted-foreground hover:text-foreground transition-colors">Education</Link>
             <a href="#community" className="text-muted-foreground hover:text-foreground transition-colors">Community</a>
             <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">About</a>
           </nav>

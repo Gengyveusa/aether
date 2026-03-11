@@ -55,7 +55,7 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // Redirect unauthenticated users to login
-  const publicPaths = ["/", "/science", "/login", "/signup", "/auth/callback"];
+  const publicPaths = ["/", "/science", "/education", "/login", "/signup", "/auth/callback"];
   const isPublicPath = publicPaths.some((p) => request.nextUrl.pathname === p);
 
   if (!user && !isPublicPath && !request.nextUrl.pathname.startsWith("/api/")) {
