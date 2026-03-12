@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createClient } from "@/lib/db/supabase-client";
 import { useRouter } from "next/navigation";
+import { CheckCircle2, Mail } from "lucide-react";
 
 export default function SignUpPage() {
   const [email, setEmail] = useState("");
@@ -17,6 +18,7 @@ export default function SignUpPage() {
   const [role, setRole] = useState("researcher");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [confirmationSent, setConfirmationSent] = useState(false);
   const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent) {
@@ -37,13 +39,69 @@ export default function SignUpPage() {
       return;
     }
 
+    // When email confirmation is enabled, Supabase returns user with empty identities
+    const needsConfirmation =
+      data.user && (!data.user.identities || data.user.identities.length === 0)
+      || (data.user && !data.session);
+
+    if (needsConfirmation) {
+      setConfirmationSent(true);
+      setLoading(false);
+      return;
+    }
+
     if (!data.user) {
-      setError("Account creation requires email confirmation. Please check your inbox and confirm your email to continue.");
+      setError("Something went wrong. Please try again.");
       setLoading(false);
       return;
     }
 
     router.push("/");
+  }
+
+  // Show confirmation screen after successful signup
+  if (confirmationSent) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-muted/30">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
+              <Mail className="h-7 w-7 text-green-600" />
+            </div>
+            <CardTitle className="text-2xl">Check Your Email</CardTitle>
+            <CardDescription className="mt-2 text-base">
+              We sent a confirmation link to
+            </CardDescription>
+            <p className="mt-1 font-medium text-foreground">{email}</p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-md bg-muted p-4 text-sm text-muted-foreground space-y-2">
+              <p className="flex items-start gap-2">
+                <CheckCircle2 className="h-4 w-4 mt-0.5 text-green-600 shrink-0" />
+                Click the link in the email to verify your account
+              </p>
+              <p className="flex items-start gap-2">
+                <CheckCircle2 className="h-4 w-4 mt-0.5 text-green-600 shrink-0" />
+                Then return here to sign in
+              </p>
+              <p className="flex items-start gap-2">
+                <CheckCircle2 className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                Check your spam folder if you don&apos;t see it within a few minutes
+              </p>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Button variant="outline" className="w-full" onClick={() => { setConfirmationSent(false); setEmail(""); setPassword(""); setFullName(""); }}>
+                Use a different email
+              </Button>
+              <p className="text-center text-sm text-muted-foreground">
+                Already confirmed?{" "}
+                <Link href="/login" className="text-primary hover:underline">Sign in</Link>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
