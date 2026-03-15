@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { OvnAxisDiagram } from "@/components/diagrams/ovn-axis-diagram";
 
 export default function HomePage() {
   return (
@@ -24,24 +25,34 @@ export default function HomePage() {
       </header>
 
       <main className="flex-1">
-        <section className="container py-24 text-center">
-          <h1 className="text-5xl font-bold tracking-tight sm:text-6xl">
-            The Oral-Vascular-Neural
-            <br />
-            <span className="text-primary">Research Network</span>
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            Building the world&apos;s largest structured dataset linking oral microbiology,
-            salivary biomarkers, and systemic disease outcomes. Connecting dentists,
-            clinician-scientists, biotech researchers, and diagnostic companies.
-          </p>
-          <div className="mt-10 flex justify-center gap-4">
-            <Link href="/signup">
-              <Button size="lg">Join the Network</Button>
-            </Link>
-            <Link href="/login">
-              <Button variant="outline" size="lg">Sign In</Button>
-            </Link>
+        <section className="container py-20 sm:py-28">
+          <div className="mx-auto max-w-3xl text-center">
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+              The Mouth May Be the Most Overlooked Driver of{" "}
+              <span className="text-primary">Systemic Disease</span>
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+              Oral microbes release inflammatory signals that travel through the
+              bloodstream and nervous system to affect the heart, brain, and
+              immune system.
+            </p>
+            <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground">
+              The <strong className="text-foreground">OVN Axis</strong>{" "}
+              (Oral&#8209;Vascular&#8209;Neural) is a scientific framework for
+              studying this connection.
+            </p>
+            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+              <Link href="/signup">
+                <Button size="lg">Join the OVN Research Network</Button>
+              </Link>
+              <Link href="#research">
+                <Button variant="outline" size="lg">Explore the Science</Button>
+              </Link>
+            </div>
+          </div>
+
+          <div className="mt-16 sm:mt-20">
+            <OvnAxisDiagram />
           </div>
         </section>
 
@@ -69,7 +80,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="py-16">
+        <section id="research" className="py-16 scroll-mt-16">
           <div className="container text-center">
             <h2 className="text-3xl font-bold">Research Focus Areas</h2>
             <div className="mt-8 grid gap-6 md:grid-cols-4">
