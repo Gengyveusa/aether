@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, AlertTriangle, FlaskConical, ArrowRight, ExternalLink } from "lucide-react";
 import { AuthNavButtons } from "@/components/auth-nav-buttons";
+import { OvnAxisDiagram } from "@/components/diagrams/ovn-axis-diagram";
 
 export default function HomePage() {
   return (
@@ -27,29 +28,39 @@ export default function HomePage() {
 
       <main className="flex-1">
         {/* ── Hero ────────────────────────────────────────────────── */}
-        <section className="container py-24 text-center">
-          <Badge variant="secondary" className="mb-6 text-xs uppercase tracking-wider">
-            For Dental Hygienists & Dentists
-          </Badge>
-          <h1 className="text-5xl font-bold tracking-tight sm:text-6xl max-w-3xl mx-auto leading-tight">
-            The Mouth-Body Connection Is Real.{" "}
-            <span className="text-primary">Let&apos;s Learn It Together.</span>
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            Periodontitis doesn&apos;t stay local. Bacterial extracellular vesicles shed from
-            periodontal pathogens enter systemic circulation, carrying concentrated virulence
-            cargo. This platform helps dental professionals understand the emerging science
-            and join a growing clinical network building the evidence base.
-          </p>
-          <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
-            <Link href="/signup">
-              <Button size="lg" className="gap-2">
-                Join the Network <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-                          <a href="/science" target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="lg">Explore the Science</Button>
-            </a>
+        <section className="container py-20 sm:py-28">
+          <div className="mx-auto max-w-3xl text-center">
+            <Badge variant="secondary" className="mb-6 text-xs uppercase tracking-wider">
+              For Dental Hygienists & Dentists
+            </Badge>
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+              The Mouth May Be the Most Overlooked Driver of{" "}
+              <span className="text-primary">Systemic Disease</span>
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+              Oral microbes release inflammatory signals that travel through the
+              bloodstream and nervous system to affect the heart, brain, and
+              immune system.
+            </p>
+            <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground">
+              The <strong className="text-foreground">OVN Axis</strong>{" "}
+              (Oral&#8209;Vascular&#8209;Neural) is a scientific framework for
+              studying this connection.
+            </p>
+            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+              <Link href="/signup">
+                <Button size="lg" className="gap-2">
+                  Join the OVN Research Network <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+              <a href="/science" target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="lg">Explore the Science</Button>
+              </a>
+            </div>
+          </div>
+
+          <div className="mt-16 sm:mt-20">
+            <OvnAxisDiagram />
           </div>
         </section>
 
@@ -257,7 +268,7 @@ export default function HomePage() {
         </section>
 
         {/* ── Community / Engagement ──────────────────────────────── */}
-        <section id="community" className="py-16">
+        <section id="community" className="py-16 scroll-mt-16">
           <div className="container text-center">
             <h2 className="text-3xl font-bold">
               Join Dental Professionals Building the Evidence Base
