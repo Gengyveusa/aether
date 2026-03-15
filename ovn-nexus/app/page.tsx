@@ -30,21 +30,18 @@ export default function HomePage() {
         {/* ── Hero ────────────────────────────────────────────────── */}
         <section className="container py-20 sm:py-28">
           <div className="mx-auto max-w-3xl text-center">
-            <Badge variant="secondary" className="mb-6 text-xs uppercase tracking-wider">
-              For Dental Hygienists & Dentists
-            </Badge>
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-              The Mouth May Be the Most Overlooked Driver of{" "}
-              <span className="text-primary">Systemic Disease</span>
+              The Mouth-Body Connection Is the Next Frontier of{" "}
+              <span className="text-primary">Medicine</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
               Oral microbes release inflammatory signals that travel through the
-              bloodstream and nervous system to affect the heart, brain, and
+              bloodstream and nervous system to influence the heart, brain, and
               immune system.
             </p>
             <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground">
               The <strong className="text-foreground">OVN Axis</strong>{" "}
-              (Oral&#8209;Vascular&#8209;Neural) is a scientific framework for
+              (Oral-Vascular-Neural) is a scientific framework for
               studying this connection.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
