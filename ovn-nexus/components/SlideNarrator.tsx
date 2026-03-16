@@ -1,297 +1,371 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { 
+  Upload, 
+  Settings2, 
+  Play, 
+  Download, 
+  Sparkles, 
+  FileText, 
+  Volume2, 
+  ChevronRight,
+  AlertCircle,
+  CheckCircle2,
+  Loader2,
+  Music4
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 interface SlideNarratorProps {
-  /** Optional pre-loaded slide image URL or File */
   initialSlide?: string | File;
-  /** Narrator voice (default: 'eryn') */
   narrator?: 'eryn' | 'peter' | 'both';
-  /** Teaching style */
   style?: 'didactic' | 'case-based' | 'socratic' | 'clinical-pearls';
-  /** Target audience */
   targetAudience?: 'dental-student' | 'oms-resident' | 'attending' | 'patient';
-  /** Duration in seconds */
   duration?: 30 | 60 | 90 | 120;
-  /** Callback when script is generated */
-  onScriptGenerated?: (result: NarrationResult) => void;
-  /** Callback when audio is generated */
-  onAudioGenerated?: (audioUrl: string) => void;
 }
 
-interface NarrationResult {
-  script: string;
-  slideTitle: string;
-  keyPoints: string[];
-  speakers: Array<{
-    speaker: string;
-    voiceId: string;
-    text: string;
-  }>;
-  estimatedDuration: number;
-}
-
-/**
- * SlideNarrator - Slide-to-Narration Component
- *
- * Upload a slide → GPT-4o Vision reads it → generates narration script
- * with [audio tags] → optionally renders expressive audio via ElevenLabs.
- *
- * Usage:
- *   <SlideNarrator
- *     narrator="eryn"
- *     style="case-based"
- *     targetAudience="oms-resident"
- *     duration={60}
- *     onScriptGenerated={(result) => console.log(result)}
- *   />
- */
 export function SlideNarrator({
   initialSlide,
   narrator = 'eryn',
-  style = 'didactic',
+  style = 'clinical-pearls',
   targetAudience = 'oms-resident',
-  duration = 60,
-  onScriptGenerated,
-  onAudioGenerated,
+  duration = 60
 }: SlideNarratorProps) {
-  const [slideFile, setSlideFile] = useState<File | null>(null);
-  const [slidePreview, setSlidePreview] = useState<string | null>(
-    typeof initialSlide === 'string' ? initialSlide : null
-  );
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
-  const [result, setResult] = useState<NarrationResult | null>(null);
+  const [step, setStep] = useState<'upload' | 'analyzing' | 'review' | 'audio'>('upload');
+  const [progress, setProgress] = useState(0);
+  const [result, setResult] = useState<any>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // Configuration states
+  const [config, setConfig] = useState({
+    narrator,
+    style,
+    targetAudience,
+    duration
+  });
 
-    if (!file.type.startsWith('image/')) {
-      setError('Please upload an image file (PNG, JPEG, WebP, etc.)');
-      return;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      setPreviewUrl(URL.createObjectURL(selectedFile));
+      setStep('upload');
     }
-
-    setSlideFile(file);
-    setError(null);
-    setResult(null);
-    setAudioUrl(null);
-
-    // Generate preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setSlidePreview(e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
   };
 
-  const generateScript = async () => {
-    if (!slideFile && !slidePreview) {
-      setError('Please upload a slide first');
-      return;
-    }
+  const startAnalysis = async () => {
+    if (!file) return;
+
+    setIsAnalyzing(true);
+    setStep('analyzing');
+    setProgress(0);
+    setError(null);
+
+    // Simulated progress for better UX
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 90) return prev;
+        return prev + Math.random() * 10;
+      });
+    }, 1000);
 
     try {
-      setIsGenerating(true);
-      setError(null);
-
       const formData = new FormData();
-      if (slideFile) {
-        formData.append('image', slideFile);
-      }
+      formData.append('file', file);
+      formData.append('style', config.style);
+      formData.append('targetAudience', config.targetAudience);
+      formData.append('duration', String(config.duration));
 
-      const options = {
-        narrator,
-        style,
-        targetAudience,
-        duration,
-        specialty: 'oral and maxillofacial surgery',
-      };
-      formData.append('options', JSON.stringify(options));
-
-      const res = await fetch('/api/narration-script', {
+      const response = await fetch('/api/narration-script', {
         method: 'POST',
         body: formData,
       });
 
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || 'Failed to generate script');
-      }
+      if (!response.ok) throw new Error('Analysis failed');
 
-      const data: NarrationResult = await res.json();
+      const data = await response.json();
       setResult(data);
-      if (onScriptGenerated) onScriptGenerated(data);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'An error occurred';
-      setError(message);
+      setStep('review');
+      setProgress(100);
+    } catch (err) {
+      setError('Failed to analyze slide. Please try again.');
+      setStep('upload');
     } finally {
-      setIsGenerating(false);
+      clearInterval(interval);
+      setIsAnalyzing(false);
     }
   };
 
   const generateAudio = async () => {
-    if (!result?.speakers) {
-      setError('Generate a script first');
-      return;
-    }
+    if (!result?.script) return;
+
+    setIsGeneratingAudio(true);
+    setProgress(0);
 
     try {
-      setIsGeneratingAudio(true);
-      setError(null);
-
-      const res = await fetch('/api/text-to-dialogue', {
+      const response = await fetch('/api/text-to-dialogue', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          turns: result.speakers,
-          outputFormat: 'mp3_44100_128',
+          script: result.script,
+          narrator: config.narrator,
         }),
       });
 
-      if (!res.ok) {
-        throw new Error('Failed to generate audio');
-      }
+      if (!response.ok) throw new Error('Audio generation failed');
 
-      const audioBlob = await res.blob();
-      const url = URL.createObjectURL(audioBlob);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
       setAudioUrl(url);
-      if (onAudioGenerated) onAudioGenerated(url);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Audio generation failed';
-      setError(message);
+      setStep('audio');
+    } catch (err) {
+      setError('Failed to generate audio. Please try again.');
     } finally {
       setIsGeneratingAudio(false);
     }
   };
 
   return (
-    <div className="flex flex-col gap-6 p-6 rounded-2xl border border-border bg-card text-card-foreground shadow-sm">
-      {/* Header */}
-      <div>
-        <h3 className="text-xl font-semibold">Slide Narrator</h3>
-        <p className="text-sm text-muted-foreground mt-1">
-          Upload a slide → GPT-4o generates teaching narration → ElevenLabs renders audio
-        </p>
-      </div>
-
-      {/* Upload Section */}
-      <div className="flex flex-col gap-3">
-        <label className="block">
-          <span className="text-sm font-medium">Upload Slide</span>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileSelect}
-            className="block w-full mt-2 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
-          />
-        </label>
-
-        {slidePreview && (
-          <div className="relative rounded-xl overflow-hidden border border-border">
-            <img
-              src={slidePreview}
-              alt="Slide preview"
-              className="w-full h-auto max-h-96 object-contain"
+    <div className="w-full max-w-6xl mx-auto space-y-8 animate-in fade-in duration-700">
+      {/* Premium Header Decoration */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-primary/10 text-primary">
+            <Sparkles className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="text-2xl font-bold">Narration Pipeline</h3>
+            <p className="text-sm text-muted-foreground">GPT-4o Vision + ElevenLabs Iconic Voices</p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          {['upload', 'analyzing', 'review', 'audio'].map((s, i) => (
+            <div 
+              key={s}
+              className={`h-1 w-12 rounded-full transition-colors duration-500 ${
+                ['upload', 'analyzing', 'review', 'audio'].indexOf(step) >= i 
+                  ? 'bg-primary' 
+                  : 'bg-muted'
+              }`}
             />
-          </div>
-        )}
-      </div>
-
-      {/* Options */}
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="text-xs text-muted-foreground">Narrator</label>
-          <p className="text-sm font-medium capitalize">{narrator}</p>
-        </div>
-        <div>
-          <label className="text-xs text-muted-foreground">Style</label>
-          <p className="text-sm font-medium">{style}</p>
-        </div>
-        <div>
-          <label className="text-xs text-muted-foreground">Audience</label>
-          <p className="text-sm font-medium">{targetAudience.replace('-', ' ')}</p>
-        </div>
-        <div>
-          <label className="text-xs text-muted-foreground">Duration</label>
-          <p className="text-sm font-medium">{duration}s</p>
+          ))}
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex gap-3">
-        <button
-          onClick={generateScript}
-          disabled={isGenerating || !slideFile}
-          className="flex-1 px-4 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isGenerating ? 'Generating Script...' : 'Generate Script'}
-        </button>
-
-        {result && (
-          <button
-            onClick={generateAudio}
-            disabled={isGeneratingAudio}
-            className="flex-1 px-4 py-3 rounded-xl bg-accent text-accent-foreground font-medium hover:bg-accent/90 transition-colors disabled:opacity-50"
-          >
-            {isGeneratingAudio ? 'Generating Audio...' : 'Generate Audio'}
-          </button>
-        )}
-      </div>
-
-      {/* Error */}
-      {error && (
-        <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
-          {error}
-        </div>
-      )}
-
-      {/* Result */}
-      {result && (
-        <div className="space-y-4 p-4 rounded-xl bg-muted">
-          <div>
-            <h4 className="font-semibold text-sm text-muted-foreground">Slide Title</h4>
-            <p className="text-base font-medium mt-1">{result.slideTitle}</p>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-sm text-muted-foreground">Key Points</h4>
-            <ul className="list-disc list-inside text-sm mt-1 space-y-1">
-              {result.keyPoints.map((point, i) => (
-                <li key={i}>{point}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-sm text-muted-foreground">Narration Script</h4>
-            <div className="mt-2 p-3 rounded-lg bg-background border border-border text-sm font-mono whitespace-pre-wrap">
-              {result.script}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Left: Interactive Canvas */}
+        <Card className="lg:col-span-7 overflow-hidden border-2 bg-slate-950/50 backdrop-blur-sm group relative">
+          {!previewUrl ? (
+            <div 
+              onClick={() => fileInputRef.current?.click()}
+              className="aspect-video flex flex-col items-center justify-center cursor-pointer hover:bg-white/5 transition-all duration-300 border-2 border-dashed border-white/10 m-4 rounded-xl group-hover:border-primary/50"
+            >
+              <div className="p-4 rounded-full bg-primary/10 text-primary mb-4 group-hover:scale-110 transition-transform">
+                <Upload className="w-8 h-8" />
+              </div>
+              <p className="font-medium text-lg">Drop your slide here</p>
+              <p className="text-sm text-muted-foreground mt-2">PowerPoint, PNG, or JPEG</p>
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileChange} 
+                className="hidden" 
+                accept="image/*"
+              />
             </div>
-          </div>
+          ) : (
+            <div className="relative aspect-video">
+              <img 
+                src={previewUrl} 
+                alt="Slide Preview" 
+                className="w-full h-full object-contain"
+              />
+              {step === 'analyzing' && (
+                <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex flex-col items-center justify-center p-8 text-center">
+                  <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+                  <h4 className="text-xl font-bold text-white mb-2">Analyzing Visual Architecture</h4>
+                  <p className="text-white/60 text-sm max-w-sm">GPT-4o is currently mapping the clinical logic and spatial relationships within your slide...</p>
+                  <Progress value={progress} className="w-64 h-1.5 mt-6" />
+                </div>
+              )}
+              {step === 'upload' && (
+                <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
+                  <Button 
+                    onClick={startAnalysis}
+                    className="w-full gap-2 h-12 text-lg font-bold shadow-2xl shadow-primary/20"
+                  >
+                    <Sparkles className="w-5 h-5" />
+                    Generate Narration Script
+                  </Button>
+                </div>
+              )}
+              {previewUrl && step !== 'analyzing' && (
+                <button 
+                  onClick={() => setPreviewUrl(null)}
+                  className="absolute top-4 right-4 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+                >
+                  <Settings2 className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          )}
+        </Card>
 
-          <div className="text-xs text-muted-foreground">
-            Est. duration: {result.estimatedDuration}s
-          </div>
-        </div>
-      )}
+        {/* Right: Controls & Results */}
+        <div className="lg:col-span-5 space-y-6">
+          {/* Configuration Panel */}
+          <Card className="p-6 border-2 bg-card/50 backdrop-blur-sm">
+            <h4 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4 flex items-center gap-2">
+              <Settings2 className="w-4 h-4" />
+              Intelligence Config
+            </h4>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-medium">Narrator Profile</label>
+                  <Select 
+                    value={config.narrator} 
+                    onValueChange={(v:any) => setConfig({...config, narrator: v})}
+                  >
+                    <SelectTrigger className="h-10 bg-background/50">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="eryn">Eryn (Professional)</SelectItem>
+                      <SelectItem value="peter">Peter (Academic)</SelectItem>
+                      <SelectItem value="both">Dialogue (Duo)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium">Teaching Style</label>
+                  <Select 
+                    value={config.style} 
+                    onValueChange={(v:any) => setConfig({...config, style: v})}
+                  >
+                    <SelectTrigger className="h-10 bg-background/50">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="clinical-pearls">Clinical Pearls</SelectItem>
+                      <SelectItem value="didactic">Didactic</SelectItem>
+                      <SelectItem value="socratic">Socratic</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
-      {/* Audio Player */}
-      {audioUrl && (
-        <div className="flex flex-col gap-2">
-          <h4 className="font-semibold text-sm">Generated Audio</h4>
-          <audio controls src={audioUrl} className="w-full" />
-          <a
-            href={audioUrl}
-            download="narration.mp3"
-            className="text-sm text-primary hover:underline"
-          >
-            Download MP3
-          </a>
+              <div className="space-y-2">
+                <label className="text-xs font-medium">Target Audience</label>
+                <Select 
+                  value={config.targetAudience} 
+                  onValueChange={(v:any) => setConfig({...config, targetAudience: v})}
+                >
+                  <SelectTrigger className="h-10 bg-background/50">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="oms-resident">OMS Resident</SelectItem>
+                    <SelectItem value="attending">Attending Surgeon</SelectItem>
+                    <SelectItem value="dental-student">Dental Student</SelectItem>
+                    <SelectItem value="patient">Patient Education</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </Card>
+
+          {/* Result Display */}
+          {result && (
+            <Card className="p-6 border-2 border-primary/20 bg-primary/5 relative overflow-hidden animate-in slide-in-from-right duration-500">
+              <div className="absolute top-0 right-0 p-3 opacity-10">
+                <FileText className="w-12 h-12" />
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <Badge variant="outline" className="mb-2 bg-primary/10 text-primary border-primary/20">
+                    Script Ready
+                  </Badge>
+                  <h4 className="text-xl font-bold">{result.slideTitle}</h4>
+                </div>
+
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-2 scrollbar-thin">
+                  <p className="text-sm leading-relaxed text-muted-foreground italic">
+                    "{result.script.substring(0, 150)}..."
+                  </p>
+                </div>
+
+                {step === 'review' && (
+                  <Button 
+                    onClick={generateAudio}
+                    disabled={isGeneratingAudio}
+                    className="w-full gap-2 h-11 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
+                  >
+                    {isGeneratingAudio ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Generating ElevenLabs Audio...
+                      </>
+                    ) : (
+                      <>
+                        <Volume2 className="w-4 h-4" />
+                        Generate Iconic Audio
+                      </>
+                    )}
+                  </Button>
+                )}
+
+                {audioUrl && (
+                  <div className="space-y-4 pt-4 border-t border-primary/10 animate-in fade-in duration-500">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold uppercase text-primary flex items-center gap-1">
+                        <Music4 className="w-3 h-3" />
+                        Final Production
+                      </span>
+                      <a 
+                        href={audioUrl} 
+                        download="narration.mp3"
+                        className="text-xs flex items-center gap-1 hover:underline text-primary"
+                      >
+                        <Download className="w-3 h-3" />
+                        Download MP3
+                      </a>
+                    </div>
+                    <audio controls src={audioUrl} className="w-full h-10 custom-audio-player" />
+                  </div>
+                )}
+              </div>
+            </Card>
+          )}
+
+          {error && (
+            <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm flex gap-2 items-start">
+              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+              {error}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
