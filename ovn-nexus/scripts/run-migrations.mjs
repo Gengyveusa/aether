@@ -11,15 +11,16 @@ const PROJECT_REF = "zwgywployfghfhjhwhqc";
 const DB_PASSWORD = process.env.SUPABASE_DB_PASSWORD;
 
 if (!DB_PASSWORD) {
-  // Try session pooler connection with service role
-  console.log("No DB_PASSWORD set. Trying pooler connection...");
+  console.error("Error: SUPABASE_DB_PASSWORD environment variable is required");
+  process.exit(1);
 }
 
-const connectionString = DB_PASSWORD
-  ? `postgresql://postgres.${PROJECT_REF}:${DB_PASSWORD}@aws-0-us-east-1.pooler.supabase.com:5432/postgres`
-  : `postgresql://postgres.${PROJECT_REF}:${DB_PASSWORD}@aws-0-us-east-1.pooler.supabase.com:6543/postgres`;
+const connectionString = `postgresql://postgres.${PROJECT_REF}:${encodeURIComponent(DB_PASSWORD)}@aws-0-us-east-1.pooler.supabase.com:5432/postgres`;
 
 const files = [
+  "00001_initial_schema.sql",
+  "00002_handle_new_user_trigger.sql",
+  "00003_add_research_access.sql",
   "00004_music_generation.sql",
   "00005_music_storage_bucket.sql",
 ];
