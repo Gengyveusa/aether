@@ -19,6 +19,7 @@ export default function HomePage() {
           </div>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
             <Link href="/education" className="text-muted-foreground hover:text-foreground transition-colors">Education</Link>
+            <Link href="/showcase" className="text-muted-foreground hover:text-foreground transition-colors">Showcase</Link>
             <a href="#community" className="text-muted-foreground hover:text-foreground transition-colors">Community</a>
             <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">About</a>
           </nav>

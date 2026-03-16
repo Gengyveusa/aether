@@ -9,10 +9,13 @@
     "lint": "next lint",
     "db:migrate": "supabase db push",
     "db:seed": "tsx scripts/seed.ts",
-    "db:reset": "supabase db reset"
+    "db:reset": "supabase db reset",
+    "video:pipeline": "tsx video-pipeline/run.ts",
+    "video:templates": "tsx video-pipeline/run.ts --list-templates"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
+    "jszip": "^3.10.1",
     "@supabase/ssr": "^0.1.0",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-avatar": "^1.0.4",
