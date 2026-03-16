@@ -46,7 +46,9 @@
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "autoprefixer": "^10.4.17",
+    "pg": "^8.20.0",
     "postcss": "^8.4.33",
+    "supabase": "^2.78.1",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.7.0",
     "typescript": "^5.3.0"
