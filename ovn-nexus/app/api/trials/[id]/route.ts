@@ -11,14 +11,7 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: error.code === "PGRST116" ? 404 : 500 });
-
-  // Also fetch trial_patient_matches if the table exists
-  const { data: matches } = await supabase
-    .from("trial_patient_matches")
-    .select("*")
-    .eq("trial_id", params.id);
-
-  return NextResponse.json({ data: { ...data, trial_patient_matches: matches || [] } });
+  return NextResponse.json({ data });
 }
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
