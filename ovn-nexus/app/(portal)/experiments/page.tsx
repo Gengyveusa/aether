@@ -57,8 +57,12 @@ export default async function ExperimentsPage() {
             <TableBody>
               {experiments?.map((exp) => (
                 <TableRow key={exp.id}>
-                  <TableCell className="font-mono text-sm">{exp.experiment_code}</TableCell>
-                  <TableCell className="font-medium max-w-[200px] truncate">{exp.title}</TableCell>
+                  <TableCell className="font-mono text-sm">
+                    <Link href={`/experiments/${exp.id}`} className="hover:underline text-primary">{exp.experiment_code}</Link>
+                  </TableCell>
+                  <TableCell className="font-medium max-w-[200px] truncate">
+                    <Link href={`/experiments/${exp.id}`} className="hover:underline">{exp.title}</Link>
+                  </TableCell>
                   <TableCell>{(exp.profiles as { full_name: string } | null)?.full_name ?? "—"}</TableCell>
                   <TableCell>{(exp.projects as { name: string } | null)?.name ?? "—"}</TableCell>
                   <TableCell>{exp.model_system ?? "—"}</TableCell>

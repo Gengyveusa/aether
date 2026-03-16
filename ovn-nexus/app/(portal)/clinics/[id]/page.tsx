@@ -32,7 +32,7 @@ export default async function ClinicDetailPage({ params }: { params: { id: strin
     <ClinicDetailClient
       clinic={clinic}
       patients={patients || []}
-      sampleCount={sampleCount || clinic.total_samples}
+      sampleCount={sampleCount ?? clinic.total_samples}
     />
   );
 }

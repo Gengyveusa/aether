@@ -49,7 +49,11 @@ export default async function PapersPage() {
             <TableBody>
               {papers?.map((paper) => (
                 <TableRow key={paper.id}>
-                  <TableCell className="font-medium max-w-[250px] truncate">{paper.title}</TableCell>
+                  <TableCell className="font-medium max-w-[250px] truncate">
+                    <Link href={`/papers/${paper.id}`} className="hover:underline text-primary">
+                      {paper.title}
+                    </Link>
+                  </TableCell>
                   <TableCell className="max-w-[150px] truncate">{paper.authors.slice(0, 3).join(", ")}{paper.authors.length > 3 ? " et al." : ""}</TableCell>
                   <TableCell>{paper.journal ?? "—"}</TableCell>
                   <TableCell className="font-mono text-xs">{paper.doi ?? "—"}</TableCell>

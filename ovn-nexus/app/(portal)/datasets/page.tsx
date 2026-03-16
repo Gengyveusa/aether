@@ -65,7 +65,9 @@ export default async function DatasetsPage() {
             <TableBody>
               {datasets?.map((ds) => (
                 <TableRow key={ds.id}>
-                  <TableCell className="font-medium max-w-[200px] truncate">{ds.name}</TableCell>
+                  <TableCell className="font-medium max-w-[200px] truncate">
+                    <Link href={`/datasets/${ds.id}`} className="hover:underline text-primary">{ds.name}</Link>
+                  </TableCell>
                   <TableCell><Badge variant="outline">{ds.dataset_type.replace(/_/g, " ")}</Badge></TableCell>
                   <TableCell className="font-mono text-xs uppercase">{ds.format}</TableCell>
                   <TableCell>{ds.file_size_bytes ? `${(ds.file_size_bytes / 1e6).toFixed(1)} MB` : "—"}</TableCell>

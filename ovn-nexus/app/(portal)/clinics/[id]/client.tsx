@@ -17,10 +17,10 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Building2, Users, TestTubes, Globe, Mail, Pencil, Trash2, ArrowLeft, Phone, MapPin } from "lucide-react";
+import { Building2, Users, FlaskConical, Globe, Mail, Pencil, Trash2, Phone, MapPin, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import type { Clinic, Patient } from "@/lib/db/types";
-import { formatDate, formatNumber } from "@/lib/utils/format";
+import { formatNumber, formatDate } from "@/lib/utils/format";
 
 interface ClinicDetailClientProps {
   clinic: Clinic & { institutions: { id: string; name: string; country: string } | null };
@@ -37,9 +37,9 @@ export function ClinicDetailClient({ clinic, patients, sampleCount }: ClinicDeta
   const [form, setForm] = useState({
     name: clinic.name,
     clinic_code: clinic.clinic_code,
-    address: clinic.address || "",
     country: clinic.country,
     city: clinic.city || "",
+    address: clinic.address || "",
     contact_email: clinic.contact_email || "",
     contact_phone: clinic.contact_phone || "",
   });
@@ -76,13 +76,13 @@ export function ClinicDetailClient({ clinic, patients, sampleCount }: ClinicDeta
   return (
     <div className="space-y-6">
       {/* Back link */}
-      <Link href="/clinics" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
-        <ArrowLeft className="mr-1 h-4 w-4" />
+      <Link href="/clinics" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+        <ArrowLeft className="h-4 w-4" />
         Back to Clinics
       </Link>
 
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold">{clinic.name}</h1>
@@ -92,28 +92,35 @@ export function ClinicDetailClient({ clinic, patients, sampleCount }: ClinicDeta
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <span className="font-mono text-sm">{clinic.clinic_code}</span>
-            <span>·</span>
-            <span>{clinic.institutions?.name ?? "No institution"}</span>
-            <span>·</span>
+            <span className="text-muted-foreground/40">|</span>
+            {clinic.institutions && (
+              <span>{clinic.institutions.name}</span>
+            )}
+            <span className="text-muted-foreground/40">|</span>
             <span>{clinic.country}</span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex gap-2">
           <Dialog open={editOpen} onOpenChange={setEditOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm">
-                <Pencil className="mr-2 h-4 w-4" />Edit
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle>Edit Clinic</DialogTitle>
-                <DialogDescription>Update clinic information.</DialogDescription>
+                <DialogDescription>Update the clinic details below.</DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
                   <Label htmlFor="edit-name">Name</Label>
                   <Input id="edit-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-code">Clinic Code</Label>
+                  <Input id="edit-code" value={form.clinic_code} onChange={(e) => setForm({ ...form, clinic_code: e.target.value })} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
@@ -150,21 +157,21 @@ export function ClinicDetailClient({ clinic, patients, sampleCount }: ClinicDeta
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive" size="sm">
-                <Trash2 className="mr-2 h-4 w-4" />Delete
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete Clinic</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Are you sure you want to delete &quot;{clinic.name}&quot;? This action cannot be undone
-                  and will remove all associated data.
+                  Are you sure you want to delete &quot;{clinic.name}&quot;? This action cannot be undone and will remove all associated data.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                  {deleting ? "Deleting..." : "Delete"}
+                  {deleting ? "Deleting..." : "Delete Clinic"}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -172,8 +179,8 @@ export function ClinicDetailClient({ clinic, patients, sampleCount }: ClinicDeta
         </div>
       </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* Stats row */}
+      <div className="grid gap-4 sm:grid-cols-4">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
@@ -182,7 +189,7 @@ export function ClinicDetailClient({ clinic, patients, sampleCount }: ClinicDeta
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Patients</p>
-                <p className="text-2xl font-bold">{formatNumber(patients.length)}</p>
+                <p className="text-2xl font-bold">{formatNumber(patients.length || clinic.total_patients)}</p>
               </div>
             </div>
           </CardContent>
@@ -191,7 +198,7 @@ export function ClinicDetailClient({ clinic, patients, sampleCount }: ClinicDeta
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className="rounded-lg bg-primary/10 p-2">
-                <TestTubes className="h-5 w-5 text-primary" />
+                <FlaskConical className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Samples</p>
@@ -221,7 +228,7 @@ export function ClinicDetailClient({ clinic, patients, sampleCount }: ClinicDeta
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Contact Email</p>
-                <p className="text-sm font-medium truncate max-w-[160px]">{clinic.contact_email || "Not set"}</p>
+                <p className="text-sm font-medium truncate max-w-[160px]">{clinic.contact_email || "Not provided"}</p>
               </div>
             </div>
           </CardContent>
@@ -245,46 +252,45 @@ export function ClinicDetailClient({ clinic, patients, sampleCount }: ClinicDeta
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Address</p>
-                    <div className="flex items-start gap-2 mt-1">
-                      <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
-                      <p className="text-sm">
-                        {clinic.address || "No address provided"}
-                        {clinic.city && <>, {clinic.city}</>}
-                        {clinic.country && <>, {clinic.country}</>}
-                      </p>
-                    </div>
-                  </div>
-                  <Separator />
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Institution</p>
-                    <p className="text-sm mt-1">{clinic.institutions?.name ?? "Not assigned"}</p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">Address</p>
+                  <div className="flex items-start gap-2">
+                    <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                    <p className="text-sm">{clinic.address || "No address on file"}</p>
                   </div>
                 </div>
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Contact Email</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <p className="text-sm">{clinic.contact_email || "Not provided"}</p>
-                    </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">Location</p>
+                  <p className="text-sm">{[clinic.city, clinic.country].filter(Boolean).join(", ") || "Not specified"}</p>
+                </div>
+              </div>
+              <Separator />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">Contact Email</p>
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-sm">{clinic.contact_email || "Not provided"}</p>
                   </div>
-                  <Separator />
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Contact Phone</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <p className="text-sm">{clinic.contact_phone || "Not provided"}</p>
-                    </div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">Contact Phone</p>
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-sm">{clinic.contact_phone || "Not provided"}</p>
                   </div>
-                  <Separator />
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Created</p>
-                    <p className="text-sm mt-1">{formatDate(clinic.created_at)}</p>
-                  </div>
+                </div>
+              </div>
+              <Separator />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">Institution</p>
+                  <p className="text-sm">{clinic.institutions?.name || "Not assigned"}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">Created</p>
+                  <p className="text-sm">{formatDate(clinic.created_at)}</p>
                 </div>
               </div>
             </CardContent>
@@ -318,8 +324,8 @@ export function ClinicDetailClient({ clinic, patients, sampleCount }: ClinicDeta
                           {patient.patient_code}
                         </Link>
                       </TableCell>
-                      <TableCell>{patient.age ?? "—"}</TableCell>
-                      <TableCell className="capitalize">{patient.sex?.replace(/_/g, " ") ?? "—"}</TableCell>
+                      <TableCell>{patient.age ?? "N/A"}</TableCell>
+                      <TableCell className="capitalize">{patient.sex?.replace(/_/g, " ") ?? "N/A"}</TableCell>
                       <TableCell>{formatDate(patient.enrollment_date)}</TableCell>
                       <TableCell>
                         <Badge variant={patient.is_active ? "default" : "secondary"}>
@@ -348,7 +354,7 @@ export function ClinicDetailClient({ clinic, patients, sampleCount }: ClinicDeta
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground py-8 text-center">
-                Activity log will be available in a future update.
+                Activity tracking coming soon. Recent visits, sample collections, and data uploads will appear here.
               </p>
             </CardContent>
           </Card>

@@ -12,7 +12,9 @@ export default async function ExperimentDetailPage({ params }: { params: { id: s
     .eq("id", params.id)
     .single();
 
-  if (error || !experiment) return notFound();
+  if (error || !experiment) {
+    notFound();
+  }
 
   const { data: datasets } = await supabase
     .from("datasets")
