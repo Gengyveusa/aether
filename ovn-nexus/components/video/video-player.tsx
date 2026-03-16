@@ -190,6 +190,7 @@ function SlidePlayer({ data, autoPlay, className }: CinematicPlayerProps) {
 
   const musicRef = useRef<HTMLAudioElement | null>(null);
   const narrationRef = useRef<HTMLAudioElement | null>(null);
+  const activeNarrationIndex = useRef<number>(-1);
   const animFrameRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
 
@@ -240,6 +241,54 @@ function SlidePlayer({ data, autoPlay, className }: CinematicPlayerProps) {
     }
   }, [isPlaying, isMuted, data.musicUrl, data.template.music.volume, currentTime]);
 
+  // Sync per-slide narration audio
+  useEffect(() => {
+    const scene = getCurrentScene(timeline, currentTime);
+    const slideIndex = scene?.slide?.index ?? -1;
+    const audioUrl = scene?.slide?.audioUrl;
+
+    // If we moved to a different slide, switch narration
+    if (slideIndex !== activeNarrationIndex.current) {
+      activeNarrationIndex.current = slideIndex;
+
+      // Stop current narration
+      if (narrationRef.current) {
+        narrationRef.current.pause();
+        narrationRef.current.src = "";
+      }
+
+      // Start new narration if available
+      if (audioUrl && isPlaying) {
+        const audio = narrationRef.current || new Audio();
+        narrationRef.current = audio;
+        audio.src = audioUrl;
+        audio.volume = 1.0;
+        audio.muted = isMuted;
+        audio.play().catch(() => {});
+      }
+    }
+
+    // Handle play/pause state changes on the current narration
+    if (narrationRef.current && narrationRef.current.src) {
+      narrationRef.current.muted = isMuted;
+      if (isPlaying && narrationRef.current.paused) {
+        narrationRef.current.play().catch(() => {});
+      } else if (!isPlaying && !narrationRef.current.paused) {
+        narrationRef.current.pause();
+      }
+    }
+  }, [currentTime, isPlaying, isMuted, timeline]);
+
+  // Cleanup narration audio on unmount
+  useEffect(() => {
+    return () => {
+      if (narrationRef.current) {
+        narrationRef.current.pause();
+        narrationRef.current.src = "";
+      }
+    };
+  }, []);
+
   // Determine current scene
   const currentScene = getCurrentScene(timeline, currentTime);
   const sceneProgress = currentScene
@@ -251,6 +300,8 @@ function SlidePlayer({ data, autoPlay, className }: CinematicPlayerProps) {
 
   const skipTo = (time: number) => {
     setCurrentTime(Math.max(0, Math.min(time, totalDuration)));
+    // Reset narration index so the next effect will trigger a new narration
+    activeNarrationIndex.current = -1;
   };
 
   const progress = (currentTime / totalDuration) * 100;

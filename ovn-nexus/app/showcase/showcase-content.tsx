@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { CinematicPlayer, VideoData } from "@/components/video/video-player";
 import { TemplatePicker } from "@/components/video/template-picker";
 
@@ -376,14 +376,102 @@ const TEMPLATE_STYLES: Record<string, VideoData["template"]> = {
   },
 };
 
+// Voice config per template (matches lib/video/templates.ts)
+const TEMPLATE_VOICE: Record<string, { voiceId: string; speed: number }> = {
+  documentary: { voiceId: "onyx", speed: 0.95 },
+  "cinematic-dark": { voiceId: "echo", speed: 0.9 },
+  "modern-minimal": { voiceId: "nova", speed: 1.0 },
+  "science-journal": { voiceId: "alloy", speed: 0.92 },
+  "impact-story": { voiceId: "fable", speed: 1.05 },
+};
+
+type NarrationStatus = "idle" | "generating" | "ready" | "error";
+
 export function ShowcaseContent() {
   const [selectedTemplate, setSelectedTemplate] = useState("cinematic-dark");
+  const [narrationStatus, setNarrationStatus] = useState<NarrationStatus>("idle");
+  const [narrationProgress, setNarrationProgress] = useState(0);
+  const [narrationError, setNarrationError] = useState<string | null>(null);
+  const [audioUrls, setAudioUrls] = useState<Record<number, string>>({});
+  const abortRef = useRef<AbortController | null>(null);
+
+  const voice = TEMPLATE_VOICE[selectedTemplate] || TEMPLATE_VOICE["cinematic-dark"];
+
+  const generateNarration = useCallback(async () => {
+    // Abort any in-progress generation
+    if (abortRef.current) abortRef.current.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    setNarrationStatus("generating");
+    setNarrationProgress(0);
+    setNarrationError(null);
+
+    // Revoke old blob URLs
+    Object.values(audioUrls).forEach((url) => URL.revokeObjectURL(url));
+    setAudioUrls({});
+
+    const newUrls: Record<number, string> = {};
+    const total = PERIO_IMMUNO_SLIDES.length;
+
+    for (let i = 0; i < total; i++) {
+      if (controller.signal.aborted) return;
+
+      const slide = PERIO_IMMUNO_SLIDES[i];
+      try {
+        const res = await fetch("/api/video/tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: slide.body,
+            voiceId: voice.voiceId,
+            speed: voice.speed,
+          }),
+          signal: controller.signal,
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: res.statusText }));
+          throw new Error(err.error || `HTTP ${res.status}`);
+        }
+
+        const blob = await res.blob();
+        newUrls[slide.index] = URL.createObjectURL(blob);
+      } catch (err) {
+        if ((err as Error).name === "AbortError") return;
+        console.error(`TTS failed for slide ${i}:`, err);
+        // Continue — skip failed slides
+      }
+
+      setNarrationProgress(Math.round(((i + 1) / total) * 100));
+      setAudioUrls({ ...newUrls });
+    }
+
+    if (Object.keys(newUrls).length === 0) {
+      setNarrationStatus("error");
+      setNarrationError("Failed to generate any narration. Check that OPENAI_API_KEY is set.");
+    } else {
+      setNarrationStatus("ready");
+    }
+  }, [voice.voiceId, voice.speed, audioUrls]);
+
+  const cancelNarration = useCallback(() => {
+    if (abortRef.current) abortRef.current.abort();
+    setNarrationStatus("idle");
+    setNarrationProgress(0);
+  }, []);
+
+  // Merge audio URLs into slide data
+  const slidesWithAudio = PERIO_IMMUNO_SLIDES.map((slide) => ({
+    ...slide,
+    audioUrl: audioUrls[slide.index],
+  }));
 
   const videoData: VideoData = {
     title: "Gingival Immunity v2.0",
     subtitle: "The Wiring Diagram — A Molecularly Resolved Control Architecture",
     author: "S. Thaddeus Connelly, DDS, MD, PhD, FACS",
-    slides: PERIO_IMMUNO_SLIDES,
+    slides: slidesWithAudio,
     template: TEMPLATE_STYLES[selectedTemplate],
   };
 
@@ -392,10 +480,73 @@ export function ShowcaseContent() {
       {/* Video Player */}
       <div data-cinematic-player className="rounded-xl overflow-hidden shadow-2xl">
         <CinematicPlayer
-          key={selectedTemplate}
+          key={`${selectedTemplate}-${narrationStatus}`}
           data={videoData}
           className="w-full"
         />
+      </div>
+
+      {/* Narration Controls */}
+      <div className="rounded-xl border bg-card p-6">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h3 className="text-lg font-semibold">AI Voice Narration</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              Generate spoken narration for all 40 slides using OpenAI TTS
+              ({voice.voiceId} voice, {voice.speed}x speed).
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            {narrationStatus === "generating" && (
+              <button
+                onClick={cancelNarration}
+                className="px-4 py-2 text-sm rounded-lg border hover:bg-muted transition-colors"
+              >
+                Cancel
+              </button>
+            )}
+            <button
+              onClick={generateNarration}
+              disabled={narrationStatus === "generating"}
+              className="px-5 py-2.5 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor: narrationStatus === "ready" ? "#16a34a" : "#3b82f6",
+                color: "#ffffff",
+              }}
+            >
+              {narrationStatus === "idle" && "Generate Narration"}
+              {narrationStatus === "generating" && `Generating... ${narrationProgress}%`}
+              {narrationStatus === "ready" && `Narration Ready (${Object.keys(audioUrls).length}/${PERIO_IMMUNO_SLIDES.length})`}
+              {narrationStatus === "error" && "Retry Narration"}
+            </button>
+          </div>
+        </div>
+
+        {/* Progress bar */}
+        {narrationStatus === "generating" && (
+          <div className="mt-3">
+            <div className="h-2 rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full rounded-full bg-blue-500 transition-[width] duration-300"
+                style={{ width: `${narrationProgress}%` }}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Processing slide {Math.ceil((narrationProgress / 100) * PERIO_IMMUNO_SLIDES.length)} of {PERIO_IMMUNO_SLIDES.length}...
+            </p>
+          </div>
+        )}
+
+        {narrationError && (
+          <p className="text-sm text-red-500 mt-2">{narrationError}</p>
+        )}
+
+        {narrationStatus === "ready" && (
+          <p className="text-xs text-muted-foreground mt-2">
+            Press play above to hear the narration synchronized with each slide.
+            Changing the template will clear generated audio.
+          </p>
+        )}
       </div>
 
       {/* Template Selector */}
@@ -407,7 +558,17 @@ export function ShowcaseContent() {
         </p>
         <TemplatePicker
           selected={selectedTemplate}
-          onChange={setSelectedTemplate}
+          onChange={(t) => {
+            setSelectedTemplate(t);
+            // Clear narration when template changes (different voice)
+            if (narrationStatus === "ready" || narrationStatus === "error") {
+              Object.values(audioUrls).forEach((url) => URL.revokeObjectURL(url));
+              setAudioUrls({});
+              setNarrationStatus("idle");
+              setNarrationProgress(0);
+              setNarrationError(null);
+            }
+          }}
         />
       </div>
 
@@ -420,11 +581,14 @@ export function ShowcaseContent() {
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
           {PERIO_IMMUNO_SLIDES.map((slide) => (
-            <div key={slide.index} className="rounded-lg bg-muted/50 p-3">
-              <span className="font-mono text-muted-foreground">
+            <div key={slide.index} className="rounded-lg bg-muted/50 p-3 flex items-start gap-2">
+              <span className="font-mono text-muted-foreground shrink-0">
                 {String(slide.index + 1).padStart(2, "0")}
-              </span>{" "}
+              </span>
               <span className="font-medium">{slide.title}</span>
+              {audioUrls[slide.index] && (
+                <span className="shrink-0 w-2 h-2 rounded-full bg-green-500 mt-1" title="Narration ready" />
+              )}
             </div>
           ))}
         </div>
@@ -443,7 +607,7 @@ export function ShowcaseContent() {
           <div className="rounded-lg bg-muted/50 p-4">
             <div className="font-semibold mb-1">AI Voice</div>
             <div className="text-muted-foreground">
-              OpenAI TTS or ElevenLabs generates natural narration from slide content
+              OpenAI TTS generates natural narration from slide content, synchronized per-slide
             </div>
           </div>
           <div className="rounded-lg bg-muted/50 p-4">
