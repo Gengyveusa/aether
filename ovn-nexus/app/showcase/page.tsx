@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { ShowcaseContent } from "./showcase-content";
 
 export const metadata = {
-  title: "Video Showcase — OVN Nexus",
-  description: "Cinematic presentations about the Oral-Vascular-Neural axis",
+  title: "Gingival Immunity v2.0 — OVN Nexus Video Showcase",
+  description: "A cinematic presentation of the molecularly resolved, spatially aware control architecture of gingival immunity",
 };
 
 export default function ShowcasePage() {
@@ -39,11 +39,11 @@ export default function ShowcasePage() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold tracking-tight">
-              The OVN Axis — A Cinematic Introduction
+              Gingival Immunity v2.0: The Wiring Diagram
             </h1>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Watch our cinematic presentation on how oral microbes influence
-              systemic disease through the Oral-Vascular-Neural pathway.
+              A molecularly resolved, spatially aware, dynamically modeled
+              layered control architecture — presented as a cinematic experience.
             </p>
           </div>
 
