@@ -50,9 +50,13 @@ export default async function ClinicsPage() {
             </TableHeader>
             <TableBody>
               {clinics?.map((clinic) => (
-                <TableRow key={clinic.id}>
-                  <TableCell className="font-mono text-sm">{clinic.clinic_code}</TableCell>
-                  <TableCell className="font-medium">{clinic.name}</TableCell>
+                <TableRow key={clinic.id} className="cursor-pointer hover:bg-muted/50">
+                  <TableCell className="font-mono text-sm">
+                    <Link href={`/clinics/${clinic.id}`} className="text-primary hover:underline">{clinic.clinic_code}</Link>
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    <Link href={`/clinics/${clinic.id}`} className="hover:underline">{clinic.name}</Link>
+                  </TableCell>
                   <TableCell>{(clinic.institutions as { name: string } | null)?.name ?? "—"}</TableCell>
                   <TableCell>{clinic.country}</TableCell>
                   <TableCell>{formatNumber(clinic.total_patients)}</TableCell>
