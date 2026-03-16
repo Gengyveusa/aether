@@ -1,46 +1,6 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-/**
- * POST /api/narration-script
- *
- * Uses GPT-4o Vision to read a slide image and generate a
- * narration script with ElevenLabs audio tags ready for
- * Text to Dialogue rendering.
- *
- * Request body (multipart/form-data OR JSON):
- *
- *   Multipart:
- *     image: File  (PNG, JPEG, WebP, GIF)
- *     options?: JSON string of NarrationOptions
- *
- *   JSON:
- *     imageUrl: string      (publicly accessible URL)
- *     imageBase64: string   (base64-encoded image, no data URI prefix)
- *     mimeType?: string     (default: 'image/png')
- *     options?: NarrationOptions
- *
- * NarrationOptions:
- *   narrator:       'eryn' | 'peter' | 'both'  (default: 'eryn')
- *   style:          'didactic' | 'case-based' | 'socratic' | 'clinical-pearls'
- *   targetAudience: 'dental-student' | 'oms-resident' | 'attending' | 'patient'
- *   duration:       30 | 60 | 90 | 120   (seconds, default: 60)
- *   specialty:      string  (e.g. 'oral and maxillofacial surgery')
- *   slideIndex:     number  (slide number in the deck, for context)
- *   totalSlides:    number  (total slides in deck)
- *   previousScript: string  (optional: prior slide script for continuity)
- *
- * Returns:
- * {
- *   script: string           // full narration text with [audio tags]
- *   speakers: Speaker[]      // turn-by-turn breakdown for Text to Dialogue
- *   slideTitle: string       // GPT-extracted slide title
- *   keyPoints: string[]      // GPT-extracted key learning points
- *   estimatedDuration: number // estimated seconds
- *   suggestedVoiceId: string  // Eryn or Peter voice ID
- * }
- */
-
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -56,231 +16,201 @@ interface NarrationOptions {
   previousScript?: string;
 }
 
-interface Speaker {
-  speaker: string;
-  voiceId: string;
-  text: string;
-}
-
-const VOICE_IDS = {
-  eryn: process.env.ELEVENLABS_VOICE_ID_ERYN || 'WuBPEavIaQB56EnsGvFh',
-  peter: process.env.ELEVENLABS_VOICE_ID_PETER || 'EapdDtSsMC291mjfSNe7',
-};
-
-function buildSystemPrompt(options: NarrationOptions): string {
-  const audience = options.targetAudience || 'oms-resident';
-  const style = options.style || 'didactic';
-  const specialty = options.specialty || 'oral and maxillofacial surgery';
-  const duration = options.duration || 60;
-  const narrator = options.narrator || 'eryn';
+function buildSystemPrompt(opts: NarrationOptions): string {
+  const {
+    style = 'clinical-pearls',
+    targetAudience = 'oms-resident',
+    duration = 60,
+    narrator = 'eryn',
+    specialty = 'oral and maxillofacial surgery',
+    slideIndex,
+    totalSlides,
+  } = opts;
 
   const audienceMap: Record<string, string> = {
-    'dental-student': 'dental students in their clinical years',
-    'oms-resident': 'oral and maxillofacial surgery residents',
-    'attending': 'attending surgeons seeking a refresher',
-    'patient': 'patients seeking to understand their condition',
+    'dental-student': 'a dental student learning core concepts',
+    'oms-resident': 'an oral and maxillofacial surgery resident with clinical exposure',
+    attending: 'an attending surgeon seeking concise clinical pearls',
+    patient: 'a patient who needs clear, jargon-free explanation',
   };
 
   const styleMap: Record<string, string> = {
-    'didactic':
-      'Clear, structured didactic teaching. State the concept, explain it, give an example.',
-    'case-based':
-      'Case-based learning. Open with a clinical scenario, build toward the teaching point.',
-    'socratic':
-      'Socratic method. Pose questions that guide the learner to discover the answer.',
-    'clinical-pearls':
-      'Practical clinical pearls. Focus on what practitioners actually need to know at the bedside.',
+    didactic: 'Use a structured, lecture-style delivery with clear explanations.',
+    'case-based': 'Frame content around a clinical scenario or case.',
+    socratic: 'Use rhetorical questions to guide the learner through reasoning.',
+    'clinical-pearls': 'Deliver crisp, high-yield clinical insights and mnemonics.',
   };
 
-  const narratorName = narrator === 'peter' ? 'Peter' : 'Eryn';
+  const slideContext =
+    slideIndex !== undefined && totalSlides !== undefined
+      ? `This is slide ${slideIndex + 1} of ${totalSlides}.`
+      : '';
 
-  return `You are ${narratorName}, an expert educator in ${specialty}.
-Your audience is ${audienceMap[audience]}.
-Teaching style: ${styleMap[style]}
-Target duration: approximately ${duration} seconds of spoken audio (~${Math.round(duration * 2.5)} words).
+  return `You are a world-class medical educator specializing in ${specialty}.
+Your task is to generate a spoken narration script for a presentation slide.
 
-Your task:
-1. Read the slide carefully — all text, labels, diagrams, tables, and figures.
-2. Write a narration script that teaches the content on the slide.
-3. Output ONLY valid JSON matching the schema below — no markdown, no preamble.
+AUDIENCE: ${audienceMap[targetAudience] ?? audienceMap['oms-resident']}
+STYLE: ${styleMap[style] ?? styleMap['clinical-pearls']}
+TARGET DURATION: approximately ${duration} seconds when read aloud.
+${slideContext}
 
-ElevenLabs Audio Tag Rules:
-- Wrap emotional cues in square brackets: [thoughtfully], [emphasizing], [gently], [with concern], [enthusiastically], [clinically]
-- Use [pause] for a beat of silence between concepts
-- For case-based style, open with [dramatically] or [setting the scene]
-- Keep tags natural — 1 tag per 2-3 sentences maximum
-
-Output JSON schema:
-{
-  "slideTitle": "string — the main topic of the slide",
-  "keyPoints": ["array of 2-5 core learning points"],
-  "script": "string — full narration with [audio tags] interspersed",
-  "speakers": [
-    {
-      "speaker": "${narratorName}",
-      "voiceId": "${VOICE_IDS[narrator === 'peter' ? 'peter' : 'eryn']}",
-      "text": "string — narration text with [audio tags]"
-    }
-  ],
-  "estimatedDuration": number
-}`;
+NARRATOR SETUP:
+${
+  narrator === 'both'
+    ? 'Use TWO speakers in dialogue format.\n- Speaker 1 (ERYN): Lead narrator, expert clinician voice.\n- Speaker 2 (PETER): Discussant, asks clarifying questions or adds nuance.\nFormat each line as: [ERYN]: ... or [PETER]: ...'
+    : `Single narrator (${narrator.toUpperCase()}). Write in a natural, spoken voice — not a lecture script.`
 }
 
-function buildUserPrompt(options: NarrationOptions): string {
-  const parts: string[] = ['Please analyze this slide and generate the narration script.'];
+OUTPUT FORMAT (JSON only, no markdown):
+{
+  "script": "full spoken text",
+  "slideTitle": "inferred title from slide content",
+  "keyPoints": ["bullet1", "bullet2", "bullet3"],
+  "speakers": [
+    { "speaker": "ERYN", "voiceId": "eryn", "text": "..." }
+  ],
+  "estimatedDuration": 60
+}
 
-  if (options.slideIndex !== undefined && options.totalSlides !== undefined) {
-    parts.push(
-      `This is slide ${options.slideIndex} of ${options.totalSlides} in the deck.`
-    );
-  }
-
-  if (options.previousScript) {
-    parts.push(
-      `For continuity, the previous slide's narration ended with: "${options.previousScript.slice(-200)}"`
-    );
-  }
-
-  return parts.join(' ');
+IMPORTANT:
+- Do NOT use markdown in the script field.
+- Speak to the audience, not AT the slide.
+- Keep it tight: no filler phrases.
+- For dialogue, alternate naturally between speakers.`;
 }
 
 export async function POST(request: Request) {
   try {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: 'OPENAI_API_KEY is not configured' },
-        { status: 500 }
-      );
-    }
+    const contentType = request.headers.get('content-type') ?? '';
 
+    let imageBase64: string | null = null;
+    let mimeType = 'image/png';
     let imageUrl: string | null = null;
     let options: NarrationOptions = {};
-    const contentType = request.headers.get('content-type') || '';
 
     if (contentType.includes('multipart/form-data')) {
-      // Handle file upload
       const formData = await request.formData();
-      const imageFile = formData.get('image') as File | null;
+      const file = formData.get('file') as File | null;
       const optionsStr = formData.get('options') as string | null;
 
-      if (!imageFile) {
-        return NextResponse.json(
-          { error: 'image field is required in form data' },
-          { status: 400 }
-        );
+      if (file) {
+        mimeType = file.type || 'image/png';
+        const arrayBuffer = await file.arrayBuffer();
+        imageBase64 = Buffer.from(arrayBuffer).toString('base64');
       }
 
       if (optionsStr) {
         try {
           options = JSON.parse(optionsStr);
         } catch {
-          return NextResponse.json(
-            { error: 'options must be valid JSON' },
-            { status: 400 }
-          );
+          // use defaults
         }
       }
 
-      // Convert file to base64 data URL
-      const arrayBuffer = await imageFile.arrayBuffer();
-      const base64 = Buffer.from(arrayBuffer).toString('base64');
-      const mime = imageFile.type || 'image/png';
-      imageUrl = `data:${mime};base64,${base64}`;
+      // Also parse flat fields from form
+      const style = formData.get('style') as string | null;
+      const targetAudience = formData.get('targetAudience') as string | null;
+      const duration = formData.get('duration') as string | null;
+      const narrator = formData.get('narrator') as string | null;
+
+      if (style) options.style = style as NarrationOptions['style'];
+      if (targetAudience) options.targetAudience = targetAudience as NarrationOptions['targetAudience'];
+      if (duration) options.duration = parseInt(duration) as NarrationOptions['duration'];
+      if (narrator) options.narrator = narrator as NarrationOptions['narrator'];
     } else {
-      // Handle JSON body
       const body = await request.json();
-      const { imageBase64, imageUrl: providedUrl, mimeType = 'image/png', options: bodyOptions } = body;
-
-      if (!imageBase64 && !providedUrl) {
-        return NextResponse.json(
-          { error: 'Provide either imageBase64, imageUrl, or multipart image upload' },
-          { status: 400 }
-        );
-      }
-
-      options = bodyOptions || {};
-
-      if (providedUrl) {
-        imageUrl = providedUrl;
-      } else {
-        imageUrl = `data:${mimeType};base64,${imageBase64}`;
-      }
+      imageUrl = body.imageUrl ?? null;
+      imageBase64 = body.imageBase64 ?? null;
+      mimeType = body.mimeType ?? 'image/png';
+      options = {
+        narrator: body.narrator,
+        style: body.style,
+        targetAudience: body.targetAudience,
+        duration: body.duration,
+        specialty: body.specialty,
+        slideIndex: body.slideIndex,
+        totalSlides: body.totalSlides,
+        previousScript: body.previousScript,
+      };
     }
 
-    // Call GPT-4o Vision
-    const completion = await openai.chat.completions.create({
+    if (!imageBase64 && !imageUrl) {
+      return NextResponse.json(
+        { error: 'No image provided. Send file (multipart) or imageUrl/imageBase64 (JSON).' },
+        { status: 400 }
+      );
+    }
+
+    const systemPrompt = buildSystemPrompt(options);
+
+    // Build image content part with proper typing
+    const imageContent = imageBase64
+      ? ({
+          type: 'image_url' as const,
+          image_url: {
+            url: `data:${mimeType};base64,${imageBase64}`,
+            detail: 'high' as const,
+          },
+        } as { type: 'image_url'; image_url: { url: string; detail: 'high' } })
+      : ({
+          type: 'image_url' as const,
+          image_url: {
+            url: imageUrl as string,
+            detail: 'high' as const,
+          },
+        } as { type: 'image_url'; image_url: { url: string; detail: 'high' } });
+
+    const completion = await (openai.chat.completions.create as Function)({
       model: 'gpt-4o',
-      max_tokens: 2048,
+      max_tokens: 1500,
+      response_format: { type: 'json_object' },
       messages: [
-        {
-          role: 'system',
-          content: buildSystemPrompt(options),
-        },
+        { role: 'system', content: systemPrompt },
         {
           role: 'user',
           content: [
             {
-              type: 'image_url',
-              image_url: {
-                url: imageUrl,
-                detail: 'high', // Use high detail for medical/educational slides
-              },
-            },
-            {
               type: 'text',
-              text: buildUserPrompt(options),
+              text: 'Analyze this slide and generate the narration script as specified.',
             },
+            imageContent,
           ],
         },
       ],
-      response_format: { type: 'json_object' },
     });
 
-    const rawContent = completion.choices[0]?.message?.content;
-    if (!rawContent) {
-      return NextResponse.json(
-        { error: 'No response from GPT-4o' },
-        { status: 500 }
-      );
-    }
-
+    const raw = completion.choices[0]?.message?.content ?? '{}';
     let parsed: Record<string, unknown>;
+
     try {
-      parsed = JSON.parse(rawContent);
+      parsed = JSON.parse(raw);
     } catch {
-      return NextResponse.json(
-        { error: 'GPT-4o returned invalid JSON', raw: rawContent },
-        { status: 500 }
-      );
+      // Try to extract JSON from the response
+      const match = raw.match(/\{[\s\S]*\}/);
+      if (match) {
+        parsed = JSON.parse(match[0]);
+      } else {
+        parsed = {
+          script: raw,
+          slideTitle: 'Slide Narration',
+          keyPoints: [],
+          speakers: [
+            { speaker: options.narrator?.toUpperCase() ?? 'ERYN', voiceId: options.narrator ?? 'eryn', text: raw },
+          ],
+          estimatedDuration: options.duration ?? 60,
+        };
+      }
     }
 
-    // Inject real voice IDs if speakers array is present
-    if (Array.isArray(parsed.speakers)) {
-      parsed.speakers = (parsed.speakers as Speaker[]).map((s) => ({
-        ...s,
-        voiceId:
-          s.speaker?.toLowerCase().includes('peter')
-            ? VOICE_IDS.peter
-            : VOICE_IDS.eryn,
-      }));
-    }
-
-    // Add usage metadata
-    const response = {
+    return NextResponse.json({
       ...parsed,
-      meta: {
-        model: 'gpt-4o',
-        promptTokens: completion.usage?.prompt_tokens,
-        completionTokens: completion.usage?.completion_tokens,
-        totalTokens: completion.usage?.total_tokens,
-      },
-    };
-
-    return NextResponse.json(response);
-  } catch (error: unknown) {
-    console.error('Narration script error:', error);
-    const message = error instanceof Error ? error.message : 'Internal server error';
+      generatedAt: new Date().toISOString(),
+      model: 'gpt-4o',
+      options,
+    });
+  } catch (err: unknown) {
+    console.error('[narration-script] Error:', err);
+    const message = err instanceof Error ? err.message : 'Unknown error';
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
