@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { CinematicPlayer, VideoData } from "@/components/video/video-player";
 import { TemplatePicker } from "@/components/video/template-picker";
+import { AmbientMusicEngine } from "@/lib/video/ambient-music";
 
 // ── Perio Immuno Presentation Data ───────────────────────────────────────────
 // "Gingival Immunity v2.0: The Wiring Diagram"
@@ -393,9 +394,43 @@ export function ShowcaseContent() {
   const [narrationProgress, setNarrationProgress] = useState(0);
   const [narrationError, setNarrationError] = useState<string | null>(null);
   const [audioUrls, setAudioUrls] = useState<Record<number, string>>({});
+  const [musicPlaying, setMusicPlaying] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const musicEngineRef = useRef<AmbientMusicEngine | null>(null);
 
   const voice = TEMPLATE_VOICE[selectedTemplate] || TEMPLATE_VOICE["cinematic-dark"];
+  const templateMusic = TEMPLATE_STYLES[selectedTemplate]?.music;
+
+  // Initialize music engine
+  useEffect(() => {
+    musicEngineRef.current = new AmbientMusicEngine();
+    return () => {
+      musicEngineRef.current?.stop();
+    };
+  }, []);
+
+  // Restart music when template changes (if playing)
+  useEffect(() => {
+    if (musicPlaying && musicEngineRef.current) {
+      musicEngineRef.current.stop();
+      // Small delay to let the old context close
+      const t = setTimeout(() => {
+        musicEngineRef.current?.start(selectedTemplate, templateMusic?.volume ?? 0.15);
+      }, 200);
+      return () => clearTimeout(t);
+    }
+  }, [selectedTemplate]);
+
+  const toggleMusic = useCallback(() => {
+    if (!musicEngineRef.current) return;
+    if (musicPlaying) {
+      musicEngineRef.current.stop();
+      setMusicPlaying(false);
+    } else {
+      musicEngineRef.current.start(selectedTemplate, templateMusic?.volume ?? 0.15);
+      setMusicPlaying(true);
+    }
+  }, [musicPlaying, selectedTemplate, templateMusic?.volume]);
 
   const generateNarration = useCallback(async () => {
     // Abort any in-progress generation
@@ -486,14 +521,18 @@ export function ShowcaseContent() {
         />
       </div>
 
-      {/* Narration Controls */}
-      <div className="rounded-xl border bg-card p-6">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <h3 className="text-lg font-semibold">AI Voice Narration</h3>
+      {/* Audio Controls */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Narration Controls */}
+        <div className="rounded-xl border bg-card p-6">
+          <div className="mb-3">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <svg className="h-5 w-5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+              AI Voice Narration
+            </h3>
             <p className="text-sm text-muted-foreground mt-1">
               Generate spoken narration for all 40 slides using OpenAI TTS
-              ({voice.voiceId} voice, {voice.speed}x speed).
+              — <strong>{voice.voiceId}</strong> voice at {voice.speed}x speed.
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -508,7 +547,7 @@ export function ShowcaseContent() {
             <button
               onClick={generateNarration}
               disabled={narrationStatus === "generating"}
-              className="px-5 py-2.5 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-5 py-2.5 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full"
               style={{
                 backgroundColor: narrationStatus === "ready" ? "#16a34a" : "#3b82f6",
                 color: "#ffffff",
@@ -520,33 +559,61 @@ export function ShowcaseContent() {
               {narrationStatus === "error" && "Retry Narration"}
             </button>
           </div>
+
+          {/* Progress bar */}
+          {narrationStatus === "generating" && (
+            <div className="mt-3">
+              <div className="h-2 rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-blue-500 transition-[width] duration-300"
+                  style={{ width: `${narrationProgress}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Processing slide {Math.ceil((narrationProgress / 100) * PERIO_IMMUNO_SLIDES.length)} of {PERIO_IMMUNO_SLIDES.length}...
+              </p>
+            </div>
+          )}
+
+          {narrationError && (
+            <p className="text-sm text-red-500 mt-2">{narrationError}</p>
+          )}
+
+          {narrationStatus === "ready" && (
+            <p className="text-xs text-muted-foreground mt-3">
+              Press play above to hear narration synchronized with each slide.
+            </p>
+          )}
         </div>
 
-        {/* Progress bar */}
-        {narrationStatus === "generating" && (
-          <div className="mt-3">
-            <div className="h-2 rounded-full bg-muted overflow-hidden">
-              <div
-                className="h-full rounded-full bg-blue-500 transition-[width] duration-300"
-                style={{ width: `${narrationProgress}%` }}
-              />
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Processing slide {Math.ceil((narrationProgress / 100) * PERIO_IMMUNO_SLIDES.length)} of {PERIO_IMMUNO_SLIDES.length}...
+        {/* Ambient Music Controls */}
+        <div className="rounded-xl border bg-card p-6">
+          <div className="mb-3">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <svg className="h-5 w-5 text-purple-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+              Ambient Background Music
+            </h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              Synthesized ambient pad that matches each template&apos;s mood.
+              Plays continuously while you watch.
             </p>
           </div>
-        )}
-
-        {narrationError && (
-          <p className="text-sm text-red-500 mt-2">{narrationError}</p>
-        )}
-
-        {narrationStatus === "ready" && (
-          <p className="text-xs text-muted-foreground mt-2">
-            Press play above to hear the narration synchronized with each slide.
-            Changing the template will clear generated audio.
+          <button
+            onClick={toggleMusic}
+            className="px-5 py-2.5 text-sm font-medium rounded-lg transition-colors w-full"
+            style={{
+              backgroundColor: musicPlaying ? "#7c3aed" : "#8b5cf6",
+              color: "#ffffff",
+            }}
+          >
+            {musicPlaying ? "Stop Background Music" : "Start Background Music"}
+          </button>
+          <p className="text-xs text-muted-foreground mt-3">
+            {musicPlaying
+              ? `Playing ambient pad for "${selectedTemplate}" template. Change template to hear a different mood.`
+              : "Click to start — each of the 5 templates has a unique harmonic signature."}
           </p>
-        )}
+        </div>
       </div>
 
       {/* Template Selector */}
@@ -568,6 +635,7 @@ export function ShowcaseContent() {
               setNarrationProgress(0);
               setNarrationError(null);
             }
+            // Music engine handles template change via useEffect
           }}
         />
       </div>
