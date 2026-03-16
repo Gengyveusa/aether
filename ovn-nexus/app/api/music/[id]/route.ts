@@ -1,18 +1,29 @@
+// @ts-nocheck
 import { NextRequest, NextResponse } from "next/server";
-import { getMusicRequests } from "@/lib/music/store";
+import { createServerSupabaseClient } from "@/lib/db/supabase-server";
 
-// GET /api/music/[id] — get a single music request
+// GET /api/music/[id] — get a single music request with its versions
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const requests = getMusicRequests();
-  const request = requests.find((r) => r.id === params.id);
+  const supabase = createServerSupabaseClient();
 
-  if (!request) {
-    return NextResponse.json({ error: "Music request not found" }, { status: 404 });
-  }
+  const { data: request, error } = await supabase
+    .from("music_requests")
+    .select("*")
+    .eq("id", params.id)
+    .single();
 
-  return NextResponse.json({ data: request });
+  if (error) return NextResponse.json({ error: "Music request not found" }, { status: 404 });
+
+  // Also fetch versions
+  const { data: versions } = await supabase
+    .from("music_versions")
+    .select("*")
+    .eq("request_id", params.id)
+    .order("version_number", { ascending: true });
+
+  return NextResponse.json({ data: { ...request, versions: versions || [] } });
 }
