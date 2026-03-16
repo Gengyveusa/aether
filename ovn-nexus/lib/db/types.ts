@@ -272,6 +272,92 @@ export interface PlatformStats {
   total_users: number;
 }
 
+// ── Music Generation Types ───────────────────────────────────
+
+export type MusicUseCase = "podcast" | "research_video" | "brand_theme" | "social_media" | "background_music" | "presentation" | "other";
+export type MusicTempo = "slow" | "medium" | "fast";
+export type MusicVoiceType = "male" | "female" | "instrumental";
+export type MusicLyricsMode = "auto" | "manual" | "none";
+export type MusicJobStatus = "draft" | "queued" | "generating" | "generated" | "review" | "approved" | "published" | "rejected";
+
+export interface MusicRequestRow {
+  id: string;
+  project_id: string | null;
+  user_id: string;
+  title: string;
+  use_case: MusicUseCase;
+  mood: string;
+  genre: string;
+  tempo: MusicTempo;
+  instrumentation: string | null;
+  voice_type: MusicVoiceType;
+  lyrics_mode: MusicLyricsMode;
+  lyrics_text: string | null;
+  prompt_notes: string | null;
+  duration_seconds: number | null;
+  generated_prompts: unknown;
+  status: MusicJobStatus;
+  assigned_operator_id: string | null;
+  tags: string[];
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MusicVersionRow {
+  id: string;
+  request_id: string;
+  version_number: number;
+  audio_url: string;
+  audio_format: string;
+  audio_size_bytes: number | null;
+  duration_seconds: number | null;
+  stems_url: string | null;
+  cover_image_url: string | null;
+  waveform_data: unknown;
+  prompt_used: string | null;
+  suno_generation_id: string | null;
+  is_selected: boolean;
+  rating: number | null;
+  review_notes: string | null;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  uploaded_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MusicCommentRow {
+  id: string;
+  request_id: string;
+  version_id: string | null;
+  user_id: string;
+  content: string;
+  timestamp_seconds: number | null;
+  created_at: string;
+}
+
+export interface MusicPublishedRow {
+  id: string;
+  request_id: string;
+  version_id: string;
+  title: string;
+  description: string | null;
+  license_type: string;
+  attached_to_type: string | null;
+  attached_to_id: string | null;
+  cover_image_url: string | null;
+  genre: string | null;
+  mood: string | null;
+  tags: string[];
+  play_count: number;
+  download_count: number;
+  published_by: string;
+  published_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
 // Supabase Database type mapping
 export interface Database {
   public: {
@@ -291,6 +377,10 @@ export interface Database {
       clinical_trials: { Row: ClinicalTrial; Insert: Omit<ClinicalTrial, "id" | "created_at" | "updated_at">; Update: Partial<Omit<ClinicalTrial, "id">> };
       ml_models: { Row: MlModel; Insert: Omit<MlModel, "id" | "created_at" | "updated_at">; Update: Partial<Omit<MlModel, "id">> };
       audit_logs: { Row: AuditLog; Insert: Omit<AuditLog, "id" | "created_at">; Update: never };
+      music_requests: { Row: MusicRequestRow; Insert: Omit<MusicRequestRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<MusicRequestRow, "id">> };
+      music_versions: { Row: MusicVersionRow; Insert: Omit<MusicVersionRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<MusicVersionRow, "id">> };
+      music_comments: { Row: MusicCommentRow; Insert: Omit<MusicCommentRow, "id" | "created_at">; Update: never };
+      music_published: { Row: MusicPublishedRow; Insert: Omit<MusicPublishedRow, "id" | "created_at" | "updated_at" | "play_count" | "download_count">; Update: Partial<Omit<MusicPublishedRow, "id">> };
     };
     Views: {
       platform_stats: { Row: PlatformStats };

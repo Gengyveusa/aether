@@ -6,10 +6,13 @@ import { cn } from "@/lib/utils/cn";
 import {
   LayoutDashboard, Building2, Users, TestTubes, FlaskConical,
   Database, FileText, Pill, Brain, Activity, Home, Lock, KeyRound,
+  Film, Music,
 } from "lucide-react";
 
 const hubNavigation = [
   { name: "Member Hub", href: "/hub", icon: Home },
+  { name: "Showcase", href: "/showcase", icon: Film },
+  { name: "Music Studio", href: "/music", icon: Music },
 ];
 
 const researchNavigation = [

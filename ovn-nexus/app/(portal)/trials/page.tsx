@@ -57,9 +57,13 @@ export default async function TrialsPage() {
             </TableHeader>
             <TableBody>
               {trials?.map((trial) => (
-                <TableRow key={trial.id}>
-                  <TableCell className="font-mono text-sm">{trial.trial_code}</TableCell>
-                  <TableCell className="font-medium max-w-[200px] truncate">{trial.title}</TableCell>
+                <TableRow key={trial.id} className="cursor-pointer hover:bg-muted/50">
+                  <TableCell className="font-mono text-sm">
+                    <Link href={`/trials/${trial.id}`} className="text-primary hover:underline">{trial.trial_code}</Link>
+                  </TableCell>
+                  <TableCell className="font-medium max-w-[200px] truncate">
+                    <Link href={`/trials/${trial.id}`} className="hover:underline">{trial.title}</Link>
+                  </TableCell>
                   <TableCell><Badge variant={PHASE_COLORS[trial.phase] ?? "outline"}>{trial.phase.replace(/_/g, " ")}</Badge></TableCell>
                   <TableCell><Badge variant={trial.status === "recruiting" ? "default" : "secondary"}>{trial.status}</Badge></TableCell>
                   <TableCell>{trial.sponsor ?? "—"}</TableCell>

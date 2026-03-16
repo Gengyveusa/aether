@@ -9,11 +9,11 @@
     "lint": "next lint",
     "db:migrate": "supabase db push",
     "db:seed": "tsx scripts/seed.ts",
-    "db:reset": "supabase db reset"
+    "db:reset": "supabase db reset",
+    "video:pipeline": "tsx video-pipeline/run.ts",
+    "video:templates": "tsx video-pipeline/run.ts --list-templates"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.0",
-    "@supabase/ssr": "^0.1.0",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-avatar": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.5",
@@ -25,9 +25,12 @@
     "@radix-ui/react-tabs": "^1.0.4",
     "@radix-ui/react-toast": "^1.1.5",
     "@radix-ui/react-tooltip": "^1.0.7",
+    "@supabase/ssr": "^0.1.0",
+    "@supabase/supabase-js": "^2.39.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "date-fns": "^3.3.0",
+    "jszip": "^3.10.1",
     "lucide-react": "^0.312.0",
     "next": "14.1.0",
     "react": "^18.2.0",
@@ -38,11 +41,14 @@
     "zod": "^3.22.0"
   },
   "devDependencies": {
+    "@types/jszip": "^3.4.0",
     "@types/node": "^20.11.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "autoprefixer": "^10.4.17",
+    "pg": "^8.20.0",
     "postcss": "^8.4.33",
+    "supabase": "^2.78.1",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.7.0",
     "typescript": "^5.3.0"

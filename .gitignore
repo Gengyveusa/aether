@@ -202,6 +202,7 @@ cython_debug/
 .cursorindexingignore
 
 # Node / TypeScript (monorepo)
+.next/
 node_modules/
 npm-debug.log*
 yarn-debug.log*
