@@ -561,7 +561,7 @@ export function ShowcaseContent() {
             });
             if (retry.ok) {
               const blob = await retry.blob();
-              newStates[slide.index] = URL.createObjectURL(blob);
+              newStates[slide.index] = { status: "success", audioUrl: URL.createObjectURL(blob), persistent: false };
             }
           } catch (retryErr) {
             if ((retryErr as Error).name === "AbortError") return;
@@ -570,16 +570,13 @@ export function ShowcaseContent() {
         } else {
           console.error(`TTS failed for slide ${slide.index}:`, err);
         }
+                newStates[slide.index] = { status: "failed", error: (err as Error).message };
+                        setSlideStates({ ...newStates });
       }
       // Small delay to avoid rate-limiting
       await new Promise((r) => setTimeout(r, 150));
 
-        newStates[slide.index] = {
-          status: "failed",
-          error: (err as Error).message,
-        };
-        setSlideStates({ ...newStates });
-      }
+
     }
 
     // Final status
