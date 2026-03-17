@@ -19,6 +19,7 @@ const PERIO_IMMUNO_SLIDES: VideoData["slides"] = [
     body: "A molecularly resolved, spatially aware, dynamically modeled layered control architecture. Because your gingiva is smarter than your thermostat.",
     imageUrl: `${SLIDE_BASE}/1_.png`,
     duration: 10,
+    narrationscript: "welcome to gingival immunity version two point zero, the wiring diagram. this is not a simple overview of gum disease. it is a complete systems map of how your gingiva actually works. your gingival tissue functions like a sophisticated layered control architecture, with sensors, controllers, actuators, and failure modes. by the end of this presentation, you will trace a signal from a bacterial surface molecule all the way through to bone loss, or to resolution. each layer builds on the last. if you understand the handoffs, you understand the disease.",
   },
   {
     index: 1,
@@ -26,6 +27,7 @@ const PERIO_IMMUNO_SLIDES: VideoData["slides"] = [
     body: "This deck reframes gingival immunity not as a simple fight-infection system, but as a sophisticated layered control architecture — complete with sensors, controllers, actuators, and failure modes. Think of it like an industrial control system: not just a smoke alarm, but a full SCADA network for your gum tissue.",
     imageUrl: `${SLIDE_BASE}/2_What-This-Presentation-Is-About.png`,
     duration: 14,
+    narrationScript: "This deck reframes gingival immunity as a sophisticated layered control architecture. Think of it like an industrial control system, not a simple smoke alarm, but a full network for your gum tissue. There are eight interconnected layers: sensors that detect bacterial threats, controllers that coordinate the response, effectors that execute it, and regulatory circuits that prevent the system from destroying itself. The goal is not sterilization. The goal is controlled coexistence. By the end of this deck, you will understand exactly how that works, and what goes wrong when it fails.",
   },
   {
     index: 2,
@@ -33,6 +35,7 @@ const PERIO_IMMUNO_SLIDES: VideoData["slides"] = [
     body: "Eight interconnected layers form the complete architecture: System Objective, Innate Sensor Layer, Innate-to-Adaptive Handoff, Adaptive Amplifier Layer, Periodontal Homeostasis, Disease as Failure Mode, Spatial and Single-Cell Control Layer, and Therapeutic Leverage Points. Each layer equals sensors, controllers, actuators, and failure triggers.",
     imageUrl: `${SLIDE_BASE}/3_.png`,
     duration: 15,
+    narrationScript: "Eight interconnected layers form the complete architecture of gingival immunity. The system objective is to maintain tissue integrity, not to sterilize. The innate sensor layer uses TLRs, NODs, and NLRP3 to detect molecular patterns. The innate-to-adaptive handoff uses dendritic cells as translators. The adaptive amplifier layer adds precision through clonal expansion. Periodontal homeostasis represents the normal state. Disease is a failure mode. The spatial control layer adds geographic precision. And therapeutic leverage points are where we can intervene. Master these eight layers, and you have the complete mental model.",
   },
   {
     index: 3,
@@ -40,6 +43,7 @@ const PERIO_IMMUNO_SLIDES: VideoData["slides"] = [
     body: "This agenda is a functional map of a biological control system. Each of the eight layers represents a distinct module with its own sensors, controllers, actuators, and failure triggers. By the end, you will be able to trace a signal from a bacterial surface molecule all the way through to bone loss — or to resolution. Each layer builds on the last. If you understand the handoffs, you understand the disease.",
     imageUrl: `${SLIDE_BASE}/4_How-to-Read-This-Deck.png`,
     duration: 16,
+    narrationScript: "This agenda is a functional map of a biological control system. Each of the eight layers represents a distinct module with its own sensors, controllers, actuators, and failure triggers. Layer one is the barrier. Layer two is innate sensing through pattern-recognition receptors. Layer three is routing through cytokine gradients. Layer four is containment through neutrophils. Layer five is the innate-to-adaptive handoff. Layer six is adaptive amplification. Layer seven is plasticity. And layer eight is resolution. By the end, you will trace any signal from bacterial contact to bone loss, or to resolution.",
   },
   {
     index: 4,
@@ -54,6 +58,7 @@ const PERIO_IMMUNO_SLIDES: VideoData["slides"] = [
     body: "Most immune systems are taught as kill everything foreign. The gingival immune system breaks that rule. Its actual goal is homeostatic coexistence — maintaining a stable tissue environment in the presence of a permanent, dense microbial community. Failure is not just not enough immunity — it is also too much, too long, in the wrong direction.",
     imageUrl: `${SLIDE_BASE}/6_The-Core-Insight-Tolerance-Not-Sterility.png`,
     duration: 15,
+    narrationScript: "Most immune systems are taught as kill-everything-foreign. The gingival immune system breaks that rule. Its actual goal is homeostatic coexistence, maintaining a stable tissue environment in the presence of a permanent dense microbial community. Failure is not just insufficient immunity. Failure is also too much immunity, sustained too long, directed in the wrong direction. Understanding this distinction is the foundation of modern periodontal immunology. The gingiva is not trying to win a war. It is trying to maintain a negotiated peace.",
   },
   {
     index: 6,
@@ -61,6 +66,7 @@ const PERIO_IMMUNO_SLIDES: VideoData["slides"] = [
     body: "The barrier module uses junctional keratinocytes with TLR2/4, NOD1/2, and NLRP3 sensors. Fusobacterium triggers TLR2/NALP2, producing human beta-defensins and CXCL8. The routing module directs mastication damage through epithelial IL-6 to homeostatic Th17 setpoint. IL-8 and ICAM-1 gradients direct neutrophils into the sulcus. This is damage-driven, not purely commensal-driven.",
     imageUrl: `${SLIDE_BASE}/7_.png`,
     duration: 16,
+    narrationScript: "The barrier module of the innate system uses junctional keratinocytes expressing TLR2, TLR4, NOD1, NOD2, and NLRP3 pattern-recognition receptors. When Fusobacterium nucleatum activates TLR2 and NALP2, keratinocytes produce human beta-defensins and the chemokine CXCL8. IL-8 and ICAM-1 gradients direct neutrophils into the gingival sulcus. This routing is driven by damage signals and bacterial patterns, not purely by commensal contact. The innate layer responds in minutes to hours, long before the adaptive system can act. Speed and pattern recognition are its defining features.",
   },
   {
     index: 7,
@@ -75,6 +81,7 @@ const PERIO_IMMUNO_SLIDES: VideoData["slides"] = [
     body: "Key effectors include neutrophils, dendritic cells, macrophages, and CD81-positive fibroblasts that secrete C3 to drive the C3aR1-neutrophil recruitment circuit. The oral setpoint is maintained by mastication IL-6 plus stromal signals driving basal Th17 tone and antimicrobial activity. The resolution module uses efferocytosis to trigger IL-10, TGF-beta, and specialized pro-resolving mediators that suppress IL-23 and IL-17.",
     imageUrl: `${SLIDE_BASE}/9_.png`,
     duration: 16,
+    narrationScript: "The key innate effectors in the gingiva include neutrophils, dendritic cells, macrophages, and CD81-positive fibroblasts that secrete complement component C3 to drive the C3aR1-neutrophil recruitment circuit. The oral homeostatic setpoint is maintained by mastication-driven IL-6 combined with stromal signals that sustain basal Th17 tone and antimicrobial activity. Critically, resolution is not passive. It is an actively programmed process. Efferocytosis, the engulfment of apoptotic neutrophils, triggers IL-10, TGF-beta, and specialized pro-resolving mediators that suppress the IL-23 and IL-17 axis. Resolution is not the absence of inflammation. Resolution is a distinct biological program.",
   },
   {
     index: 9,
@@ -89,6 +96,7 @@ const PERIO_IMMUNO_SLIDES: VideoData["slides"] = [
     body: "The dendritic cell is the relay station between innate and adaptive immunity. DC maturation upregulates MHC-II and CD80/86. Cytokine imprinting through IL-12, IL-23, and IL-6 shapes the adaptive response. Without maturation, adaptive priming aborts entirely. Epithelial and stromal instruction via IL-1, IL-6, and IL-23 shapes the bias — Th17 versus Treg at the crossroads.",
     imageUrl: `${SLIDE_BASE}/11_.png`,
     duration: 15,
+    narrationScript: "The dendritic cell is the relay station between innate and adaptive immunity. When the innate system detects a threat and matures a dendritic cell, that cell travels to the lymph node and presents antigen to naive T cells. But it does more than present antigen. It also delivers a second signal, and a cytokine context, that determines what kind of adaptive response is mounted. Without DC maturation, T cells become tolerant, not activated. The cytokines IL-12, IL-23, and IL-6 produced by the DC shape whether the response becomes Th1, Th17, or Treg. The DC does not just present antigen. It casts the vote on what kind of immune war to fight.",
   },
   {
     index: 11,
@@ -103,6 +111,7 @@ const PERIO_IMMUNO_SLIDES: VideoData["slides"] = [
     body: "The adaptive system uses V(D)J recombination and affinity maturation for clonal precision. The core balance is Th17 effector versus Treg versus T-follicular-helper. On the B-cell side, class switching leads to plasma cells that are major RANKL sources but also produce IL-35 and IL-37 regulatory signals. The adaptive layer reinforces protection or locks in destruction. It is the amplifier with a volume knob.",
     imageUrl: `${SLIDE_BASE}/13_.png`,
     duration: 16,
+    narrationScript: "The adaptive immune system in the gingiva uses V-D-J recombination and affinity maturation for clonal precision. The core balance is between Th17 effector cells, regulatory T cells, and T-follicular-helper cells. On the B-cell side, class switching to IgG leads to plasma cells that are major RANKL sources, but certain plasma cell subsets also produce IL-35 and IL-37 as regulatory signals. The adaptive layer reinforces protection or locks in destruction. It is the amplifier with a volume knob. When properly controlled, it provides precise, memory-based immune defense. When dysregulated, it drives the chronic destructive inflammation that defines periodontitis.",
   },
   {
     index: 13,
@@ -110,6 +119,7 @@ const PERIO_IMMUNO_SLIDES: VideoData["slides"] = [
     body: "Where the innate system is fast and broad, the adaptive system is slow, specific, and amplifiable. It uses V(D)J recombination and affinity maturation to generate exquisitely targeted responses — and immunological memory to respond faster next time. When properly calibrated, it provides targeted pathogen control. When dysregulated, it drives the chronic, tissue-destructive inflammation that defines periodontitis.",
     imageUrl: `${SLIDE_BASE}/14_Adaptive-Immunity-Precision-Over-Speed.png`,
     duration: 15,
+    narrationScript: "Where the innate system is fast and broad, the adaptive system is slow, specific, and amplifiable. It uses V-D-J recombination and affinity maturation to generate exquisitely targeted responses, and immunological memory to respond faster next time. The core balance in the gingiva is between Th17 effector cells, regulatory T cells, and T-follicular-helper cells. When this balance is maintained, the adaptive system provides targeted pathogen control. When it is dysregulated, it drives the chronic tissue-destructive inflammation that defines periodontitis. Precision is both the adaptive system's greatest asset and its most dangerous failure mode.",
   },
   {
     index: 14,
@@ -131,6 +141,7 @@ const PERIO_IMMUNO_SLIDES: VideoData["slides"] = [
     body: "The junctional epithelium maintains constant neutrophil transit with innate-dominant signaling and PD-L1-positive immunosuppression. The sulcular epithelium runs adaptive and tertiary-lymphoid-structure-like surveillance with T-cell predominance. The stromal zone houses a fibroblast-ILC3-neutrophil circuit. Inflammation is not absent — it is spatially organized and purposeful.",
     imageUrl: `${SLIDE_BASE}/17_.png`,
     duration: 15,
+    narrationScript: "Periodontal homeostasis is not a state of inflammation absence. It is a state of organized, spatially controlled, purposeful immune activity. The junctional epithelium maintains a constant flow of neutrophils into the sulcus. The sulcular epithelium runs adaptive immune surveillance. The stromal zone controls neutrophil positioning through C3 signals. Three distinct zones, three distinct immune programs, all operating simultaneously. Health is not the absence of immune activity. Health is immune activity that is precisely organized and capable of resolution.",
   },
   {
     index: 17,
@@ -208,6 +219,7 @@ const PERIO_IMMUNO_SLIDES: VideoData["slides"] = [
     body: "Immune cells get most of the attention — but the resident stromal cells of the gingiva are not passive bystanders. They are active immune regulators that shape every aspect of the local response. In disease, stromal reprogramming can lock the tissue into a pro-inflammatory state even after the microbial trigger is reduced. Treat the stroma, not just the immune cells — stromal reprogramming is a key driver of chronicity.",
     imageUrl: `${SLIDE_BASE}/28_Stromal-Cells-The-Immune-Systems-Hidden-Infrastructure.png`,
     duration: 15,
+    narrationScript: "Immune cells get most of the attention. But the resident stromal cells of the gingiva are not passive bystanders. They are active immune regulators that shape every aspect of the local response. Junctional keratinocytes constitutively produce keratokines that recruit and position neutrophils. Sulcular keratinocytes bias toward adaptive surveillance. CD81-positive fibroblasts secrete C3 to drive the neutrophil recruitment circuit. And in disease, senescent fibroblasts develop a senescence-associated secretory phenotype that sustains chronic inflammation. Stromal reprogramming in disease is a key driver of chronicity. Treat the stroma, not just the immune cells.",
   },
   {
     index: 28,
@@ -243,6 +255,7 @@ const PERIO_IMMUNO_SLIDES: VideoData["slides"] = [
     body: "Barrier. Sensing through PRR. Routing through gradients. Containment through neutrophils and efferocytosis. Instruction through DC handoff. Clonal amplification. Plasticity from Th17 to T-follicular-helper. Resolution through SPMs and efferocytosis. Periodontitis equals checkpoint failures at Containment plus Resolution plus Protective Plasticity. Eight steps. Three failure points. One disease.",
     imageUrl: `${SLIDE_BASE}/33_.png`,
     duration: 15,
+    narrationScript: "Here is the mnemonic: Barrier. Sensing through pattern-recognition receptors. Routing through cytokine and chemokine gradients. Containment through neutrophils and efferocytosis. Instruction through dendritic cell handoff. Clonal amplification through T and B cells. Plasticity from Th17 to T-follicular-helper. And Resolution through specialized pro-resolving mediators and efferocytosis. Periodontitis equals checkpoint failures at Containment, Resolution, and Protective Plasticity. Eight steps. Three failure points. One disease. Learn this sequence and you have a complete mental model for gingival immunology.",
   },
   {
     index: 33,
@@ -285,6 +298,7 @@ const PERIO_IMMUNO_SLIDES: VideoData["slides"] = [
     body: "Three paths forward. Zoom into a layer: full pathway diagrams for C5aR-TLR2 crosstalk, Th17-to-Tfh switch, or SPM signaling cascades. Systems modeling: dynamical ODE models of the bistable attractor, parameterized from 2024 to 2026 atlas datasets, to identify tipping points for intervention. Translational design: trial readout mapping to control architecture layers, with biomarker selection aligned to checkpoint identity. The wiring diagram is complete. Now decide which wire to pull.",
     imageUrl: `${SLIDE_BASE}/39_.png`,
     duration: 15,
+    narrationScript: "The wiring diagram is now complete. Three paths forward. First, zoom into a specific layer at the full pathway level. See the complete C5aR-TLR2 crosstalk mechanism, the Th17-to-T-follicular-helper conversion circuitry, or the specialized pro-resolving mediator signaling cascade in detail. Second, build a systems model using ordinary differential equations parameterized from 2024 to 2026 atlas datasets to identify tipping points for intervention. Third, design translational readouts by mapping clinical trial endpoints directly to the control architecture layers. The wiring diagram is complete. Now decide which wire you want to pull.",
   },
   {
     index: 39,
@@ -292,6 +306,7 @@ const PERIO_IMMUNO_SLIDES: VideoData["slides"] = [
     body: "This deck has given you the wiring diagram. Now it is time to zoom in, go deeper, and connect the biology to clinical practice. Three paths forward: zoom into a layer at the pathway level, connect each failure mode to a clinical presentation, and follow the frontier of 2024 to 2026 spatial atlas data. The architecture you have learned is a scaffold — not a ceiling. The best immunologists are the ones who never stop asking: but what controls that?",
     imageUrl: `${SLIDE_BASE}/40_Your-Next-Steps-Deepening-the-Architecture.png`,
     duration: 15,
+    narrationScript: "This deck has given you the wiring diagram. Now it is time to zoom in, go deeper, and connect the biology to clinical practice. Three paths forward. Zoom into any layer at the pathway level and see the full molecular detail. Connect each failure mode to a clinical presentation and understand what the biology predicts about disease progression. And follow the frontier of 2024 to 2026 spatial atlas data to see where the science is heading. The architecture you have learned is a scaffold, not a ceiling. The best immunologists are the ones who never stop asking: but what controls that?",
   },
 ];
 
@@ -518,7 +533,7 @@ export function ShowcaseContent() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            text: slide.body,
+            text: slide.narrationScript ?? slide.body,
             voiceId: voice.voiceId,
             speed: voice.speed,
             slideIndex: slide.index,
@@ -556,7 +571,7 @@ export function ShowcaseContent() {
             const retry = await fetch("/api/video/tts", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ text: slide.body, voiceId: voice.voiceId, speed: voice.speed }),
+              body: JSON.stringify({ text: slide.narrationScript ?? slide.body, voiceId: voice.voiceId, speed: voice.speed }),
               signal: controller.signal,
             });
             if (retry.ok) {

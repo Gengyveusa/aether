@@ -12,7 +12,9 @@ interface VideoSlide {
   body: string;
   imageUrl?: string;
   duration: number; // seconds
-  audioUrl?: string;
+  15audioUrl?: string;
+  narrationScript?: string;
+
 }
 
 interface VideoData {
@@ -214,9 +216,9 @@ function SlidePlayer({ data, autoPlay, className }: CinematicPlayerProps) {
 
       setCurrentTime((prev) => {
                 const rawNext = prev + delta;
-        const next = narrationActiveRef.current && rawNext > slideEndTimeRef.current
-          ? slideEndTimeRef.current
-          : rawNext;
+        const next = rawNext > slideEndTimeRef.current
+              ? slideEndTimeRef.current
+              : rawNext;
         if (next >= totalDuration) {
           setIsPlaying(false);
           return totalDuration;
