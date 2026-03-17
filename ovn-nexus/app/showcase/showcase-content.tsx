@@ -10,6 +10,7 @@ import { AmbientMusicEngine } from "@/lib/video/ambient-music";
 // Full 40-slide presentation with narration scripts and slide images.
 
 const SLIDE_BASE = "/slides/perio-immuno";
+const PRESENTATION_ID = "gingival-immunity-v2";
 
 const PERIO_IMMUNO_SLIDES: VideoData["slides"] = [
   {
@@ -377,43 +378,95 @@ const TEMPLATE_STYLES: Record<string, VideoData["template"]> = {
   },
 };
 
-// Voice config per template (matches lib/video/templates.ts)
+// Voice config per template — these map to ElevenLabs voices when key is set,
+// falls back to OpenAI voices automatically via the API route.
 const TEMPLATE_VOICE: Record<string, { voiceId: string; speed: number }> = {
-  documentary: { voiceId: "onyx", speed: 0.95 },
-  "cinematic-dark": { voiceId: "echo", speed: 0.9 },
-  "modern-minimal": { voiceId: "nova", speed: 1.0 },
-  "science-journal": { voiceId: "alloy", speed: 0.92 },
-  "impact-story": { voiceId: "fable", speed: 1.05 },
+  documentary: { voiceId: "onyx", speed: 0.95 },       // → ElevenLabs George
+  "cinematic-dark": { voiceId: "echo", speed: 0.9 },   // → ElevenLabs Roger
+  "modern-minimal": { voiceId: "nova", speed: 1.0 },   // → ElevenLabs Aria
+  "science-journal": { voiceId: "alloy", speed: 0.92 }, // → ElevenLabs Sarah
+  "impact-story": { voiceId: "fable", speed: 1.05 },   // → ElevenLabs Eryn
 };
+
+// ── Per-Slide Status Tracking ───────────────────────────────────────────────
+
+type SlideAudioStatus = "pending" | "generating" | "success" | "failed" | "stored";
+
+interface SlideAudioState {
+  status: SlideAudioStatus;
+  audioUrl?: string;      // blob URL (transient) or CDN URL (persistent)
+  error?: string;
+  retries?: number;
+  provider?: string;
+  persistent?: boolean;   // true if stored in Supabase
+}
 
 type NarrationStatus = "idle" | "generating" | "ready" | "error";
 
 export function ShowcaseContent() {
   const [selectedTemplate, setSelectedTemplate] = useState("cinematic-dark");
   const [narrationStatus, setNarrationStatus] = useState<NarrationStatus>("idle");
-  const [narrationProgress, setNarrationProgress] = useState(0);
-  const [narrationError, setNarrationError] = useState<string | null>(null);
-  const [audioUrls, setAudioUrls] = useState<Record<number, string>>({});
+  const [slideStates, setSlideStates] = useState<Record<number, SlideAudioState>>({});
   const [musicPlaying, setMusicPlaying] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const musicEngineRef = useRef<AmbientMusicEngine | null>(null);
 
   const voice = TEMPLATE_VOICE[selectedTemplate] || TEMPLATE_VOICE["cinematic-dark"];
   const templateMusic = TEMPLATE_STYLES[selectedTemplate]?.music;
 
-  // Initialize music engine
+  // Computed stats
+  const readyCount = Object.values(slideStates).filter(
+    (s) => s.status === "success" || s.status === "stored"
+  ).length;
+  const failedCount = Object.values(slideStates).filter((s) => s.status === "failed").length;
+  const generatingCount = Object.values(slideStates).filter((s) => s.status === "generating").length;
+  const progress = PERIO_IMMUNO_SLIDES.length > 0
+    ? Math.round(((readyCount + failedCount) / PERIO_IMMUNO_SLIDES.length) * 100)
+    : 0;
+
+  // ── Check for pre-stored audio on mount ─────────────────────────────────
   useEffect(() => {
-    musicEngineRef.current = new AmbientMusicEngine();
-    return () => {
-      musicEngineRef.current?.stop();
-    };
+    checkStoredAudio();
   }, []);
 
-  // Restart music when template changes (if playing)
+  const checkStoredAudio = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/video/store?presentationId=${PRESENTATION_ID}`);
+      if (!res.ok) return;
+      const data = await res.json();
+
+      if (data.slides && data.slides.length > 0) {
+        const stored: Record<number, SlideAudioState> = {};
+        for (const slide of data.slides) {
+          if (slide.index >= 0) {
+            stored[slide.index] = {
+              status: "stored",
+              audioUrl: slide.url,
+              persistent: true,
+              provider: "stored",
+            };
+          }
+        }
+        setSlideStates(stored);
+        if (Object.keys(stored).length === PERIO_IMMUNO_SLIDES.length) {
+          setNarrationStatus("ready");
+        }
+      }
+    } catch {
+      // No stored audio — that's fine
+    }
+  }, []);
+
+  // ── Music engine ────────────────────────────────────────────────────────
+  useEffect(() => {
+    musicEngineRef.current = new AmbientMusicEngine();
+    return () => { musicEngineRef.current?.stop(); };
+  }, []);
+
   useEffect(() => {
     if (musicPlaying && musicEngineRef.current) {
       musicEngineRef.current.stop();
-      // Small delay to let the old context close
       const t = setTimeout(() => {
         musicEngineRef.current?.start(selectedTemplate, templateMusic?.volume ?? 0.15);
       }, 200);
@@ -432,27 +485,34 @@ export function ShowcaseContent() {
     }
   }, [musicPlaying, selectedTemplate, templateMusic?.volume]);
 
+  // ── Generate Narration (slide-by-slide with retry) ──────────────────────
   const generateNarration = useCallback(async () => {
-    // Abort any in-progress generation
     if (abortRef.current) abortRef.current.abort();
     const controller = new AbortController();
     abortRef.current = controller;
 
     setNarrationStatus("generating");
-    setNarrationProgress(0);
-    setNarrationError(null);
 
-    // Revoke old blob URLs
-    Object.values(audioUrls).forEach((url) => URL.revokeObjectURL(url));
-    setAudioUrls({});
+    // Only generate slides that don't already have stored audio
+    const slidesToGenerate = PERIO_IMMUNO_SLIDES.filter((slide) => {
+      const state = slideStates[slide.index];
+      return !state || state.status === "failed" || state.status === "pending";
+    });
 
-    const newUrls: Record<number, string> = {};
-    const total = PERIO_IMMUNO_SLIDES.length;
+    // Mark all pending slides as pending in state
+    const newStates = { ...slideStates };
+    for (const slide of slidesToGenerate) {
+      newStates[slide.index] = { status: "pending" };
+    }
+    setSlideStates({ ...newStates });
 
-    for (let i = 0; i < total; i++) {
+    for (const slide of slidesToGenerate) {
       if (controller.signal.aborted) return;
 
-      const slide = PERIO_IMMUNO_SLIDES[i];
+      // Mark as generating
+      newStates[slide.index] = { status: "generating" };
+      setSlideStates({ ...newStates });
+
       try {
         const res = await fetch("/api/video/tts", {
           method: "POST",
@@ -461,6 +521,7 @@ export function ShowcaseContent() {
             text: slide.body,
             voiceId: voice.voiceId,
             speed: voice.speed,
+            slideIndex: slide.index,
           }),
           signal: controller.signal,
         });
@@ -470,37 +531,114 @@ export function ShowcaseContent() {
           throw new Error(err.error || `HTTP ${res.status}`);
         }
 
+        const provider = res.headers.get("X-TTS-Provider") || "unknown";
         const blob = await res.blob();
-        newUrls[slide.index] = URL.createObjectURL(blob);
+        const blobUrl = URL.createObjectURL(blob);
+
+        newStates[slide.index] = {
+          status: "success",
+          audioUrl: blobUrl,
+          provider,
+          persistent: false,
+        };
+        setSlideStates({ ...newStates });
+
+        // Store to Supabase in background (fire-and-forget)
+        storeAudioInBackground(blob, slide.index);
+
       } catch (err) {
         if ((err as Error).name === "AbortError") return;
-        console.error(`TTS failed for slide ${i}:`, err);
-        // Continue — skip failed slides
-      }
+        console.error(`[Showcase] TTS failed for slide ${slide.index}:`, err);
 
-      setNarrationProgress(Math.round(((i + 1) / total) * 100));
-      setAudioUrls({ ...newUrls });
+        newStates[slide.index] = {
+          status: "failed",
+          error: (err as Error).message,
+        };
+        setSlideStates({ ...newStates });
+      }
     }
 
-    if (Object.keys(newUrls).length === 0) {
+    // Final status
+    const finalReady = Object.values(newStates).filter(
+      (s) => s.status === "success" || s.status === "stored"
+    ).length;
+    const finalFailed = Object.values(newStates).filter((s) => s.status === "failed").length;
+
+    if (finalReady === 0) {
       setNarrationStatus("error");
-      setNarrationError("Failed to generate any narration. Check that OPENAI_API_KEY is set.");
     } else {
       setNarrationStatus("ready");
     }
-  }, [voice.voiceId, voice.speed, audioUrls]);
+
+    if (finalFailed > 0) {
+      console.warn(`[Showcase] ${finalFailed} slides failed generation. Use "Retry Failed" to re-attempt.`);
+    }
+  }, [voice.voiceId, voice.speed, slideStates]);
+
+  // ── Store audio to Supabase (background) ────────────────────────────────
+  const storeAudioInBackground = useCallback(async (blob: Blob, slideIndex: number) => {
+    try {
+      const buffer = await blob.arrayBuffer();
+      const base64 = btoa(
+        new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), "")
+      );
+
+      const res = await fetch("/api/video/store", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          audioBase64: base64,
+          slideIndex,
+          presentationId: PRESENTATION_ID,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setSlideStates((prev) => ({
+          ...prev,
+          [slideIndex]: {
+            ...prev[slideIndex],
+            status: "stored",
+            audioUrl: data.url, // Replace blob URL with persistent CDN URL
+            persistent: true,
+          },
+        }));
+      }
+    } catch {
+      // Non-critical — blob URL still works for playback
+    }
+  }, []);
+
+  // ── Retry failed slides only ────────────────────────────────────────────
+  const retryFailed = useCallback(async () => {
+    // Reset failed slides to pending, then re-run
+    setSlideStates((prev) => {
+      const updated = { ...prev };
+      for (const [idx, state] of Object.entries(updated)) {
+        if (state.status === "failed") {
+          updated[Number(idx)] = { status: "pending" };
+        }
+      }
+      return updated;
+    });
+    // Small delay then re-trigger
+    setTimeout(() => generateNarration(), 100);
+  }, [generateNarration]);
 
   const cancelNarration = useCallback(() => {
     if (abortRef.current) abortRef.current.abort();
-    setNarrationStatus("idle");
-    setNarrationProgress(0);
-  }, []);
+    setNarrationStatus(readyCount > 0 ? "ready" : "idle");
+  }, [readyCount]);
 
-  // Merge audio URLs into slide data
-  const slidesWithAudio = PERIO_IMMUNO_SLIDES.map((slide) => ({
-    ...slide,
-    audioUrl: audioUrls[slide.index],
-  }));
+  // ── Merge audio URLs into slide data ────────────────────────────────────
+  const slidesWithAudio = PERIO_IMMUNO_SLIDES.map((slide) => {
+    const state = slideStates[slide.index];
+    return {
+      ...slide,
+      audioUrl: state?.audioUrl,
+    };
+  });
 
   const videoData: VideoData = {
     title: "Gingival Immunity v2.0",
@@ -531,15 +669,40 @@ export function ShowcaseContent() {
               AI Voice Narration
             </h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Generate spoken narration for all 40 slides using OpenAI TTS
-              — <strong>{voice.voiceId}</strong> voice at {voice.speed}x speed.
+              Generate spoken narration for all 40 slides using ElevenLabs
+              (falls back to OpenAI if no ElevenLabs key).
+              Voice: <strong>{voice.voiceId}</strong> at {voice.speed}x.
             </p>
           </div>
-          <div className="flex items-center gap-3">
+
+          {/* Status bar */}
+          <div className="flex items-center gap-2 mb-3 text-xs">
+            <span className="inline-flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-green-500" />
+              {readyCount} ready
+            </span>
+            {failedCount > 0 && (
+              <span className="inline-flex items-center gap-1 text-red-500">
+                <span className="w-2 h-2 rounded-full bg-red-500" />
+                {failedCount} failed
+              </span>
+            )}
+            {generatingCount > 0 && (
+              <span className="inline-flex items-center gap-1 text-blue-500">
+                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                {generatingCount} generating
+              </span>
+            )}
+            <span className="text-muted-foreground ml-auto">
+              {readyCount}/{PERIO_IMMUNO_SLIDES.length}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
             {narrationStatus === "generating" && (
               <button
                 onClick={cancelNarration}
-                className="px-4 py-2 text-sm rounded-lg border hover:bg-muted transition-colors"
+                className="px-3 py-2 text-sm rounded-lg border hover:bg-muted transition-colors"
               >
                 Cancel
               </button>
@@ -547,17 +710,30 @@ export function ShowcaseContent() {
             <button
               onClick={generateNarration}
               disabled={narrationStatus === "generating"}
-              className="px-5 py-2.5 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full"
+              className="px-5 py-2.5 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-1"
               style={{
-                backgroundColor: narrationStatus === "ready" ? "#16a34a" : "#3b82f6",
+                backgroundColor:
+                  readyCount === PERIO_IMMUNO_SLIDES.length ? "#16a34a" :
+                  narrationStatus === "generating" ? "#6366f1" : "#3b82f6",
                 color: "#ffffff",
               }}
             >
-              {narrationStatus === "idle" && "Generate Narration"}
-              {narrationStatus === "generating" && `Generating... ${narrationProgress}%`}
-              {narrationStatus === "ready" && `Narration Ready (${Object.keys(audioUrls).length}/${PERIO_IMMUNO_SLIDES.length})`}
-              {narrationStatus === "error" && "Retry Narration"}
+              {narrationStatus === "idle" && readyCount === 0 && "Generate All Narration"}
+              {narrationStatus === "idle" && readyCount > 0 && readyCount < PERIO_IMMUNO_SLIDES.length && `Generate Remaining (${PERIO_IMMUNO_SLIDES.length - readyCount} slides)`}
+              {narrationStatus === "generating" && `Generating... ${progress}%`}
+              {narrationStatus === "ready" && readyCount === PERIO_IMMUNO_SLIDES.length && "All 40 Slides Ready"}
+              {narrationStatus === "ready" && readyCount < PERIO_IMMUNO_SLIDES.length && `${readyCount}/${PERIO_IMMUNO_SLIDES.length} Ready`}
+              {narrationStatus === "error" && "Retry Generation"}
             </button>
+            {failedCount > 0 && narrationStatus !== "generating" && (
+              <button
+                onClick={retryFailed}
+                className="px-3 py-2 text-sm rounded-lg transition-colors"
+                style={{ backgroundColor: "#ef4444", color: "#ffffff" }}
+              >
+                Retry {failedCount} Failed
+              </button>
+            )}
           </div>
 
           {/* Progress bar */}
@@ -566,22 +742,15 @@ export function ShowcaseContent() {
               <div className="h-2 rounded-full bg-muted overflow-hidden">
                 <div
                   className="h-full rounded-full bg-blue-500 transition-[width] duration-300"
-                  style={{ width: `${narrationProgress}%` }}
+                  style={{ width: `${progress}%` }}
                 />
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                Processing slide {Math.ceil((narrationProgress / 100) * PERIO_IMMUNO_SLIDES.length)} of {PERIO_IMMUNO_SLIDES.length}...
-              </p>
             </div>
-          )}
-
-          {narrationError && (
-            <p className="text-sm text-red-500 mt-2">{narrationError}</p>
           )}
 
           {narrationStatus === "ready" && (
             <p className="text-xs text-muted-foreground mt-3">
-              Press play above to hear narration synchronized with each slide.
+              Press play above — narration syncs with each slide automatically.
             </p>
           )}
         </div>
@@ -594,7 +763,7 @@ export function ShowcaseContent() {
               Ambient Background Music
             </h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Synthesized ambient pad that matches each template&apos;s mood.
+              Synthesized ambient pad matched to each template&apos;s mood.
               Plays continuously while you watch.
             </p>
           </div>
@@ -627,38 +796,68 @@ export function ShowcaseContent() {
           selected={selectedTemplate}
           onChange={(t) => {
             setSelectedTemplate(t);
-            // Clear narration when template changes (different voice)
+            // Clear non-persistent audio when template changes (different voice)
             if (narrationStatus === "ready" || narrationStatus === "error") {
-              Object.values(audioUrls).forEach((url) => URL.revokeObjectURL(url));
-              setAudioUrls({});
-              setNarrationStatus("idle");
-              setNarrationProgress(0);
-              setNarrationError(null);
+              const hasPersistedAudio = Object.values(slideStates).some((s) => s.persistent);
+              if (!hasPersistedAudio) {
+                // Revoke blob URLs
+                Object.values(slideStates).forEach((s) => {
+                  if (s.audioUrl && !s.persistent) URL.revokeObjectURL(s.audioUrl);
+                });
+                setSlideStates({});
+                setNarrationStatus("idle");
+              }
             }
-            // Music engine handles template change via useEffect
           }}
         />
       </div>
 
-      {/* Slide index */}
+      {/* Slide Index with Per-Slide Status */}
       <div className="rounded-xl border bg-card p-8">
-        <h3 className="text-lg font-semibold mb-4">40 Slides — Full Presentation</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">40 Slides — Full Presentation</h3>
+          <button
+            onClick={() => setShowAdmin(!showAdmin)}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {showAdmin ? "Hide Details" : "Show Generation Details"}
+          </button>
+        </div>
         <p className="text-sm text-muted-foreground mb-6">
-          This cinematic presentation covers the complete architecture of gingival immunity,
-          from the system objective through eight interconnected layers to therapeutic leverage points.
+          Each slide shows its audio generation status. Green = ready, red = failed, gray = pending.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-          {PERIO_IMMUNO_SLIDES.map((slide) => (
-            <div key={slide.index} className="rounded-lg bg-muted/50 p-3 flex items-start gap-2">
-              <span className="font-mono text-muted-foreground shrink-0">
-                {String(slide.index + 1).padStart(2, "0")}
-              </span>
-              <span className="font-medium">{slide.title}</span>
-              {audioUrls[slide.index] && (
-                <span className="shrink-0 w-2 h-2 rounded-full bg-green-500 mt-1" title="Narration ready" />
-              )}
-            </div>
-          ))}
+          {PERIO_IMMUNO_SLIDES.map((slide) => {
+            const state = slideStates[slide.index];
+            const statusColor =
+              state?.status === "success" || state?.status === "stored" ? "bg-green-500" :
+              state?.status === "failed" ? "bg-red-500" :
+              state?.status === "generating" ? "bg-blue-500 animate-pulse" :
+              "bg-gray-300";
+
+            return (
+              <div key={slide.index} className="rounded-lg bg-muted/50 p-3">
+                <div className="flex items-start gap-2">
+                  <span className="font-mono text-muted-foreground shrink-0">
+                    {String(slide.index + 1).padStart(2, "0")}
+                  </span>
+                  <span className="font-medium flex-1">{slide.title}</span>
+                  <span className={`shrink-0 w-2 h-2 rounded-full mt-1 ${statusColor}`} />
+                </div>
+                {showAdmin && state && (
+                  <div className="mt-2 pl-7 text-[10px] text-muted-foreground space-y-0.5">
+                    <div>Status: <span className="font-medium">{state.status}</span></div>
+                    {state.provider && <div>Provider: {state.provider}</div>}
+                    {state.persistent && <div className="text-green-600">Stored in CDN</div>}
+                    {state.error && <div className="text-red-500">{state.error}</div>}
+                    {state.retries !== undefined && state.retries > 0 && (
+                      <div>Retries: {state.retries}</div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -675,19 +874,19 @@ export function ShowcaseContent() {
           <div className="rounded-lg bg-muted/50 p-4">
             <div className="font-semibold mb-1">AI Voice</div>
             <div className="text-muted-foreground">
-              OpenAI TTS generates natural narration from slide content, synchronized per-slide
+              ElevenLabs (primary) or OpenAI TTS generates natural narration per-slide with retry and persistent storage
             </div>
           </div>
           <div className="rounded-lg bg-muted/50 p-4">
             <div className="font-semibold mb-1">AI Music</div>
             <div className="text-muted-foreground">
-              Cinematic background scores generated to match each template mood
+              Cinematic ambient pads synthesized in-browser, matched to each template&apos;s harmonic signature
             </div>
           </div>
           <div className="rounded-lg bg-muted/50 p-4">
-            <div className="font-semibold mb-1">Reusable Template</div>
+            <div className="font-semibold mb-1">Persistent Storage</div>
             <div className="text-muted-foreground">
-              Drop any .pptx file into the pipeline to generate a new cinematic video
+              Generated audio is stored to Supabase CDN — once generated, it loads instantly on revisit
             </div>
           </div>
         </div>
