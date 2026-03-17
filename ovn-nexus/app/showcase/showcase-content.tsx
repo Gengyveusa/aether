@@ -19,7 +19,7 @@ const PERIO_IMMUNO_SLIDES: VideoData["slides"] = [
     body: "A molecularly resolved, spatially aware, dynamically modeled layered control architecture. Because your gingiva is smarter than your thermostat.",
     imageUrl: `${SLIDE_BASE}/1_.png`,
     duration: 10,
-    narrationscript: "welcome to gingival immunity version two point zero, the wiring diagram. this is not a simple overview of gum disease. it is a complete systems map of how your gingiva actually works. your gingival tissue functions like a sophisticated layered control architecture, with sensors, controllers, actuators, and failure modes. by the end of this presentation, you will trace a signal from a bacterial surface molecule all the way through to bone loss, or to resolution. each layer builds on the last. if you understand the handoffs, you understand the disease.",
+    narrationScript: "welcome to gingival immunity version two point zero, the wiring diagram. this is not a simple overview of gum disease. it is a complete systems map of how your gingiva actually works. your gingival tissue functions like a sophisticated layered control architecture, with sensors, controllers, actuators, and failure modes. by the end of this presentation, you will trace a signal from a bacterial surface molecule all the way through to bone loss, or to resolution. each layer builds on the last. if you understand the handoffs, you understand the disease.",
   },
   {
     index: 1,
@@ -175,7 +175,8 @@ const PERIO_IMMUNO_SLIDES: VideoData["slides"] = [
     index: 21,
     title: "Why P. gingivalis Is a Keystone Pathogen",
     body: "Porphyromonas gingivalis is not the most abundant bacterium in the periodontal pocket — but it is the most strategically dangerous. It functions as a keystone pathogen: a low-abundance organism that disproportionately disrupts the entire immune ecosystem. Its sabotage toolkit includes gingipains, C5aR-TLR2 crosstalk, FimA fimbriae, and a weak lipid A variant LPS. P. gingivalis does not want you dead — it wants you inflamed. Inflammation is its food source.",
-    imageUrl: `${SLIDE_BASE}/22_Why-P-gingivalis-Is-a-Keystone-Pathogen.png`,
+    imageUrl: `${SLIDE_BASE}/22
+    _Why-P-gingivalis-Is-a-Keystone-Pathogen.png`,
     duration: 17,
   },
   {
@@ -255,7 +256,8 @@ const PERIO_IMMUNO_SLIDES: VideoData["slides"] = [
     body: "Barrier. Sensing through PRR. Routing through gradients. Containment through neutrophils and efferocytosis. Instruction through DC handoff. Clonal amplification. Plasticity from Th17 to T-follicular-helper. Resolution through SPMs and efferocytosis. Periodontitis equals checkpoint failures at Containment plus Resolution plus Protective Plasticity. Eight steps. Three failure points. One disease.",
     imageUrl: `${SLIDE_BASE}/33_.png`,
     duration: 15,
-    narrationScript: "Here is the mnemonic: Barrier. Sensing through pattern-recognition receptors. Routing through cytokine and chemokine gradients. Containment through neutrophils and efferocytosis. Instruction through dendritic cell handoff. Clonal amplification through T and B cells. Plasticity from Th17 to T-follicular-helper. And Resolution through specialized pro-resolving mediators and efferocytosis. Periodontitis equals checkpoint failures at Containment, Resolution, and Protective Plasticity. Eight steps. Three failure points. One disease. Learn this sequence and you have a complete mental model for gingival immunology.",
+    :22
+     "Here is the mnemonic: Barrier. Sensing through pattern-recognition receptors. Routing through cytokine and chemokine gradients. Containment through neutrophils and efferocytosis. Instruction through dendritic cell handoff. Clonal amplification through T and B cells. Plasticity from Th17 to T-follicular-helper. And Resolution through specialized pro-resolving mediators and efferocytosis. Periodontitis equals checkpoint failures at Containment, Resolution, and Protective Plasticity. Eight steps. Three failure points. One disease. Learn this sequence and you have a complete mental model for gingival immunology.",
   },
   {
     index: 33,
