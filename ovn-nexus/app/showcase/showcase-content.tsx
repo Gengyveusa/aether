@@ -256,9 +256,9 @@ const PERIO_IMMUNO_SLIDES: VideoData["slides"] = [
     body: "Barrier. Sensing through PRR. Routing through gradients. Containment through neutrophils and efferocytosis. Instruction through DC handoff. Clonal amplification. Plasticity from Th17 to T-follicular-helper. Resolution through SPMs and efferocytosis. Periodontitis equals checkpoint failures at Containment plus Resolution plus Protective Plasticity. Eight steps. Three failure points. One disease.",
     imageUrl: `${SLIDE_BASE}/33_.png`,
     duration: 15,
-    :22
-     "Here is the mnemonic: Barrier. Sensing through pattern-recognition receptors. Routing through cytokine and chemokine gradients. Containment through neutrophils and efferocytosis. Instruction through dendritic cell handoff. Clonal amplification through T and B cells. Plasticity from Th17 to T-follicular-helper. And Resolution through specialized pro-resolving mediators and efferocytosis. Periodontitis equals checkpoint failures at Containment, Resolution, and Protective Plasticity. Eight steps. Three failure points. One disease. Learn this sequence and you have a complete mental model for gingival immunology.",
-  },
+        narrationScript: "Here is the mnemonic: Barrier. Sensing through pattern-recognition receptors. Routing through cytokine gradients. Containment through neutrophils. Sensing through TLRs. Amplification through clonal expansion. Plasticity. Resolution. Each step connects to the next in the eight-stage gingival control loop.",
+          },
+    
   {
     index: 33,
     title: "The Eight-Stage Loop: Your Mental Model for Gingival Immunity",
