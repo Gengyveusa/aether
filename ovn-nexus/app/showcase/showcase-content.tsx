@@ -561,14 +561,14 @@ export function ShowcaseContent() {
             });
             if (retry.ok) {
               const blob = await retry.blob();
-              newUrls[slide.index] = URL.createObjectURL(blob);
+              newStates[slide.index] = URL.createObjectURL(blob);
             }
           } catch (retryErr) {
             if ((retryErr as Error).name === "AbortError") return;
-            console.error(`TTS retry failed for slide ${i}:`, retryErr);
+            console.error(`TTS retry failed for slide slide.indexi}:`, retryErr);
           }
         } else {
-          console.error(`TTS failed for slide ${i}:`, err);
+          console.error(`TTS failed for slide ${slide.index}:`, err);
         }
       }
       // Small delay to avoid rate-limiting
@@ -593,8 +593,7 @@ export function ShowcaseContent() {
     } else {
       setNarrationStatus("ready");
     }
-  }, [voice.voiceId, voice.speed]);
-
+  
     if (finalFailed > 0) {
       console.warn(`[Showcase] ${finalFailed} slides failed generation. Use "Retry Failed" to re-attempt.`);
     }
