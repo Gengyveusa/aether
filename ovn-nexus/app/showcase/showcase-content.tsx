@@ -565,7 +565,7 @@ export function ShowcaseContent() {
             }
           } catch (retryErr) {
             if ((retryErr as Error).name === "AbortError") return;
-            console.error(`TTS retry failed for slide slide.indexi}:`, retryErr);
+            console.error(`TTS retry failed for slide${slide.index}:`, retryErr);
           }
         } else {
           console.error(`TTS failed for slide ${slide.index}:`, err);
