@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, Film } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ShowcaseContent } from "./showcase-content";
+import { SlideNarrator } from "@/components/SlideNarrator";
 
 export const metadata = {
   title: "Gingival Immunity v2.0 — OVN Nexus Video Showcase",
@@ -48,6 +49,17 @@ export default function ShowcasePage() {
           </div>
 
           <ShowcaseContent />
+
+                    {/* New Slide Narrator Section */}
+          <div className="mt-16 border-t pt-16">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold tracking-tight">Create Your Own Narrated Slide Presentations</h2>
+              <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+                Upload a slide, generate AI narration with GPT-4o Vision, and create professional audio with ElevenLabs.
+              </p>
+            </div>
+            <SlideNarrator />
+          </div>
         </div>
       </main>
 

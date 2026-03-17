@@ -548,7 +548,31 @@ export function ShowcaseContent() {
 
       } catch (err) {
         if ((err as Error).name === "AbortError") return;
-        console.error(`[Showcase] TTS failed for slide ${slide.index}:`, err);
+        // Retry once on rate-limit (429) or server errors
+        const status = (err as { status?: number }).status;
+        if (status === 429 || (status && status >= 500)) {
+          await new Promise((r) => setTimeout(r, 2000));
+          try {
+            const retry = await fetch("/api/video/tts", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ text: slide.body, voiceId: voice.voiceId, speed: voice.speed }),
+              signal: controller.signal,
+            });
+            if (retry.ok) {
+              const blob = await retry.blob();
+              newUrls[slide.index] = URL.createObjectURL(blob);
+            }
+          } catch (retryErr) {
+            if ((retryErr as Error).name === "AbortError") return;
+            console.error(`TTS retry failed for slide ${i}:`, retryErr);
+          }
+        } else {
+          console.error(`TTS failed for slide ${i}:`, err);
+        }
+      }
+      // Small delay to avoid rate-limiting
+      await new Promise((r) => setTimeout(r, 150));
 
         newStates[slide.index] = {
           status: "failed",
@@ -569,6 +593,7 @@ export function ShowcaseContent() {
     } else {
       setNarrationStatus("ready");
     }
+  }, [voice.voiceId, voice.speed]);
 
     if (finalFailed > 0) {
       console.warn(`[Showcase] ${finalFailed} slides failed generation. Use "Retry Failed" to re-attempt.`);
