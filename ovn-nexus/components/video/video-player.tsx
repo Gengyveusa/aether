@@ -12,7 +12,7 @@ interface VideoSlide {
   body: string;
   imageUrl?: string;
   duration: number; // seconds
-  15audioUrl?: string;
+  audioUrl?: string;
   narrationScript?: string;
 
 }
