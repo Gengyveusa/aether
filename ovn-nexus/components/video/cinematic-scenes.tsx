@@ -263,15 +263,7 @@ export function SlideScene({
             >
               {title}
             </h2>
-            {body && (
-              <p
-                className="text-lg leading-relaxed line-clamp-3"
-                style={{ color: style.textColor, opacity: 0.8 }}
-              >
-                {body}
-              </p>
-            )}
-          </div>
+            </div>
         </div>
       )}
     </div>

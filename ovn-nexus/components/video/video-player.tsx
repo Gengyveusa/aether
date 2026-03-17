@@ -193,6 +193,8 @@ function SlidePlayer({ data, autoPlay, className }: CinematicPlayerProps) {
   const activeNarrationIndex = useRef<number>(-1);
   const animFrameRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
+  const narrationActiveRef = useRef(false);
+  const slideEndTimeRef = useRef<number>(Infinity);
 
   const { style, timing } = data.template;
 
@@ -211,7 +213,10 @@ function SlidePlayer({ data, autoPlay, className }: CinematicPlayerProps) {
       lastTimeRef.current = now;
 
       setCurrentTime((prev) => {
-        const next = prev + delta;
+                const rawNext = prev + delta;
+        const next = narrationActiveRef.current && rawNext > slideEndTimeRef.current
+          ? slideEndTimeRef.current
+          : rawNext;
         if (next >= totalDuration) {
           setIsPlaying(false);
           return totalDuration;
@@ -255,6 +260,7 @@ function SlidePlayer({ data, autoPlay, className }: CinematicPlayerProps) {
       if (narrationRef.current) {
         narrationRef.current.pause();
         narrationRef.current.src = "";
+        narrationActiveRef.current = false;
       }
 
       // Start new narration if available
@@ -265,6 +271,9 @@ function SlidePlayer({ data, autoPlay, className }: CinematicPlayerProps) {
         audio.volume = 1.0;
         audio.muted = isMuted;
         audio.play().catch(() => {});
+        narrationActiveRef.current = true;
+      slideEndTimeRef.current = (scene?.startTime ?? 0) + (scene?.duration ?? Infinity);
+      audio.onended = () => { narrationActiveRef.current = false; };
       }
     }
 
