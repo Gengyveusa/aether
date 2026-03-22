@@ -9,37 +9,76 @@ created: "2026-03-22"
 updated: "2026-03-22"
 ---
 # ✈️ QUANTUM BIOLOGY FLIGHT DECK CHECKLIST
-> Pre-flight for ARPA-H Delphi — T-minus 17 days
-## 1. THESIS INTEGRITY
-- [ ] Core thesis note complete with all 4 architectures
-- [ ] Cancer amplification evidence documented
-- [ ] Aging decoherence evidence documented
-- [ ] Opposing signatures table finalized
+
+> Pre-flight checks for ARPA-H Delphi submission — T-minus 17 days.
+
+> [!danger] SUBMISSION DEADLINE: April 8, 2026
+
+## 1. THESIS INTEGRITY (Structural)
+
+- [x] Core thesis note complete with all 4 architectures
+- [x] Cancer amplification evidence per architecture documented
+- [x] Aging decoherence evidence per architecture documented
+- [x] Opposing signatures table finalized
+- [x] QPI mathematical model formalized
+
 ## 2. CANDIDATE PIPELINE
-- [x] 10 candidates entered in 02-Candidates
-- [ ] Each has cancer/aging signature fields
-- [ ] Top 5 selected for Delphi narrative
+
+- [x] 10+ candidates entered
+- [x] Each candidate has cancer/aging signatures
+- [x] Top 5 candidates selected for Delphi narrative
+- [x] Match-score logic in Candidate Tracker
+- [x] Architecture coverage matrix complete
+
 ## 3. GRANT DOCUMENTS
-- [ ] ARPA-H Delphi 6-page draft complete
-- [ ] Internal review by Co-PI Lanzara
-- [ ] Final polish and format check
-- [ ] UCB-UCSF deliverables tracker created
+
+- [x] ARPA-H Delphi 6-page draft complete
+- [ ] ARPA-H Delphi internal review
+- [ ] ARPA-H Delphi final polish
+- [x] UCB-UCSF deliverables tracker
+- [x] Exec summary one-pager
+
 ## 4. EXPERIMENTAL READINESS
-- [ ] Probius QES protocol documented
-- [ ] Lanzara pump-probe protocol drafted
-- [ ] Sample handling SOP created
+
+- [x] Probius QES protocol documented
+- [x] Lanzara pump-probe protocol drafted
+- [ ] Sample handling SOP
+- [ ] IRB/biosafety pathway identified
+
 ## 5. SWARM INTEGRATION
-- [ ] ScienceClaw agent profile in vault
-- [ ] Seeding prompt stored
-- [ ] 1+ swarm artifact ingested
+
+- [x] ScienceClaw agent profile in vault
+- [x] Seeding prompt stored
+- [ ] Swarm artifact ingested
+- [x] MIT Buehler link documented
+
 ## 6. VAULT SYSTEMS
-- [x] CSS snippet active (LCARS)
-- [ ] All Dataview queries returning data
+
+- [x] CSS snippet active LCARS v2
+- [x] All Dataview queries returning data
 - [x] Folder structure complete
-- [ ] Frontmatter consistent across notes
-## 7. FINAL PRE-FLIGHT
-- [ ] One-page exec summary ready
-- [ ] Visual timeline Canvas created
-- [ ] All P0 items green
-- [ ] Co-PI sign-off
-- [ ] **SUBMIT April 8, 2026**
+- [x] Frontmatter consistent
+- [x] Literature backbone indexed (5 papers)
+- [x] Systems status dashboard live
+
+## 7. EVIDENCE BACKBONE
+
+- [x] Engel 2007 — FMO coherence
+- [x] Cao 2020 — Quantum biology review
+- [x] Hore & Mouritsen 2016 — Radical pairs
+- [x] Yoshino 2018 — NAD+ aging
+- [x] Moser & Dutton — Electron tunneling
+
+## 8. FINAL PRE-FLIGHT
+
+- [x] Visual timeline Canvas created
+- [x] One-page exec summary ready
+- [ ] Co-PI sign-off (Lanzara)
+- [ ] Format check — 6-page limit
+- [ ] **SUBMIT — April 8, 2026**
+
+## Links
+
+- [[00-Flight-Deck/Mission-Overview]]
+- [[00-Flight-Deck/Delphi-Sprint-Planner]]
+- [[03-Grants/ARPA-H-Delphi-Solution-Summary]]
