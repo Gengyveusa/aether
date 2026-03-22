@@ -1,0 +1,607 @@
+/* ╔══════════════════════════════════════════════════════════════╗
+   ║  QUANTUM DISTILLERY — LCARS THEME                          ║
+   ║  Star Trek LCARS-inspired dark theme for Obsidian           ║
+   ║  Neon Cyan / Gold / Lavender accents                        ║
+   ╚══════════════════════════════════════════════════════════════╝ */
+
+:root {
+  /* ── Void & Panel Backgrounds ── */
+  --bg-void: #000000;
+  --bg-primary: #060a14;
+  --bg-secondary: #0a0f1c;
+  --bg-panel: #0d1326;
+
+  /* ── LCARS Accent Palette ── */
+  --lcars-cyan: #00e5ff;
+  --lcars-gold: #f8b700;
+  --lcars-orange: #ff7b00;
+  --lcars-lavender: #cc99ff;
+  --lcars-blue: #6699ff;
+  --lcars-red: #ff3333;
+  --lcars-green: #33ff88;
+  --lcars-teal: #00ccaa;
+
+  /* ── Typography ── */
+  --font-monospace: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace;
+  --font-text: var(--font-monospace);
+  --font-interface: var(--font-monospace);
+}
+
+/* ═══════════════════════════════════════════
+   BASE LAYOUT
+   ═══════════════════════════════════════════ */
+
+body {
+  background-color: var(--bg-void) !important;
+  color: #c0d0e0;
+  font-family: var(--font-monospace);
+  -webkit-font-smoothing: antialiased;
+}
+
+.theme-dark {
+  --background-primary: var(--bg-primary);
+  --background-primary-alt: var(--bg-secondary);
+  --background-secondary: var(--bg-secondary);
+  --background-secondary-alt: var(--bg-panel);
+  --text-normal: #c0d0e0;
+  --text-muted: #5a7090;
+  --text-faint: #3a506a;
+  --text-accent: var(--lcars-cyan);
+  --interactive-accent: var(--lcars-cyan);
+}
+
+.markdown-preview-view,
+.markdown-source-view,
+.cm-s-obsidian {
+  background-color: var(--bg-primary) !important;
+  color: #c0d0e0;
+  font-family: var(--font-monospace);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+/* ═══════════════════════════════════════════
+   H1 — LCARS PRIMARY BAR (Cyan-to-Blue)
+   ═══════════════════════════════════════════ */
+
+.markdown-preview-view h1,
+.markdown-rendered h1,
+.cm-header-1 {
+  background: linear-gradient(90deg, var(--lcars-cyan) 0%, var(--lcars-blue) 100%);
+  color: #000000 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 800;
+  font-size: 1.35em;
+  padding: 10px 24px 10px 20px;
+  margin: 28px 0 18px 0;
+  border-radius: 24px 4px 4px 24px;
+  box-shadow: 0 0 18px rgba(0, 229, 255, 0.35), 0 0 4px rgba(0, 229, 255, 0.6);
+  border: none;
+  display: block;
+}
+
+/* ═══════════════════════════════════════════
+   H2 — LCARS SECONDARY BAR (Gold-to-Orange)
+   ═══════════════════════════════════════════ */
+
+.markdown-preview-view h2,
+.markdown-rendered h2,
+.cm-header-2 {
+  background: linear-gradient(90deg, var(--lcars-gold) 0%, var(--lcars-orange) 100%);
+  color: #000000 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  font-size: 1.15em;
+  padding: 8px 20px 8px 16px;
+  margin: 24px 0 14px 0;
+  border-radius: 18px 3px 3px 18px;
+  border: none;
+  display: block;
+}
+
+/* ═══════════════════════════════════════════
+   H3 — Lavender Accent Bar
+   ═══════════════════════════════════════════ */
+
+.markdown-preview-view h3,
+.markdown-rendered h3,
+.cm-header-3 {
+  color: var(--lcars-lavender) !important;
+  font-weight: 600;
+  font-size: 1.05em;
+  padding: 6px 14px;
+  margin: 20px 0 10px 0;
+  border-left: 4px solid var(--lcars-lavender);
+  background: linear-gradient(90deg, rgba(204, 153, 255, 0.08) 0%, transparent 100%);
+  border-radius: 0;
+}
+
+/* ═══════════════════════════════════════════
+   H4 — Teal Accent
+   ═══════════════════════════════════════════ */
+
+.markdown-preview-view h4,
+.markdown-rendered h4,
+.cm-header-4 {
+  color: var(--lcars-teal) !important;
+  font-weight: 600;
+  font-size: 0.98em;
+  padding: 4px 0;
+  margin: 16px 0 8px 0;
+  border-bottom: 1px solid rgba(0, 204, 170, 0.3);
+}
+
+/* ═══════════════════════════════════════════
+   H5 & H6
+   ═══════════════════════════════════════════ */
+
+.markdown-preview-view h5,
+.markdown-rendered h5 {
+  color: var(--lcars-blue) !important;
+  font-size: 0.92em;
+  font-weight: 600;
+}
+
+.markdown-preview-view h6,
+.markdown-rendered h6 {
+  color: var(--text-muted) !important;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ═══════════════════════════════════════════
+   TABLES — Sensor Grid Style
+   ═══════════════════════════════════════════ */
+
+.markdown-preview-view table,
+.markdown-rendered table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 13px;
+  background-color: var(--bg-primary);
+}
+
+.markdown-preview-view thead tr,
+.markdown-rendered thead tr {
+  background: linear-gradient(90deg, rgba(0, 229, 255, 0.15), rgba(0, 229, 255, 0.05));
+  color: var(--lcars-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 12px;
+}
+
+.markdown-preview-view thead,
+.markdown-rendered thead {
+  border-bottom: 2px solid var(--lcars-cyan);
+}
+
+.markdown-preview-view th,
+.markdown-rendered th {
+  padding: 8px 12px;
+  font-weight: 700;
+  text-align: left;
+  color: var(--lcars-cyan);
+}
+
+.markdown-preview-view td,
+.markdown-rendered td {
+  padding: 7px 12px;
+  border-bottom: 1px solid rgba(90, 112, 144, 0.15);
+}
+
+.markdown-preview-view tbody tr:nth-child(odd),
+.markdown-rendered tbody tr:nth-child(odd) {
+  background-color: rgba(6, 10, 20, 0.6);
+}
+
+.markdown-preview-view tbody tr:nth-child(even),
+.markdown-rendered tbody tr:nth-child(even) {
+  background-color: rgba(10, 15, 28, 0.8);
+}
+
+.markdown-preview-view tbody tr:hover,
+.markdown-rendered tbody tr:hover {
+  background-color: rgba(0, 229, 255, 0.06);
+  box-shadow: inset 3px 0 0 var(--lcars-cyan);
+  transition: all 0.15s ease;
+}
+
+/* Dataview tables inherit LCARS styling */
+.dataview.table-view-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.dataview.table-view-table thead tr {
+  background: linear-gradient(90deg, rgba(0, 229, 255, 0.15), rgba(0, 229, 255, 0.05));
+  border-bottom: 2px solid var(--lcars-cyan);
+}
+
+.dataview.table-view-table th {
+  color: var(--lcars-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 12px;
+  padding: 8px 12px;
+}
+
+.dataview.table-view-table td {
+  padding: 7px 12px;
+  border-bottom: 1px solid rgba(90, 112, 144, 0.15);
+}
+
+.dataview.table-view-table tbody tr:nth-child(odd) {
+  background-color: rgba(6, 10, 20, 0.6);
+}
+
+.dataview.table-view-table tbody tr:hover {
+  background-color: rgba(0, 229, 255, 0.06);
+  box-shadow: inset 3px 0 0 var(--lcars-cyan);
+}
+
+/* ═══════════════════════════════════════════
+   CALLOUTS — LCARS Panel Style
+   ═══════════════════════════════════════════ */
+
+.callout {
+  background-color: rgba(6, 10, 20, 0.85) !important;
+  border: 1px solid rgba(90, 112, 144, 0.2);
+  border-left: 4px solid var(--lcars-cyan);
+  border-radius: 2px 6px 6px 2px;
+  padding: 0;
+  margin: 14px 0;
+  overflow: hidden;
+}
+
+.callout-title {
+  background: linear-gradient(90deg, rgba(0, 229, 255, 0.12), transparent) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 14px;
+  color: var(--lcars-cyan);
+}
+
+.callout-content {
+  padding: 10px 14px;
+}
+
+/* Callout Variants */
+.callout[data-callout="danger"],
+.callout[data-callout="blocked"],
+.callout[data-callout="bug"] {
+  border-left-color: var(--lcars-red);
+}
+.callout[data-callout="danger"] .callout-title,
+.callout[data-callout="blocked"] .callout-title,
+.callout[data-callout="bug"] .callout-title {
+  background: linear-gradient(90deg, rgba(255, 51, 51, 0.12), transparent) !important;
+  color: var(--lcars-red);
+}
+
+.callout[data-callout="success"],
+.callout[data-callout="go"],
+.callout[data-callout="check"],
+.callout[data-callout="done"] {
+  border-left-color: var(--lcars-green);
+}
+.callout[data-callout="success"] .callout-title,
+.callout[data-callout="go"] .callout-title,
+.callout[data-callout="check"] .callout-title,
+.callout[data-callout="done"] .callout-title {
+  background: linear-gradient(90deg, rgba(51, 255, 136, 0.12), transparent) !important;
+  color: var(--lcars-green);
+}
+
+.callout[data-callout="warning"],
+.callout[data-callout="caution"],
+.callout[data-callout="attention"] {
+  border-left-color: var(--lcars-gold);
+}
+.callout[data-callout="warning"] .callout-title,
+.callout[data-callout="caution"] .callout-title,
+.callout[data-callout="attention"] .callout-title {
+  background: linear-gradient(90deg, rgba(248, 183, 0, 0.12), transparent) !important;
+  color: var(--lcars-gold);
+}
+
+.callout[data-callout="info"],
+.callout[data-callout="note"] {
+  border-left-color: var(--lcars-blue);
+}
+.callout[data-callout="info"] .callout-title,
+.callout[data-callout="note"] .callout-title {
+  background: linear-gradient(90deg, rgba(102, 153, 255, 0.12), transparent) !important;
+  color: var(--lcars-blue);
+}
+
+/* ═══════════════════════════════════════════
+   TAGS — Pill Badges
+   ═══════════════════════════════════════════ */
+
+.tag, a.tag {
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(0, 229, 255, 0.08));
+  color: var(--lcars-cyan) !important;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 14px;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.tag:hover, a.tag:hover {
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.35), rgba(0, 229, 255, 0.15));
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+}
+
+/* ═══════════════════════════════════════════
+   CODE BLOCKS
+   ═══════════════════════════════════════════ */
+
+.markdown-preview-view pre,
+.markdown-rendered pre {
+  background-color: var(--bg-void) !important;
+  border-left: 3px solid var(--lcars-blue);
+  border-radius: 2px 4px 4px 2px;
+  padding: 14px 16px;
+  margin: 14px 0;
+  overflow-x: auto;
+}
+
+.markdown-preview-view pre code,
+.markdown-rendered pre code {
+  color: var(--lcars-green) !important;
+  font-family: var(--font-monospace);
+  font-size: 13px;
+  background: none !important;
+  padding: 0;
+}
+
+/* Inline Code */
+.markdown-preview-view code,
+.markdown-rendered code,
+.cm-inline-code {
+  background-color: rgba(0, 229, 255, 0.08) !important;
+  color: var(--lcars-cyan) !important;
+  font-family: var(--font-monospace);
+  font-size: 13px;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+/* ═══════════════════════════════════════════
+   LINKS
+   ═══════════════════════════════════════════ */
+
+.markdown-preview-view a,
+.markdown-rendered a,
+a.internal-link,
+a.external-link {
+  color: var(--lcars-cyan) !important;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.markdown-preview-view a:hover,
+.markdown-rendered a:hover,
+a.internal-link:hover,
+a.external-link:hover {
+  color: var(--lcars-green) !important;
+  text-shadow: 0 0 8px rgba(51, 255, 136, 0.4);
+}
+
+/* ═══════════════════════════════════════════
+   CHECKBOXES — LCARS Toggle
+   ═══════════════════════════════════════════ */
+
+.markdown-preview-view input[type="checkbox"],
+.markdown-rendered input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(0, 229, 255, 0.4);
+  border-radius: 3px;
+  background-color: var(--bg-void);
+  cursor: pointer;
+  vertical-align: middle;
+  position: relative;
+  transition: all 0.15s ease;
+}
+
+.markdown-preview-view input[type="checkbox"]:checked,
+.markdown-rendered input[type="checkbox"]:checked {
+  background-color: var(--lcars-cyan);
+  border-color: var(--lcars-cyan);
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
+}
+
+.markdown-preview-view input[type="checkbox"]:checked::after,
+.markdown-rendered input[type="checkbox"]:checked::after {
+  content: '✓';
+  color: #000000;
+  font-size: 12px;
+  font-weight: 900;
+  position: absolute;
+  top: -1px;
+  left: 2px;
+}
+
+/* ═══════════════════════════════════════════
+   BLOCKQUOTES
+   ═══════════════════════════════════════════ */
+
+.markdown-preview-view blockquote,
+.markdown-rendered blockquote {
+  border-left: 3px solid var(--lcars-cyan);
+  background-color: rgba(0, 229, 255, 0.03);
+  color: var(--lcars-blue);
+  padding: 10px 16px;
+  margin: 12px 0;
+  border-radius: 0 4px 4px 0;
+}
+
+/* ═══════════════════════════════════════════
+   HORIZONTAL RULE — LCARS Divider
+   ═══════════════════════════════════════════ */
+
+.markdown-preview-view hr,
+.markdown-rendered hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, var(--lcars-cyan), transparent);
+  box-shadow: 0 0 6px rgba(0, 229, 255, 0.3);
+  margin: 24px 0;
+}
+
+/* ═══════════════════════════════════════════
+   BOLD & ITALIC
+   ═══════════════════════════════════════════ */
+
+.markdown-preview-view strong,
+.markdown-rendered strong,
+.cm-strong {
+  color: var(--lcars-gold) !important;
+  font-weight: 700;
+}
+
+.markdown-preview-view em,
+.markdown-rendered em,
+.cm-em {
+  color: var(--lcars-lavender) !important;
+  font-style: italic;
+}
+
+/* ═══════════════════════════════════════════
+   SCROLLBAR
+   ═══════════════════════════════════════════ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-void);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(90, 112, 144, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--lcars-cyan);
+}
+
+/* ═══════════════════════════════════════════
+   SIDEBAR / NAV
+   ═══════════════════════════════════════════ */
+
+.nav-file-title,
+.nav-folder-title {
+  color: var(--lcars-blue) !important;
+  font-family: var(--font-monospace);
+  font-size: 13px;
+  transition: all 0.15s ease;
+}
+
+.nav-file-title:hover,
+.nav-folder-title:hover {
+  color: var(--lcars-cyan) !important;
+  background-color: rgba(0, 229, 255, 0.06);
+}
+
+.nav-file-title.is-active {
+  color: var(--lcars-cyan) !important;
+  background-color: rgba(0, 229, 255, 0.1);
+}
+
+.nav-folder-title {
+  color: var(--lcars-gold) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+
+/* ═══════════════════════════════════════════
+   STATUS BAR
+   ═══════════════════════════════════════════ */
+
+.status-bar {
+  background-color: var(--bg-void) !important;
+  border-top: 1px solid rgba(90, 112, 144, 0.15);
+  color: var(--text-muted);
+  font-family: var(--font-monospace);
+  font-size: 11px;
+}
+
+/* ═══════════════════════════════════════════
+   GRAPH VIEW
+   ═══════════════════════════════════════════ */
+
+.graph-view.color-fill {
+  color: var(--lcars-cyan);
+}
+
+.graph-view.color-fill-highlight {
+  color: var(--lcars-gold);
+}
+
+.graph-view.color-line {
+  color: rgba(0, 229, 255, 0.2);
+}
+
+.graph-view.color-text {
+  color: #c0d0e0;
+}
+
+.graph-view.color-fill-attachment {
+  color: var(--lcars-lavender);
+}
+
+/* ═══════════════════════════════════════════
+   TRANSITIONS
+   ═══════════════════════════════════════════ */
+
+a, .nav-file-title, .nav-folder-title, .tag,
+input[type="checkbox"], tbody tr, button {
+  transition: all 0.18s ease;
+}
+
+/* ═══════════════════════════════════════════
+   LISTS
+   ═══════════════════════════════════════════ */
+
+.markdown-preview-view ul > li::marker {
+  color: var(--lcars-cyan);
+}
+
+.markdown-preview-view ol > li::marker {
+  color: var(--lcars-gold);
+}
+
+/* ═══════════════════════════════════════════
+   FRONTMATTER / METADATA
+   ═══════════════════════════════════════════ */
+
+.frontmatter-container {
+  background-color: var(--bg-panel) !important;
+  border: 1px solid rgba(90, 112, 144, 0.15);
+  border-radius: 4px;
+  font-family: var(--font-monospace);
+}
+
+.frontmatter-container .frontmatter-section-label {
+  color: var(--lcars-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
