@@ -43,7 +43,7 @@ updated: "2026-03-22"
 - [x] Grant pipeline notes (ARPA-H, UCB-UCSF, Exec Summary)
 - [~] ARPA-H Solution Summary Pages 1–6 drafted *(in progress — ~40%)*
 - [x] Internal review / red-team checklist
-- [ ] Final submission package assembled
+- [~] Final submission package assembled *(in progress — checklist created)*
 
 ## 5. EXPERIMENTAL READINESS (100%)
 
@@ -70,11 +70,11 @@ updated: "2026-03-22"
 - [x] Collaboration trackers (Lanzara, Buehler)
 - [x] Templates (Candidate, Weekly Review, Literature)
 
-## 8. FINAL PRE-FLIGHT (20%)
+## 8. FINAL PRE-FLIGHT (50%)
 
 - [x] Visual timeline Canvas created
 - [x] One-page exec summary ready
-- [ ] Weekly review cycle initiated
+- [x] Weekly review cycle initiated
 - [ ] Co-PI sign-off (Lanzara)
 - [ ] Format check — 6-page limit
 - [ ] **SUBMIT — April 8, 2026**
