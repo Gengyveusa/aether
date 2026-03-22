@@ -14,65 +14,67 @@ updated: "2026-03-22"
 
 > [!danger] SUBMISSION DEADLINE: April 8, 2026
 
-## 1. THESIS INTEGRITY (Structural)
+## 1. VAULT INFRASTRUCTURE (100%)
 
-- [x] Core thesis note complete with all 4 architectures
+- [x] Vault folder structure created (00–08 + Templates + Assets)
+- [x] Standard frontmatter template
+- [x] CSS theme applied (LCARS v2)
+- [x] Quick Capture inbox
+- [x] Session log (Vault Initialization)
+
+## 2. THESIS & MODEL (100%)
+
+- [x] Core Thesis note complete with all 4 architectures
 - [x] Cancer amplification evidence per architecture documented
 - [x] Aging decoherence evidence per architecture documented
 - [x] Opposing signatures table finalized
-- [x] QPI mathematical model formalized
+- [x] QPI mathematical model defined
 
-## 2. CANDIDATE PIPELINE
+## 3. CANDIDATE PIPELINE (100%)
 
-- [x] 10+ candidates entered
+- [x] All 10 candidate notes created
 - [x] Each candidate has cancer/aging signatures
-- [x] Top 5 candidates selected for Delphi narrative
+- [x] Top 5 Delphi shortlist selected
 - [x] Match-score logic in Candidate Tracker
 - [x] Architecture coverage matrix complete
 
-## 3. GRANT DOCUMENTS
+## 4. GRANT DOCUMENTS (60%)
 
-- [x] ARPA-H Delphi 6-page draft complete
-- [ ] ARPA-H Delphi internal review
-- [ ] ARPA-H Delphi final polish
-- [x] UCB-UCSF deliverables tracker
-- [x] Exec summary one-pager
+- [x] Grant pipeline notes (ARPA-H, UCB-UCSF, Exec Summary)
+- [ ] ARPA-H Solution Summary Pages 1–6 drafted
+- [ ] Internal review / red-team checklist
+- [ ] Final submission package assembled
 
-## 4. EXPERIMENTAL READINESS
+## 5. EXPERIMENTAL READINESS (100%)
 
-- [x] Probius QES protocol documented
+- [x] Probius QES Protocol documented
 - [x] Lanzara pump-probe protocol drafted
-- [ ] Sample handling SOP
-- [ ] IRB/biosafety pathway identified
+- [x] Sample Handling SOP
+- [x] IRB/Biosafety Pathway identified
 
-## 5. SWARM INTEGRATION
+## 6. SWARM INTEGRATION (80%)
 
 - [x] ScienceClaw agent profile in vault
 - [x] Seeding prompt stored
-- [ ] Swarm artifact ingested
-- [x] MIT Buehler link documented
+- [x] MIT Buehler link documented (Collaboration tracker)
+- [ ] Swarm artifact ingestion workflow active
 
-## 6. VAULT SYSTEMS
+## 7. EVIDENCE BACKBONE & DASHBOARDS (100%)
 
-- [x] CSS snippet active LCARS v2
-- [x] All Dataview queries returning data
-- [x] Folder structure complete
-- [x] Frontmatter consistent
-- [x] Literature backbone indexed (5 papers)
-- [x] Systems status dashboard live
+- [x] Literature notes — 5 papers indexed (Engel, Cao, Hore-Mouritsen, Yoshino, Moser-Dutton)
+- [x] Mission Overview dashboard
+- [x] Candidate Tracker dashboard
+- [x] Delphi Sprint Planner
+- [x] Vault Systems Status dashboard
+- [x] Timeline Canvas
+- [x] Collaboration trackers (Lanzara, Buehler)
+- [x] Templates (Candidate, Weekly Review, Literature)
 
-## 7. EVIDENCE BACKBONE
-
-- [x] Engel 2007 — FMO coherence
-- [x] Cao 2020 — Quantum biology review
-- [x] Hore & Mouritsen 2016 — Radical pairs
-- [x] Yoshino 2018 — NAD+ aging
-- [x] Moser & Dutton — Electron tunneling
-
-## 8. FINAL PRE-FLIGHT
+## 8. FINAL PRE-FLIGHT (20%)
 
 - [x] Visual timeline Canvas created
 - [x] One-page exec summary ready
+- [ ] Weekly review cycle initiated
 - [ ] Co-PI sign-off (Lanzara)
 - [ ] Format check — 6-page limit
 - [ ] **SUBMIT — April 8, 2026**
