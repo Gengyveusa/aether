@@ -8,43 +8,93 @@ tags: [dashboard, flight-deck, mission]
 created: "2026-03-22"
 updated: "2026-03-22"
 ---
-# 🛫 QUANTUM DISTILLERY — MISSION OVERVIEW
+# 🖖 LCARS MAIN VIEWER — QUANTUM DISTILLERY
+
 > **Core Thesis:** Cancer *amplifies* quantum protection architectures. Aging *decoheres* them. Probius QES reads the vibrational fingerprints.
-> [!danger] ARPA-H DELPHI COUNTDOWN
-> **T-MINUS 17 DAYS** — Deadline: April 8, 2026
-> Solution Summary: 6 pages | Status: Draft
-> Co-PI: Alessandra Lanzara (UCB Physics)
-## Go / No-Go Board
-> [!success] SYSTEMS GREEN
+
+---
+
+> [!danger] 🔴 ARPA-H DELPHI COUNTDOWN
+> ## T-MINUS 17 DAYS
+> **Deadline: April 8, 2026**
+>
+> | Parameter | Value |
+> |---|---|
+> | Document | Solution Summary — 6 pages |
+> | Status | 🟡 Draft |
+> | PI | [Name] |
+> | Co-PI | Alessandra Lanzara (UCB Physics) |
+> | Submission | ARPA-H DELPHI Open BAA |
+>
+> **All hands: battlestations. This is not a drill.**
+
+---
+
+> [!success] 🟢 GO / NO-GO BOARD — ALL P0-CRITICAL SYSTEMS
 > ```dataview
-> TABLE status AS "Status", priority AS "Priority", due AS "Due" FROM "" WHERE priority = "P0-Critical" SORT due ASC
+> TABLE status AS "Status", priority AS "Priority", due AS "Due"
+> FROM ""
+> WHERE priority = "P0-Critical"
+> SORT due ASC
 > ```
-## Candidate Tracker
-> [!info] QUANTUM SIGNATURES — CANCER↑ / AGING↓
+
+---
+
+> [!info] 🔵 CANDIDATE TRACKER — QUANTUM SIGNATURES
+> **Cancer ↑ amplifies | Aging ↓ decoheres**
+>
 > ```dataview
-> TABLE cancer-signature AS "Cancer ↑", aging-signature AS "Aging ↓", proteins AS "Proteins", status AS "Status" FROM "02-Candidates" SORT status ASC
+> TABLE
+>   cancer-signature AS "Cancer ↑",
+>   aging-signature AS "Aging ↓",
+>   proteins AS "Proteins",
+>   status AS "Status"
+> FROM "02-Candidates"
+> SORT priority ASC
 > ```
-## Grant Pipeline
-> [!warning] FUNDING STATUS
+>
+> **Keystone:** GSH Redox Defense — 4/4 architecture alignment
+
+---
+
+> [!warning] 🟠 GRANT PIPELINE — FUNDING STATUS
 > ```dataview
-> TABLE status AS "Status", due AS "Due", priority AS "Priority" FROM "03-Grants" SORT due ASC
+> TABLE
+>   status AS "Status",
+>   due AS "Due",
+>   priority AS "Priority",
+>   type AS "Type"
+> FROM "03-Grants"
+> SORT due ASC
 > ```
-## Swarm Status
-> [!tip] SCIENCECLAW × INFINITE
+
+---
+
+> [!tip] 🟣 SWARM STATUS — SCIENCECLAW × INFINITE
 > ```dataview
-> TABLE swarm-artifact-id AS "Artifact", status AS "Status", updated AS "Updated" FROM "05-Swarm" SORT updated DESC LIMIT 10
+> TABLE
+>   swarm-artifact-id AS "Artifact",
+>   status AS "Status",
+>   updated AS "Updated"
+> FROM "05-Swarm"
+> SORT updated DESC
+> LIMIT 10
 > ```
-## Experimental Readiness
-```dataview
-TABLE status AS "Status", due AS "Due", priority AS "Priority" FROM "04-Experiments" SORT priority ASC
-```
-## Systems Status
-| System | Status |
-|---|---|
-| Vault Integrity | 🟢 Online |
-| CSS Theme | 🟢 LCARS Active |
-| Dataview Queries | 🟢 Live |
-| Candidates Loaded | 🟡 5/10 |
-| Grant Docs | 🟡 Draft |
-| Swarm | 🟢 Seeded |
-| Experiments | 🟡 Protocol Draft |
+>
+> **Platform:** ScienceClaw × Infinite (MIT Buehler)
+> **Mission:** Mine quantum biology + oncology + geroscience for opposing cancer/aging signatures
+
+---
+
+## 📡 SYSTEMS STATUS
+
+Vault Integrity:: 🟢 Online
+CSS Theme:: 🟢 LCARS v2 Active
+Dataview Queries:: 🟢 Live
+Candidates Loaded:: 🟢 10/10
+Grant Docs:: 🟡 Draft
+
+---
+
+> [!quote] STARDATE 2026.081
+> *"The quantum signature is not the disease. The quantum signature is the body's attempt to protect itself. Cancer amplifies that protection. Aging loses it."*
