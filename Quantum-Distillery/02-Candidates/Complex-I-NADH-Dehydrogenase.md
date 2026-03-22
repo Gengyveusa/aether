@@ -3,12 +3,14 @@ status: "🟢 Active"
 category: "candidate"
 type: "protein-complex"
 priority: "P1-High"
-cancer-signature: "↑ Reverse electron transport hyperactivated; oncogenic ROS signaling via Complex I flavin site"
-aging-signature: "↓ ND subunit mutations accumulate; FeS cluster N2 geometry distortion; electron tunneling efficiency drops"
-proteins: [MT-ND1, MT-ND4, MT-ND5, NDUFS1, NDUFS2]
-tags: [candidate, complex-I, ETC, mitochondria]
+cancer-signature: "↑ Enhanced forward + reverse electron tunneling through FeS chain"
+aging-signature: "↓ mtDNA mutations distort FeS geometry reducing tunneling efficiency"
+proteins: [Complex-I, ND1, ND5, NDUFS1]
+architecture: "3/4 ETC + tunneling + FMO"
+tags: [candidate, complex-I, mitochondria]
 created: "2026-03-22"
 updated: "2026-03-22"
 ---
 # 🔬 Candidate: Complex I (NADH:Ubiquinone Oxidoreductase)
-Architecture 3 exemplar. Cancer amplifies reverse electron transport. Aging decoheres FeS tunneling chain.
+
+Architecture 3/4 alignment — ETC, tunneling, and FMO. Cancer amplifies forward and reverse electron tunneling through the FeS chain. Aging accumulates mtDNA mutations that distort FeS cluster geometry, reducing tunneling efficiency.
