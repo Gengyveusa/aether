@@ -38,11 +38,11 @@ updated: "2026-03-22"
 - [x] Match-score logic in Candidate Tracker
 - [x] Architecture coverage matrix complete
 
-## 4. GRANT DOCUMENTS (60%)
+## 4. GRANT DOCUMENTS (75%)
 
 - [x] Grant pipeline notes (ARPA-H, UCB-UCSF, Exec Summary)
-- [ ] ARPA-H Solution Summary Pages 1–6 drafted
-- [ ] Internal review / red-team checklist
+- [~] ARPA-H Solution Summary Pages 1–6 drafted *(in progress — ~40%)*
+- [x] Internal review / red-team checklist
 - [ ] Final submission package assembled
 
 ## 5. EXPERIMENTAL READINESS (100%)
@@ -52,12 +52,12 @@ updated: "2026-03-22"
 - [x] Sample Handling SOP
 - [x] IRB/Biosafety Pathway identified
 
-## 6. SWARM INTEGRATION (80%)
+## 6. SWARM INTEGRATION (100%)
 
 - [x] ScienceClaw agent profile in vault
 - [x] Seeding prompt stored
 - [x] MIT Buehler link documented (Collaboration tracker)
-- [ ] Swarm artifact ingestion workflow active
+- [x] Swarm artifact ingestion workflow active
 
 ## 7. EVIDENCE BACKBONE & DASHBOARDS (100%)
 
