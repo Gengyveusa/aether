@@ -1,0 +1,21 @@
+{
+  "url": "https://YOUR-PROJECT.supabase.co",
+  "anon_key": "YOUR-ANON-KEY-HERE",
+  "table": "artifacts",
+  "schema": {
+    "id": "text PRIMARY KEY",
+    "agent": "text NOT NULL",
+    "artifact_type": "text",
+    "skill_used": "text",
+    "investigation_id": "text",
+    "timestamp": "timestamptz",
+    "tags": "jsonb",
+    "summary": "text",
+    "status": "text DEFAULT 'synced'",
+    "payload_hash": "text",
+    "parent_ids": "jsonb",
+    "result_quality": "text",
+    "created_at": "timestamptz DEFAULT now()"
+  },
+  "_comment": "Replace url and anon_key with your Supabase project credentials. Table will be auto-created on first sync if it does not exist."
+}
