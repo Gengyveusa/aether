@@ -28,7 +28,7 @@ updated: "2026-03-22"
 - [ ] Budget spreadsheet (Excel)
 - [ ] Biosketches (all Co-PIs)
 - [ ] Letters of support (Lanzara, Buehler)
-- [ ] Data management plan
+- [x] Data management plan *(draft created — [[03-Grants/Data-Management-Plan]])*
 - [ ] IRB approval letter or exemption
 - [ ] Institutional endorsement
 
