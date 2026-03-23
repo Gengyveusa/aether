@@ -10,7 +10,7 @@ updated: "2026-03-22"
 ---
 # ✈️ QUANTUM BIOLOGY FLIGHT DECK CHECKLIST
 
-> Pre-flight checks for ARPA-H Delphi submission — T-minus 17 days.
+> Pre-flight checks for ARPA-H Delphi submission — T-minus 16 days. Week 2 execution sprint in progress.
 
 > [!danger] SUBMISSION DEADLINE: April 8, 2026
 
@@ -43,7 +43,10 @@ updated: "2026-03-22"
 - [x] Grant pipeline notes (ARPA-H, UCB-UCSF, Exec Summary)
 - [~] ARPA-H Solution Summary Pages 1–6 drafted *(in progress — ~85%, red team findings addressed)*
 - [x] Internal review / red-team checklist
-- [~] Final submission package assembled *(in progress — checklist created)*
+- [x] Data management plan drafted
+- [x] Gap analysis and consistency audit complete
+- [x] Budget and IRB input memos created
+- [~] Final submission package assembled *(in progress — blockers: budget numbers, IRB, letters of support)*
 
 ## 5. EXPERIMENTAL READINESS (100%)
 

@@ -253,7 +253,7 @@ Total request: $X M over 3 years (placeholder — typical ARPA-H Delphi range).
 - **Appendix A**: Quantum Protection Index (QPI) Mathematical Framework — [[01-Core-Thesis/Quantum-Protection-Index-QPI-Model]]
 - **Appendix B**: Probius QES Technical Specifications — [[04-Experiments/Probius-QES-Protocol]]
 - **Appendix C**: Top 5 Delphi Candidate Profiles — [[00-Flight-Deck/Top-5-Delphi-Candidates]]
-- **Appendix D**: ScienceClaw Agent Architecture — [[05-Swarm-Intelligence/ScienceClaw-Agent-Profile]]
+- **Appendix D**: ScienceClaw Agent Architecture — [[05-Swarm/ScienceClaw-Agent-Profile]]
 - **Appendix E**: Sample Handling SOP — [[04-Experiments/Sample-Handling-SOP]]
 
 ---
@@ -273,5 +273,5 @@ Total request: $X M over 3 years (placeholder — typical ARPA-H Delphi range).
 - [[01-Core-Thesis/Quantum-Protection-Index-QPI-Model]]
 - [[00-Flight-Deck/Top-5-Delphi-Candidates]]
 - [[03-Grants/UCB-UCSF-Seed-Grant]]
-- [[03-Grants/Executive-Summary]]
+- [[03-Grants/Exec-Summary-ARPA-H-NSF]]
 - [[00-Flight-Deck/Red-Team-Review-Checklist]]

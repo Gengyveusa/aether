@@ -91,7 +91,7 @@ Where:
 
 ### Weight Justification
 
-- α and γ weighted highest because NADH and Complex I have the most direct Probius QES readout and the strongest published cancer↑/aging↓ differential data (see [[02-Candidates/NADH-Redox-State]], [[02-Candidates/Complex-I-Activity]]).
+- α and γ weighted highest because NADH and Complex I have the most direct Probius QES readout and the strongest published cancer↑/aging↓ differential data (see [[02-Candidates/NADH-Redox-State]], [[02-Candidates/Complex-I-NADH-Dehydrogenase]]).
 - δ weighted lowest pending human validation of cryptochrome spin signatures in plasma (see red-team finding #1).
 - Weights are designed to be re-calibrated after Year 1 validation cohort data.
 

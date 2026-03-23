@@ -34,8 +34,8 @@ updated: "2026-03-22"
 
 ## Technical Appendices
 
-- [ ] QPI model specification
-- [ ] Probius QES protocol summary
+- [x] QPI model specification *(mathematical weights defined — [[01-Core-Thesis/Quantum-Protection-Index-QPI-Model]])*
+- [x] Probius QES protocol summary *(spectral specs + LODs added — [[04-Experiments/Probius-QES-Protocol]])*
 - [ ] Preliminary data figures (if available)
 
 ## Submission Mechanics
