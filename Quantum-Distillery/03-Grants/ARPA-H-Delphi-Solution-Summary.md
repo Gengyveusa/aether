@@ -10,9 +10,9 @@ updated: "2026-03-22"
 ---
 # ARPA-H DELPHI — 6-PAGE SOLUTION SUMMARY
 
-> [!target] SUBMISSION TARGET: ARPA-H Delphi — April 8, 2026 | Status: DRAFT | Completion: ~85%
+> [!target] SUBMISSION TARGET: ARPA-H Delphi — April 8, 2026 | Status: DRAFT | Completion: ~90%
 
-> PI: [Name] | Co-PI: Alessandra Lanzara (UCB Physics) | Collaborator: Markus Buehler (MIT DMSE)
+> PI: [PI: TBD — requires human input] | Co-PI: Alessandra Lanzara (UCB Physics) | Co-PI: Markus Buehler (MIT CEE)
 
 ---
 
@@ -53,7 +53,7 @@ A unified quantum-protection diagnostic platform enabling:
 |---|---|---|
 | PI | UCB / UCSF | Quantum biology integration, QPI development |
 | Alessandra Lanzara | UCB Physics | Ultrafast mid-IR/THz spectroscopy, ground-truth validation |
-| Markus Buehler | MIT DMSE | ScienceClaw × Infinite swarm AI, computational modeling |
+| Markus Buehler | MIT CEE | ScienceClaw × Infinite swarm AI, computational modeling |
 | Clinical Partners | UCSF | Clinical translation, cohort recruitment, regulatory |
 
 ---
@@ -73,9 +73,12 @@ The quantum protection framework rests on four experimentally validated architec
 
 ### Quantum Protection Index (QPI) Model
 
-$$QPI = w_1 \cdot f(NADH) + w_2 \cdot f(FAD) + w_3 \cdot f(ATP) + w_4 \cdot f(GSH)$$
+$$QPI = \alpha \cdot A_{FMO} + \beta \cdot A_{tunnel} + \gamma \cdot A_{ETC} + \delta \cdot A_{spin}$$
 
-- QPI > 0 → Cancer trajectory | QPI < 0 → Aging trajectory | QPI ≈ 0 → Homeostasis
+- QPI is normalized to a 0–1 scale (1.0 = healthy young adult baseline)
+- QPI 0.8–1.0 → Optimal | QPI 0.4–0.59 → Moderate dysregulation | QPI <0.2 → Critical
+- QPI >1.0 → Cancer amplification (quantum protection hyperactivated)
+- Aging: QPI declines monotonically | Cancer: asymmetric architecture spikes
 - Full mathematical framework: [[01-Core-Thesis/Quantum-Protection-Index-QPI-Model]]
 
 ### Measurement Strategy
@@ -169,9 +172,9 @@ Quantum biology integration lead. Expertise in translational research bridging q
 
 World-leading ultrafast spectroscopist. Mid-IR/THz pump-probe capabilities for direct measurement of quantum coherence lifetimes in biological samples. Lab equipped with femtosecond laser systems, cryogenic sample stages, and custom spectral analysis pipelines. **Role**: Validate QES signatures against gold-standard ultrafast measurements.
 
-### Co-PI: Markus Buehler (MIT CSAIL/CEE)
+### Co-PI: Markus Buehler (MIT CEE)
 
-Pioneer in AI-driven materials science and biological modeling. Developer of ScienceClaw swarm intelligence platform. **Role**: Deploy AI agents for literature mining, hypothesis generation, cross-architecture pattern discovery, and predictive modeling of quantum protection signatures.
+Pioneer in AI-driven materials science and biological modeling. Department of Civil and Environmental Engineering, with cross-appointments in CSAIL and DMSE. Developer of ScienceClaw swarm intelligence platform. **Role**: Deploy AI agents for literature mining, hypothesis generation, cross-architecture pattern discovery, and predictive modeling of quantum protection signatures.
 
 ### Clinical Partner (UCSF)
 
@@ -189,7 +192,7 @@ Access to biobanked plasma samples (cancer cohort, aging cohort, healthy control
 |---|---|---|---|---|
 | PI | UCB / UCSF | Project lead, QPI development | 30% | Quantum biology integration |
 | Alessandra Lanzara | UCB Physics | Ultrafast validation | 15% | Femtosecond spectroscopy |
-| Markus Buehler | MIT CSAIL/CEE | AI/swarm modeling | 10% | ScienceClaw platform |
+| Markus Buehler | MIT CEE | AI/swarm modeling | 10% | ScienceClaw platform |
 | Postdoc 1 | UCB | QES measurements | 100% | Spectroscopy & data analysis |
 | Research Technician | UCSF | Sample processing | 100% | Biospecimen handling |
 | Clinical Coordinator | UCSF | Cohort management | 50% | IRB, recruitment |
@@ -247,6 +250,9 @@ Total request: $X M over 3 years (placeholder — typical ARPA-H Delphi range).
 3. [[06-Literature/Moser-2006-Electron-Tunneling-Chains]] — Moser CC, Dutton PL. *Biochim Biophys Acta* series. Electron tunneling through protein chains in mitochondrial respiratory complexes — distance and energetic dependencies.
 4. [[06-Literature/Hore-2016-Radical-Pair-Mechanism]] — Hore PJ, Mouritsen H. *Annu Rev Biophys* 45:299-344 (2016). Radical pair mechanism in cryptochrome magnetoreception — spin coherence maintained in warm, wet biological systems.
 5. [[06-Literature/Cao-2020-Quantum-Biology-Revisited]] — Cao J et al. *Sci Adv* 6:eaaz4888 (2020). Comprehensive review of quantum biology — covers all four architectures, current state of evidence, and future directions.
+6. [[06-Literature/Yoshino-2018-NAD-Aging]] — Yoshino J et al. *Cell Metab* 27:513-528 (2018). NAD+ declines ~50% between ages 40–60, directly impacting sirtuin activity and mitochondrial function — quantitative grounding for QPI aging trajectory.
+7. [[06-Literature/Reczek-2017-Cryptochrome-Cancer-Signaling]] — Reczek CR et al. [DOI: TBD]. Cryptochrome dysregulation in cancer: CRY1/CRY2 aberrant expression, ROS interaction with radical pair spin states, circadian disruption and cancer risk.
+8. [[06-Literature/Peek-2015-Circadian-Clock-Aging]] — Peek CB et al. [DOI: TBD]. Age-related decline in CRY expression correlates with circadian rhythm disruption and mitochondrial dysfunction — supports aging↓ decoherence in spin coherence architecture.
 
 ### Appendices
 

@@ -14,21 +14,31 @@ updated: "2026-03-22"
 
 ## Formal Definition
 
-$$QPI = w_1 \cdot f(NADH) + w_2 \cdot f(FAD) + w_3 \cdot f(ATP) + w_4 \cdot f(GSH)$$
+$$QPI = \alpha \cdot A_{FMO} + \beta \cdot A_{tunnel} + \gamma \cdot A_{ETC} + \delta \cdot A_{spin}$$
 
-| QPI Value | Interpretation |
+The QPI is normalized to a 0–1 scale calibrated against a healthy young adult reference population:
+
+| QPI Range | Interpretation |
 |---|---|
-| QPI > 0 | Cancer trajectory (quantum protection amplified) |
-| QPI < 0 | Aging trajectory (quantum protection decohered) |
-| QPI ≈ 0 | Quantum homeostasis |
+| 0.8–1.0 | Optimal quantum protection (healthy young adult baseline) |
+| 0.6–0.79 | Mild decoherence (early aging signature) |
+| 0.4–0.59 | Moderate dysregulation (aging or early cancer) |
+| 0.2–0.39 | Severe dysregulation (advanced aging or active cancer) |
+| <0.2 | Critical (late-stage cancer with aging acceleration) |
+| >1.0 | Cancer amplification (quantum protection hyperactivated) |
+
+**Cancer vs Aging discrimination:**
+- **Aging:** QPI decreases monotonically with age, all architecture scores declining proportionally
+- **Cancer:** QPI may be elevated (>1.0) due to amplification, with individual architecture scores showing asymmetric spikes
+- **Cancer+Aging:** Mixed pattern — overall low QPI but specific architecture amplification
 
 ## Transform Functions
 
-$f(x)$ are nonlinear transforms — log-ratio for concentration-based metabolites, z-score normalized to a healthy reference population. Each transform maps raw Probius QES signal to a standardized deviation from homeostatic baseline.
+Each architecture sub-score ($A_{FMO}$, $A_{tunnel}$, $A_{ETC}$, $A_{spin}$) is derived from nonlinear transforms of raw Probius QES signals — log-ratio for concentration-based metabolites, z-score normalized to the healthy reference population. Each transform maps raw signal to a standardized score where 1.0 = healthy young adult mean.
 
 ## Weight Training
 
-Weights $w_1$ through $w_4$ are trained via logistic regression on paired Probius QES + Lanzara spectroscopy datasets from three cohorts:
+Weights $\alpha$ through $\delta$ are trained via logistic regression on paired Probius QES + Lanzara spectroscopy datasets from three cohorts:
 
 1. **Young healthy** (ages 20–35, n=50)
 2. **Aged** (ages 65+, n=50)
@@ -47,11 +57,11 @@ Each sub-index isolates the contribution of one architecture to the composite sc
 
 ## Threshold Calibration
 
-Clinical decision boundaries are calibrated against the Lanzara spectroscopy ground truth. Thresholds define zones: protective (cancer-like amplification), homeostatic, and vulnerable (aging-like decoherence).
+Clinical decision boundaries are calibrated against the Lanzara spectroscopy ground truth. Thresholds define zones on the 0–1 scale: optimal (0.8–1.0), mild decoherence (0.6–0.79), moderate dysregulation (0.4–0.59), severe (0.2–0.39), and critical (<0.2). Cancer amplification is detected when QPI exceeds 1.0 with asymmetric architecture sub-scores.
 
 ## Sensitivity Analysis
 
-Hypothesis: GSH carries the highest weight ($w_4$) as the keystone metabolite — its redox status affects all four architectures simultaneously. NADH expected second due to direct ETC and tunneling roles.
+Hypothesis: The ETC architecture ($\gamma$) and FMO architecture ($\alpha$) carry the highest weights due to strongest direct Probius QES readout. GSH contributes primarily through the tunneling architecture ($\beta$). See weight justification below.
 
 ## Validation Metrics
 

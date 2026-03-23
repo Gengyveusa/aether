@@ -22,7 +22,7 @@ updated: "2026-03-22"
 > |---|---|
 > | Document | Solution Summary — 6 pages |
 > | Status | 🟡 Draft |
-> | PI | [Name] |
+> | PI | [PI: TBD — requires human input] |
 > | Co-PI | Alessandra Lanzara (UCB Physics) |
 > | Submission | ARPA-H DELPHI Open BAA |
 >

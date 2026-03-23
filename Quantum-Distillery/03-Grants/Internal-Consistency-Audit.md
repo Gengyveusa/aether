@@ -116,18 +116,19 @@ updated: "2026-03-23"
 
 ## Summary of Required Actions
 
-| # | Issue | Severity | Action |
-|---|---|---|---|
-| 1 | Buehler dept: DMSE vs CSAIL/CEE | P1 | Normalize to MIT DMSE |
-| 2 | Buehler role: Collaborator vs Co-PI | P1 | PI decision required |
-| 3 | QPI dual scale (signed vs 0–1) | **P0** | Reconcile before submission |
-| 4 | QPI variable names (w vs α) | P1 | Normalize notation |
-| 5 | Broken wikilink: 05-Swarm-Intelligence | P1 | Fix to 05-Swarm |
-| 6 | Broken wikilink: Complex-I-Activity | P1 | Fix to Complex-I-NADH-Dehydrogenase |
-| 7 | Broken wikilink: Executive-Summary | P2 | Fix to Exec-Summary-ARPA-H-NSF |
-| 8 | ScienceClaw × vs x | P2 | Normalize to × |
-| 9 | T-minus countdown stale | P2 | Accept or make dynamic |
-| 10 | IRB timeline ambiguity | P1 | Clarify initial vs pilot IRB |
+| # | Issue | Severity | Action | Status |
+|---|---|---|---|---|
+| 1 | Buehler dept: DMSE vs CSAIL/CEE | P1 | Normalized to **MIT CEE** (primary appointment) with cross-appointment note | **Resolved** ✅ |
+| 2 | Buehler role: Collaborator vs Co-PI | P1 | Standardized as **Co-PI** across all grant-facing docs | **Resolved** ✅ |
+| 3 | QPI dual scale (signed vs 0–1) | **P0** | Adopted **0–1 normalized scale** as canonical; >1.0 = cancer amplification; updated Solution Summary + QPI Model | **Resolved** ✅ |
+| 4 | QPI variable names (w vs α) | P1 | Normalized to **α, β, γ, δ** notation throughout | **Resolved** ✅ |
+| 5 | Broken wikilink: 05-Swarm-Intelligence | P1 | Fixed to `05-Swarm/` (Phase 13) | **Resolved** ✅ |
+| 6 | Broken wikilink: Complex-I-Activity | P1 | Fixed to `Complex-I-NADH-Dehydrogenase` (Phase 13) | **Resolved** ✅ |
+| 7 | Broken wikilink: Executive-Summary | P2 | Fixed to `Exec-Summary-ARPA-H-NSF` (Phase 13) | **Resolved** ✅ |
+| 8 | ScienceClaw × vs x | P2 | Normalized to **×** (Unicode) in Agent Profile | **Resolved** ✅ |
+| 9 | T-minus countdown stale | P2 | Updated to T-minus 16 in Aviation Checklist | **Resolved** ✅ |
+| 10 | IRB timeline ambiguity | P1 | Clarified in IRB-Inputs-Needed.md — initial IRB April 2026, pilot IRB Q2 Y3 | **Resolved** ✅ |
+| 11 | PI name placeholder | P0 | Standardized to `[PI: TBD — requires human input]` across all files | **Mitigated** (awaiting PI) |
 
 ## Links
 

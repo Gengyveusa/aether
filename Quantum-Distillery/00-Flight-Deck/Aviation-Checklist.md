@@ -41,11 +41,12 @@ updated: "2026-03-22"
 ## 4. GRANT DOCUMENTS (95%)
 
 - [x] Grant pipeline notes (ARPA-H, UCB-UCSF, Exec Summary)
-- [~] ARPA-H Solution Summary Pages 1–6 drafted *(in progress — ~85%, red team findings addressed)*
+- [~] ARPA-H Solution Summary Pages 1–6 drafted *(in progress — ~90%, QPI scale reconciled, references expanded, consistency fixes applied)*
 - [x] Internal review / red-team checklist
 - [x] Data management plan drafted
 - [x] Gap analysis and consistency audit complete
-- [x] Budget and IRB input memos created
+- [x] Budget and IRB input memos created + draft budget template
+- [x] Internal consistency audit — all 10 findings resolved
 - [~] Final submission package assembled *(in progress — blockers: budget numbers, IRB, letters of support)*
 
 ## 5. EXPERIMENTAL READINESS (100%)

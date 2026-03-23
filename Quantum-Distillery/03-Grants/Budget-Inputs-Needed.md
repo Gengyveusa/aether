@@ -118,8 +118,13 @@ updated: "2026-03-23"
 9. When do we need final budget numbers for a April 8 submission? (Internal deadline)
 10. Can we include cost escalation (3%/yr) for Years 2-3?
 
+## Draft Budget Template
+
+See [[03-Grants/Draft-Budget-Template]] for a structured 3-year budget with estimated non-personnel line items and reference F&A rates. Personnel costs remain [TBD] pending SPO input.
+
 ## Links
 
+- [[03-Grants/Draft-Budget-Template]]
 - [[03-Grants/ARPA-H-Delphi-Solution-Summary]]
 - [[03-Grants/Solution-Summary-Gap-List]]
 - [[00-Flight-Deck/Red-Team-Review-Checklist]]

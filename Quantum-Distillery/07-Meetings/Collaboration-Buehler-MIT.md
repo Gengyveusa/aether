@@ -6,12 +6,12 @@ tags: [meeting, buehler, MIT, scienceclaw, swarm, collaboration]
 created: "2026-03-22"
 updated: "2026-03-22"
 ---
-# 🤝 COLLABORATION TRACKER: MARKUS BUEHLER (MIT DMSE)
+# 🤝 COLLABORATION TRACKER: MARKUS BUEHLER (MIT CEE)
 
 | Field | Details |
 |---|---|
-| **Role** | Collaborator |
-| **Institution** | MIT, Department of Materials Science and Engineering |
+| **Role** | Co-PI |
+| **Institution** | MIT, Department of Civil and Environmental Engineering (cross-appointments: CSAIL, DMSE) |
 | **Expertise** | AI swarm materials-to-biology |
 | **Platform** | ScienceClaw × Infinite |
 | **Contribution** | Computational tunneling models + literature mining |
