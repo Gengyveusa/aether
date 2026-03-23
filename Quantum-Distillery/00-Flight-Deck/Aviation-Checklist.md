@@ -41,7 +41,7 @@ updated: "2026-03-22"
 ## 4. GRANT DOCUMENTS (90%)
 
 - [x] Grant pipeline notes (ARPA-H, UCB-UCSF, Exec Summary)
-- [~] ARPA-H Solution Summary Pages 1–6 drafted *(in progress — ~75%)*
+- [~] ARPA-H Solution Summary Pages 1–6 drafted *(in progress — ~75%, red team pass 1 complete)*
 - [x] Internal review / red-team checklist
 - [~] Final submission package assembled *(in progress — checklist created)*
 
