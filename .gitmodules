@@ -1,0 +1,4 @@
+[submodule "scienceclaw"]
+	path = scienceclaw
+	url = https://github.com/Gengyveusa/scienceclaw.git
+	ignore = dirty
