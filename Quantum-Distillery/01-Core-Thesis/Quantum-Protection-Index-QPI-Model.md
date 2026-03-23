@@ -68,6 +68,49 @@ Hypothesis: GSH carries the highest weight ($w_4$) as the keystone metabolite �
 | ATP | log-ratio | ETC + tunneling | Rank 4 |
 | GSH | log-ratio | ALL (keystone) | Rank 1 |
 
+## Mathematical Specification of QPI Weights
+
+The QPI composite score is calculated as:
+
+```
+QPI = α·A_FMO + β·A_tunnel + γ·A_ETC + δ·A_spin
+```
+
+Where:
+- **A_FMO** = FMO coherence score (derived from NADH/FAD fluorescence lifetime ratios)
+- **A_tunnel** = Enzyme tunneling score (derived from kinetic isotope effect proxies in GSH redox cycling)
+- **A_ETC** = Mitochondrial ETC quantum transfer score (derived from Complex I/CoQ10/CytC electron transport efficiency markers)
+- **A_spin** = Cryptochrome spin coherence score (derived from cryptochrome expression and radical pair recombination kinetics)
+
+### Proposed Initial Weights (Literature-Derived)
+
+- **α = 0.30** (strongest direct Probius QES signal: NADH/FAD)
+- **β = 0.25** (GSH thiol modes detectable, strong cancer/aging data)
+- **γ = 0.30** (Complex I is primary ETC target, robust spectral signature)
+- **δ = 0.15** (weakest current evidence in human plasma; weight to be increased as cryptochrome biomarkers are validated)
+
+### Weight Justification
+
+- α and γ weighted highest because NADH and Complex I have the most direct Probius QES readout and the strongest published cancer↑/aging↓ differential data (see [[02-Candidates/NADH-Redox-State]], [[02-Candidates/Complex-I-Activity]]).
+- δ weighted lowest pending human validation of cryptochrome spin signatures in plasma (see red-team finding #1).
+- Weights are designed to be re-calibrated after Year 1 validation cohort data.
+
+### Scoring Interpretation
+
+| QPI Range | Interpretation |
+|---|---|
+| 0.8–1.0 | Optimal quantum protection (healthy young adult) |
+| 0.6–0.79 | Mild decoherence (early aging signature) |
+| 0.4–0.59 | Moderate dysregulation (aging or early cancer) |
+| 0.2–0.39 | Severe dysregulation (advanced aging or active cancer) |
+| <0.2 | Critical (late-stage cancer with aging acceleration) |
+
+### Cancer vs Aging Discrimination
+
+- **Cancer:** QPI may be elevated (>1.0) due to amplification, with individual architecture scores showing asymmetric spikes
+- **Aging:** QPI decreases monotonically with age, all architecture scores declining proportionally
+- **Cancer+Aging:** Mixed pattern with overall low QPI but specific architecture amplification
+
 ## Links
 
 - [[01-Core-Thesis/Core-Thesis]]

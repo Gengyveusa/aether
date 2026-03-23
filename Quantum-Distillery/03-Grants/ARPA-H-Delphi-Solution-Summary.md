@@ -10,7 +10,7 @@ updated: "2026-03-22"
 ---
 # ARPA-H DELPHI — 6-PAGE SOLUTION SUMMARY
 
-> [!target] SUBMISSION TARGET: ARPA-H Delphi — April 8, 2026 | Status: DRAFT | Completion: ~75%
+> [!target] SUBMISSION TARGET: ARPA-H Delphi — April 8, 2026 | Status: DRAFT | Completion: ~85%
 
 > PI: [Name] | Co-PI: Alessandra Lanzara (UCB Physics) | Collaborator: Markus Buehler (MIT DMSE)
 
@@ -21,6 +21,8 @@ updated: "2026-03-22"
 ### Problem
 
 Current cancer diagnostics miss early-stage metabolic shifts; aging biomarkers lack mechanistic grounding. Both fields operate in silos despite sharing a common quantum-biological substrate. No existing platform unifies cancer and aging detection through a single mechanistic framework.
+
+**In plain terms:** Every living cell runs on quantum mechanics — electrons tunnel through enzymes, energy flows coherently through molecular networks, and magnetic fields influence cellular signaling through spin physics. We have discovered that cancer hijacks these quantum processes (turning them up too high) while aging degrades them (letting them fall apart). By measuring the molecular fingerprints of these quantum systems in a drop of blood, we can detect both cancer and aging from a single test.
 
 ### Insight
 
@@ -107,6 +109,10 @@ ScienceClaw × Infinite agents (MIT Buehler lab) provide:
 - Hypothesis generation with testability scores
 - Architecture mapping of novel candidate metabolites
 - Tunneling geometry MD simulations
+
+### Competitive Differentiation
+
+Existing metabolomics platforms (Metabolon, Nightingale Health, Somalogic) measure bulk metabolite concentrations but cannot resolve the quantum-level vibrational states that distinguish cancer amplification from aging decoherence. Traditional Raman/FTIR spectroscopy requires large sample volumes (100+ µL) and lacks the sensitivity for low-abundance quantum biomarkers. Probius QES uniquely combines: (1) label-free operation requiring only 2-4 µL, (2) vibrational resolution sufficient to distinguish NADH-bound vs free states, (3) simultaneous multi-analyte detection across all 4 architecture biomarkers, and (4) integration with AI-driven spectral decomposition for QPI scoring. No existing platform offers this combination of minimal sample, multi-architecture quantum biomarker profiling, and mechanistic interpretability.
 
 ---
 
@@ -256,7 +262,7 @@ Total request: $X M over 3 years (placeholder — typical ARPA-H Delphi range).
 
 - [x] Pages 1–3 scaffolded with content
 - [x] Pages 4–6 content drafted
-- [ ] Internal review / red-team pass
+- [x] Internal review / red-team pass 1 complete
 - [ ] Co-PI review (Lanzara)
 - [ ] Final polish and format check (6-page limit)
 - [ ] **SUBMIT — April 8, 2026**

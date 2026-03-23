@@ -38,10 +38,10 @@ updated: "2026-03-22"
 - [x] Match-score logic in Candidate Tracker
 - [x] Architecture coverage matrix complete
 
-## 4. GRANT DOCUMENTS (90%)
+## 4. GRANT DOCUMENTS (95%)
 
 - [x] Grant pipeline notes (ARPA-H, UCB-UCSF, Exec Summary)
-- [~] ARPA-H Solution Summary Pages 1–6 drafted *(in progress — ~75%, red team pass 1 complete)*
+- [~] ARPA-H Solution Summary Pages 1–6 drafted *(in progress — ~85%, red team findings addressed)*
 - [x] Internal review / red-team checklist
 - [~] Final submission package assembled *(in progress — checklist created)*
 
@@ -61,7 +61,7 @@ updated: "2026-03-22"
 
 ## 7. EVIDENCE BACKBONE & DASHBOARDS (100%)
 
-- [x] Literature notes — 5 papers indexed (Engel, Cao, Hore-Mouritsen, Yoshino, Moser-Dutton)
+- [x] Literature notes — 7 papers indexed (Engel, Cao, Hore-Mouritsen, Yoshino, Moser-Dutton, Reczek-2017, Peek-2015)
 - [x] Mission Overview dashboard
 - [x] Candidate Tracker dashboard
 - [x] Delphi Sprint Planner
