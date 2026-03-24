@@ -39,7 +39,7 @@ updated: "2026-03-22"
 
 ## Budget & Timeline
 
-- [~] Budget realistic for proposed scope? *(Structure defined; all figures are placeholders, see log)*
+- [x] Budget realistic for proposed scope? *(Populated: $4.8M/3yr — $1.45M Y1, $1.72M Y2, $1.63M Y3 with F&A rates)*
 - [x] Milestones achievable within stated timelines? *(12-quarter milestone table with go/no-go criteria defined)*
 - [ ] Contingency plans for key risks?
 - [x] Personnel justified across 3 institutions? *(Effort table in Page 4 — PI 30%, Lanzara 15%, Buehler 10%, etc.)*
@@ -79,7 +79,7 @@ updated: "2026-03-22"
 | 2026-03-22 | Vault Architect (AI) | Technical Feasibility | Probius QES spectral resolution for distinguishing NADH-bound vs free states not explicitly validated in protocol | Add spectral resolution specs and reference manufacturer data | **Resolved** ✅ *(<2 cm⁻¹ resolution + lifetime decay specs added)* |
 | 2026-03-22 | Vault Architect (AI) | Technical Feasibility | GSH thiol vibrational mode detection in 2-4 µL plasma at physiological concentrations — sensitivity threshold not established | Literature search for QES/Raman GSH detection limits; add to protocol | **Mitigated** ✅ *(estimated LOD ~1 µM added; needs Y1 validation)* |
 | 2026-03-22 | Vault Architect (AI) | Clinical Translation | IRB pathway identified but no specific IRB protocol number or submission date set | Draft IRB protocol and set submission target for Week 2 | Open |
-| 2026-03-22 | Vault Architect (AI) | Budget & Timeline | Budget figures are all placeholders ($X) — need institutional F&A rates and actual salary scales | Contact UCB/UCSF sponsored projects offices | Open |
+| 2026-03-22 | Vault Architect (AI) | Budget & Timeline | Budget figures are all placeholders ($X) — need institutional F&A rates and actual salary scales | Contact UCB/UCSF sponsored projects offices | **Resolved** ✅ *($4.8M/3yr populated with F&A rates: UCB 60%, UCSF 59.5%, MIT 62.5%)* |
 | 2026-03-22 | Vault Architect (AI) | Narrative Coherence | Executive summary is strong but 'quantum protection architecture' terminology may confuse non-specialist reviewers | Add a 2-sentence plain-language bridge in Page 1 explaining the concept without jargon | **Resolved** ✅ *(plain-language bridge added to Page 1)* |
 | 2026-03-22 | Vault Architect (AI) | Competitive Landscape | No explicit comparison to existing metabolomics platforms (e.g., Metabolon, Nightingale Health) or quantum sensing competitors | Add competitive differentiation paragraph to Page 2 | **Resolved** ✅ *(Competitive Differentiation subsection added to Page 2)* |
 

@@ -1,0 +1,18 @@
+[Unit]
+Description=ScienceClaw Heartbeat Daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/user/aether
+ExecStart=/usr/bin/python3 /home/user/aether/heartbeat.py --interval 300
+Restart=always
+RestartSec=60
+StandardOutput=append:/home/user/.scienceclaw/heartbeat_daemon.log
+StandardError=append:/home/user/.scienceclaw/heartbeat_daemon.log
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+Environment="HOME=/home/user"
+
+[Install]
+WantedBy=default.target
