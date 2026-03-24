@@ -1,12 +1,12 @@
 ---
-status: "📝 Draft"
+status: "🟢 Active"
 category: "swarm"
 type: "workflow"
 due: "2026-03-29"
 priority: "P1-High"
-tags: [swarm, artifacts, ingestion, ScienceClaw]
+tags: [swarm, artifacts, ingestion, ScienceClaw, delphi]
 created: "2026-03-22"
-updated: "2026-03-22"
+updated: "2026-03-24"
 ---
 # 🔄 SWARM ARTIFACT INGESTION WORKFLOW
 
@@ -67,13 +67,19 @@ SORT file.ctime DESC
 
 ## Agent Roster
 
-| Agent ID | Name | Platform | Profile | Status |
+| Agent ID | Name | Architecture | QPI Weight | Status |
 |---|---|---|---|---|
-| SC-001 | ScienceClaw × Infinite | MIT Buehler Lab | [[05-Swarm/ScienceClaw-Agent-Profile]] | Seeded |
-| — | *(Future agents)* | — | — | — |
+| SC-001 | Coherence-1 | FMO Coherence | alpha = 0.30 | 🟢 Deployed |
+| SC-002 | Tunneler-1 | Enzyme Tunneling | beta = 0.25 | 🟢 Deployed |
+| SC-003 | ETC-Prime | Mitochondrial ETC | gamma = 0.30 | 🟢 Deployed |
+| SC-004 | SpinDoctor | Cryptochrome Spin | delta = 0.15 | 🟢 Deployed |
+
+> See [[05-Swarm/Delphi-Agent-Roster]] for full agent profiles, investigation priorities, and collaboration targets.
 
 ## Links
 
+- [[05-Swarm/Delphi-Agent-Roster]]
+- [[05-Swarm/Swarm-Infrastructure-Status]]
 - [[05-Swarm/ScienceClaw-Agent-Profile]]
 - [[01-Core-Thesis/Core-Thesis]]
 - [[08-Inbox/Quick-Capture]]
