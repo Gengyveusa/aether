@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
-# Setup script for ScienceClaw → Supabase sync
+# Setup script for ScienceClaw -> Supabase sync (Delphi Enhanced)
 # Creates config directory and prompts for credentials
 
 set -euo pipefail
 
 CONFIG_DIR="$HOME/.scienceclaw"
 CONFIG_FILE="$CONFIG_DIR/supabase_config.json"
-TEMPLATE="$(dirname "$0")/supabase_config_template.json"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-echo "=== ScienceClaw Supabase Sync Setup ==="
+echo "=== ScienceClaw Supabase Sync Setup (Delphi Enhanced) ==="
+echo "    Schema version: 2.0"
+echo "    Mission: ARPA-H Delphi — Quantum Protection Index"
 echo
 
 mkdir -p "$CONFIG_DIR"
@@ -42,7 +44,12 @@ cat > "$CONFIG_FILE" <<EOF
 {
   "url": "$SUPABASE_URL",
   "anon_key": "$SUPABASE_KEY",
-  "table": "$TABLE"
+  "table": "$TABLE",
+  "schema_version": "2.0",
+  "mission": {
+    "id": "delphi-qpi-2026",
+    "name": "ARPA-H Delphi — Quantum Protection Index"
+  }
 }
 EOF
 
@@ -54,11 +61,21 @@ echo
 
 # Print the CREATE TABLE SQL
 echo "=== Run this SQL in your Supabase SQL Editor ==="
-python3 "$(dirname "$0")/supabase_sync.py" --create-table
+python3 "$SCRIPT_DIR/supabase_sync.py" --create-table
+echo
+
+# Show migration option
+echo "=== If upgrading from schema v1.0 ==="
+echo "Run: python3 $SCRIPT_DIR/supabase_sync.py --migrate"
 echo
 
 echo "=== Test connectivity ==="
-echo "Run: python3 $(dirname "$0")/supabase_sync.py --once"
+echo "Run: python3 $SCRIPT_DIR/supabase_sync.py --once"
 echo
+
 echo "=== Enable watch mode ==="
-echo "Run: python3 $(dirname "$0")/supabase_sync.py --watch"
+echo "Run: python3 $SCRIPT_DIR/supabase_sync.py --watch"
+echo
+
+echo "=== View sync stats ==="
+echo "Run: python3 $SCRIPT_DIR/supabase_sync.py --stats"

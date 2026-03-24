@@ -1,6 +1,6 @@
 [Unit]
-Description=ScienceClaw Heartbeat Daemon
-After=network-online.target
+Description=ScienceClaw Heartbeat Daemon — Delphi Mission
+After=network-online.target postgresql.service
 Wants=network-online.target
 
 [Service]
@@ -13,6 +13,16 @@ StandardOutput=append:/home/user/.scienceclaw/heartbeat_daemon.log
 StandardError=append:/home/user/.scienceclaw/heartbeat_daemon.log
 Environment="PATH=/usr/local/bin:/usr/bin:/bin"
 Environment="HOME=/home/user"
+Environment="PYTHONUNBUFFERED=1"
+# Delphi mission environment
+Environment="SCIENCECLAW_MISSION=delphi-qpi-2026"
+Environment="SCIENCECLAW_DISABLE_SKILL_AUTO_REFRESH=1"
+
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/home/user/.scienceclaw /home/user/aether
+PrivateTmp=true
 
 [Install]
 WantedBy=default.target

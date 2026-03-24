@@ -2,20 +2,20 @@
   "url": "https://YOUR-PROJECT.supabase.co",
   "anon_key": "YOUR-ANON-KEY-HERE",
   "table": "artifacts",
-  "schema": {
-    "id": "text PRIMARY KEY",
-    "agent": "text NOT NULL",
-    "artifact_type": "text",
-    "skill_used": "text",
-    "investigation_id": "text",
-    "timestamp": "timestamptz",
-    "tags": "jsonb",
-    "summary": "text",
-    "status": "text DEFAULT 'synced'",
-    "payload_hash": "text",
-    "parent_ids": "jsonb",
-    "result_quality": "text",
-    "created_at": "timestamptz DEFAULT now()"
+  "schema_version": "2.0",
+  "mission": {
+    "id": "delphi-qpi-2026",
+    "name": "ARPA-H Delphi — Quantum Protection Index",
+    "deadline": "2026-04-08",
+    "architectures": ["FMO", "tunneling", "ETC", "spin"],
+    "metabolite_targets": ["NADH", "FAD", "ATP", "GSH", "CoQ10"]
   },
-  "_comment": "Replace url and anon_key with your Supabase project credentials. Table will be auto-created on first sync if it does not exist."
+  "sync_options": {
+    "batch_size": 50,
+    "poll_interval_seconds": 30,
+    "max_retries": 4,
+    "enable_architecture_tagging": true,
+    "enable_metabolite_extraction": true
+  },
+  "_comment": "Replace url and anon_key with your Supabase project credentials. Run 'python3 supabase_sync.py --create-table' for the SQL schema, or '--migrate' to upgrade from v1.0."
 }
