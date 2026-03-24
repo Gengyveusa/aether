@@ -1,0 +1,15 @@
+{
+  "livePreview": true,
+  "readableLineLength": true,
+  "strictLineBreaks": false,
+  "showFrontmatter": false,
+  "foldHeading": true,
+  "foldIndent": true,
+  "showLineNumber": false,
+  "defaultViewMode": "preview",
+  "promptDelete": false,
+  "alwaysUpdateLinks": true,
+  "newFileLocation": "folder",
+  "newFileFolderPath": "08-Inbox",
+  "attachmentFolderPath": "Assets"
+}
