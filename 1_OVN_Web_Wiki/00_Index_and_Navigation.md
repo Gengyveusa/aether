@@ -43,11 +43,18 @@
 
 | Route | Page | Status | Content |
 |-------|------|--------|---------|
-| `/showcase` | **Showcase** | Live | Presentation gallery, slide decks, video pipeline output |
-| `/music` | **Music Studio** | Live | Audio generation, narrator profiles, teaching-style selectors |
+| `/showcase` | **Showcase** | ✅ Live | Presentation gallery, slide decks, video pipeline output |
+| `/music` | **Music Studio** | ✅ Live | Audio generation, narrator profiles, teaching-style selectors |
+| `/dashboard/ml` | **AI & ML Lab** | ✅ Live | Risk Prediction Engine (CVD/neuro/metabolic), Trial Matching, Model Registry |
+| `/dashboard/lab` | **Knowledge Graph Explorer** | ✅ Live | Entity relationships, Total Edges/Entity Types/Relationship Types, Source/Target filters |
 | `/community` | **Community Hub** | Partial | Case discussions (coming soon), member contributions |
-| `/biomarkers` | **Biomarker Tracking** | Coming Soon | De-identified aggregated data, periodontal therapy → systemic biomarker changes |
-| Dashboard | **Member Dashboard** | Inferred | Role-based access, module progress, contribution tracking |
+| `/biomarkers` | **Biomarker Tracking** | 🔜 Coming Soon | De-identified aggregated data, periodontal therapy → systemic biomarker changes |
+
+### Admin Routes (Elevated Privilege)
+
+| Route | Page | Status | Content |
+|-------|------|--------|---------|
+| `/admin/keys` | **Research Access Keys** | ✅ Live | UUID/custom key generation, email-based access grants, All Access Keys table |
 
 ### Navigation Structure
 
@@ -60,6 +67,17 @@ Header Nav:
 ├── About              → #about (anchor on homepage)
 └── [Sign In / Sign Up] → /login, /signup
 
+Dashboard Nav (auth-gated):
+├── ML Lab             → /dashboard/ml
+│   ├── Risk Prediction Engine
+│   ├── Trial Matching
+│   └── Model Registry
+├── Knowledge Graph    → /dashboard/lab
+│   ├── Entity Explorer
+│   └── Source/Target Filters
+└── Admin (admin-only)
+    └── Access Keys    → /admin/keys
+
 Footer Nav:
 ├── Explore the Science → /science
 ├── Sign In             → /login
@@ -71,11 +89,14 @@ Footer Nav:
 ## Platform Architecture
 
 - **Framework:** Next.js with server-side rendering
-- **Auth:** Email/password with role-based access control
-- **Roles:** Selectable at signup (dropdown) — likely: Clinician, Researcher, Biotech, Student
+- **Auth:** Email/password with RBAC + API key auth for programmatic access
+- **Roles:** Clinician, Researcher, Biotech, Student (signup dropdown) + Admin (elevated)
 - **Content delivery:** Static public pages + auth-gated interactive features
 - **Video pipeline:** Slides → GPT-4o Vision → ElevenLabs narration → music synthesis → Supabase storage
-- **Data layer:** Supabase (inferred from showcase/music architecture)
+- **ML/AI:** Risk Prediction Engine (periodontal staging + biomarkers → CVD/neuro/metabolic risk scores)
+- **Knowledge Graph:** Entity-relationship explorer with typed edges and filterable graph metrics
+- **API layer:** Key-authenticated research API (keys provisioned at `/admin/keys`)
+- **Data layer:** Supabase (user data, media, knowledge graph, ML model registry, access keys)
 
 ---
 

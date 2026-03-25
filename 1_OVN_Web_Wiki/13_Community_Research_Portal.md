@@ -156,13 +156,64 @@ INDIVIDUAL CLINICIAN                    AGGREGATED PLATFORM
 
 ---
 
+## Research Backend Integration
+
+The Community & Research Portal connects directly to the platform's authenticated research backend tools. These are not standalone features — they form an integrated research pipeline.
+
+### Data Flow: Community → Research Backend
+
+```
+COMMUNITY INPUT                    RESEARCH BACKEND
+─────────────────                  ────────────────────────────
+
+Case Discussions ──────────→ Knowledge Graph Explorer
+(clinical observations)         (/dashboard/lab)
+                                ├── New entity relationships
+                                ├── Edge validation
+                                └── Evidence tier tagging
+
+Biomarker Tracking ────────→ AI & ML Lab
+(pre/post treatment data)       (/dashboard/ml)
+                                ├── Risk Prediction Engine training data
+                                ├── Model validation cohorts
+                                └── Feature importance analysis
+
+Both ──────────────────────→ Trial Matching
+                                (/dashboard/ml → Trial Matching tab)
+                                ├── Patient eligibility signals
+                                ├── Site identification
+                                └── Enrollment acceleration
+```
+
+### How Community Data Feeds the ML Lab
+
+| Community Source | ML Lab Consumer | Value |
+|-----------------|----------------|-------|
+| Biomarker pre/post pairs | Risk Prediction Engine training | Real-world outcome data for model calibration |
+| Case discussions with systemic outcomes | Feature engineering | Discover new predictive features beyond standard biomarkers |
+| Periodontal staging data | Staging → risk score mapping | Quantify risk gradient across AAP stages |
+| Longitudinal follow-up | Model validation | Prospective performance evaluation |
+
+### How Community Data Feeds the Knowledge Graph
+
+| Community Source | Knowledge Graph Consumer | Value |
+|-----------------|------------------------|-------|
+| Case observations ("periodontal patient also had X") | New entity-edge candidates | Hypothesis generation from clinical pattern recognition |
+| Biomarker correlation data | Edge weight evidence | Strengthen or weaken relationship confidence |
+| Treatment outcome reports | Intervention → outcome edges | Map which interventions affect which endpoints |
+
+---
+
 ## Member Contribution Model
 
 ### How Members Contribute
 1. **Learn:** Complete education modules, stay current
 2. **Discuss:** Submit and comment on clinical cases (coming soon)
 3. **Track:** Contribute pre/post-treatment biomarker data (coming soon)
-4. **Feedback:** Shape platform development through suggestions
+4. **Explore:** Navigate the knowledge graph to discover research connections ([[12_Member_Hub_Platform]])
+5. **Predict:** Use the ML risk prediction engine for patient risk stratification ([[12_Member_Hub_Platform]])
+6. **Match:** Connect patients with relevant clinical trials via the Trial Matching tab
+7. **Feedback:** Shape platform development through suggestions
 
 ### What Members Get
 1. **Evidence-tiered education** grounded in latest oral-systemic research
@@ -170,17 +221,22 @@ INDIVIDUAL CLINICIAN                    AGGREGATED PLATFORM
 3. **Aggregated data access** — see patterns across many clinicians' experiences
 4. **Clinical tools** — showcase presentations, video pipeline, music studio for patient/peer education
 5. **Research participation** — contribute to the evidence base without running formal trials
+6. **AI-powered risk scoring** — ML-based cardiovascular/neurodegeneration/metabolic risk predictions
+7. **Knowledge graph access** — explore entity relationships across the oral-systemic research landscape
+8. **API access** — programmatic research access via provisioned API keys (request from admin)
 
 ---
 
 ## Related Files
 
-- [[12_Member_Hub_Platform]] — Platform architecture and technical details
+- [[12_Member_Hub_Platform]] — Platform architecture, ML Lab, Knowledge Graph, Admin tools
 - [[06_Education_Series_Overview]] — Education module system (Pillar 1)
 - [[09_Series3_Information_Collapse]] — Module 50 on biomarkers (connects to Pillar 3)
 - [[05_Clinical_Action_Guidelines]] — Clinical framework that community applies
 - [[14_Legal_Disclaimers_Attribution]] — Data privacy and ethical considerations
+- [[03_OMV_Biology]] — OMV/gingipain features used in ML risk prediction
+- [[02_Evidence_Tiers]] — Tier system used in knowledge graph edge classification
 
 ---
 
-#community #research-portal #case-discussions #biomarker-tracking #living-document #member-contributions
+#community #research-portal #case-discussions #biomarker-tracking #living-document #member-contributions #ml-integration #knowledge-graph
