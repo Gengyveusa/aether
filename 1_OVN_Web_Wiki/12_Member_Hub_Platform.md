@@ -112,17 +112,23 @@ An integrated audio generation environment for creating educational content acco
 
 The dashboard is the **operational backend** of the OVN research platform. It is not a simple profile page — it is a full-featured research workstation with AI/ML capabilities, knowledge graph exploration, and administrative tooling.
 
-#### Dashboard Route Tree
+#### Full Research Portal Sidebar
 
 ```
-/dashboard
+/dashboard               ← Landing: 8 metric cards, 4 charts, activity feed
+├── /clinics             ← Clinics Registry (multi-site management)
+├── /patients            ← Patients Registry (de-identified cohort)
+├── /biomarkers          ← Biomarkers (6 markers, samples, disease associations)
+├── /experiments         ← Experiments Registry (studies + model systems)
+├── /datasets            ← Datasets (Microbiome 16S, RNA-Seq, Proteomics, EV Cargo)
+├── /papers              ← Papers Registry (literature + DOIs)
+├── /trials              ← Trials Registry (clinical trials by phase/status)
 ├── /dashboard/ml        ← AI & Machine Learning Lab
 ├── /dashboard/lab       ← Knowledge Graph Explorer
-└── (additional tabs inferred from architecture)
-
-/admin
-└── /admin/keys          ← Research Access Key Management
+└── /admin/keys          ← Research Access Key Management (admin only)
 ```
+
+Full data registry schemas: [[15_Research_Portal_Backend]]
 
 ---
 
@@ -479,16 +485,24 @@ AUTH-GATED ROUTES (Member Hub)
 ├── /showcase            Presentation Gallery + Video Pipeline
 ├── /music               Music Studio + Audio Generation
 ├── /community           Community Hub (partial)
-├── /dashboard
-│   ├── /dashboard/ml    AI & ML Lab
-│   │   ├── Risk Prediction Engine
-│   │   ├── Trial Matching Tab
-│   │   └── Model Registry Tab
-│   └── /dashboard/lab   Knowledge Graph Explorer
-│       ├── Entity Relationship Visualization
-│       ├── Source/Target Type Filters
-│       └── Graph Metrics (Edges, Entity Types, Relationship Types)
-└── /biomarkers          Biomarker Tracking (coming soon)
+│
+RESEARCH PORTAL (Auth + Access Key)
+├── /dashboard           Landing: 8 metrics, 4 charts, activity feed
+├── /clinics             Clinics Registry (sites)
+├── /patients            Patients Registry (cohort)
+├── /biomarkers          Biomarkers (6 markers, samples, associations)
+├── /experiments         Experiments Registry (studies)
+├── /datasets            Datasets (16S, RNA-Seq, Proteomics, EV Cargo)
+├── /papers              Papers Registry (literature)
+├── /trials              Trials Registry (clinical trials)
+├── /dashboard/ml        AI & ML Lab
+│   ├── Risk Prediction Engine
+│   ├── Trial Matching Tab
+│   └── Model Registry Tab
+└── /dashboard/lab       Knowledge Graph Explorer
+    ├── Entity Relationship Visualization
+    ├── Source/Target Type Filters
+    └── Graph Metrics (Edges, Entity Types, Relationship Types)
 
 ADMIN ROUTES (Elevated Privilege)
 └── /admin
@@ -541,7 +555,8 @@ ADMIN ROUTES (Elevated Privilege)
 - [[03_OMV_Biology]] — OMV/gingipain data that feeds the ML risk engine
 - [[04_Five_Step_Cascade]] — Cascade model underlying risk prediction targets
 - [[02_Evidence_Tiers]] — Tier system used in knowledge graph edge classification
+- [[15_Research_Portal_Backend]] — Full research portal data registries (Clinics, Patients, Biomarkers, Experiments, Datasets, Papers, Trials)
 
 ---
 
-#member-hub #platform #authentication #showcase #music-studio #video-pipeline #supabase #ml-lab #knowledge-graph #admin #access-keys #risk-prediction
+#member-hub #platform #authentication #showcase #music-studio #video-pipeline #supabase #ml-lab #knowledge-graph #admin #access-keys #risk-prediction #research-portal

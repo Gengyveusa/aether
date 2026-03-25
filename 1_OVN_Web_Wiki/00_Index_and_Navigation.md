@@ -24,6 +24,7 @@
 | 12 | [[12_Member_Hub_Platform]] | Auth, signup, roles, showcase, music studio |
 | 13 | [[13_Community_Research_Portal]] | Case discussions, biomarker tracking, member features |
 | 14 | [[14_Legal_Disclaimers_Attribution]] | Disclaimers, author credentials, institutional info |
+| 15 | [[15_Research_Portal_Backend]] | Full research portal: Dashboard, Clinics, Patients, Biomarkers, Experiments, Datasets, Papers, Trials |
 
 ---
 
@@ -48,7 +49,19 @@
 | `/dashboard/ml` | **AI & ML Lab** | ✅ Live | Risk Prediction Engine (CVD/neuro/metabolic), Trial Matching, Model Registry |
 | `/dashboard/lab` | **Knowledge Graph Explorer** | ✅ Live | Entity relationships, Total Edges/Entity Types/Relationship Types, Source/Target filters |
 | `/community` | **Community Hub** | Partial | Case discussions (coming soon), member contributions |
-| `/biomarkers` | **Biomarker Tracking** | 🔜 Coming Soon | De-identified aggregated data, periodontal therapy → systemic biomarker changes |
+
+### Research Portal Routes (Auth + Access Key Required)
+
+| Route | Page | Status | Content |
+|-------|------|--------|---------|
+| `/dashboard` | **Dashboard Landing** | ✅ Live | 8 metric cards, 4 charts (Biomarker Trends, Perio Severity, Risk Radar, Activity), "Unlock Research Portal" key input |
+| `/clinics` | **Clinics Registry** | ✅ Live | Table: Code/Name/Institution/Country/Patients/Samples/Status, +Add Clinic |
+| `/patients` | **Patients Registry** | ✅ Live | Table: Code/Clinic/Age/Sex/Smoking/Diabetes/Enrolled/Status, +Add Patient |
+| `/biomarkers` | **Biomarkers Registry** | ✅ Live | 6 tracked biomarkers, 4 Disease Association cards, Sample tracking table |
+| `/experiments` | **Experiments Registry** | ✅ Live | Table: Code/Title/PI/Project/Model System/Status/Start Date |
+| `/datasets` | **Datasets Registry** | ✅ Live | 4 categories (Microbiome 16S, RNA-Seq, Proteomics, EV Cargo), dataset table |
+| `/papers` | **Papers Registry** | ✅ Live | Table: Title/Authors/Journal/DOI/Published Date/Keywords |
+| `/trials` | **Trials Registry** | ✅ Live | Table: Code/Title/Phase/Status/Sponsor/Enrollment/Start Date |
 
 ### Admin Routes (Elevated Privilege)
 
@@ -67,16 +80,23 @@ Header Nav:
 ├── About              → #about (anchor on homepage)
 └── [Sign In / Sign Up] → /login, /signup
 
-Dashboard Nav (auth-gated):
-├── ML Lab             → /dashboard/ml
+Research Portal Sidebar (auth + access key):
+├── Dashboard          → /dashboard (metrics, charts, activity)
+├── Clinics            → /clinics (site registry)
+├── Patients           → /patients (cohort registry)
+├── Biomarkers         → /biomarkers (6 markers, samples, associations)
+├── Experiments        → /experiments (study registry)
+├── Datasets           → /datasets (16S, RNA-Seq, Proteomics, EV Cargo)
+├── Papers             → /papers (literature registry)
+├── Trials             → /trials (clinical trial registry)
+├── ML Models          → /dashboard/ml
 │   ├── Risk Prediction Engine
 │   ├── Trial Matching
 │   └── Model Registry
-├── Knowledge Graph    → /dashboard/lab
-│   ├── Entity Explorer
+├── Lab                → /dashboard/lab
+│   ├── Knowledge Graph Explorer
 │   └── Source/Target Filters
-└── Admin (admin-only)
-    └── Access Keys    → /admin/keys
+└── Access Keys        → /admin/keys (admin only)
 
 Footer Nav:
 ├── Explore the Science → /science
