@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantum Distillery — Swarm Monitor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Antonio:wght@400;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+/* ── LCARS Color System ─────────────────────────────── */
+:root {
+  --lcars-orange:  #FF9900;
+  --lcars-gold:    #FFCC66;
+  --lcars-blue:    #9999FF;
+  --lcars-purple:  #CC99CC;
+  --lcars-red:     #CC6666;
+  --lcars-cyan:    #99CCFF;
+  --lcars-green:   #66FF66;
+  --lcars-amber:   #FFCC00;
+  --lcars-bg:      #000000;
+  --lcars-panel:   #0d0d1a;
+  --lcars-panel2:  #1a1a2e;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--lcars-bg);
+  color: var(--lcars-gold);
+  font-family: 'Antonio', 'Helvetica Neue', Arial, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Scrollbars ─────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--lcars-panel); }
+::-webkit-scrollbar-thumb { background: var(--lcars-orange); border-radius: 2px; }
+* { scrollbar-width: thin; scrollbar-color: var(--lcars-orange) var(--lcars-panel); }
+
+/* ── LCARS Panel ────────────────────────────────────── */
+.panel {
+  background: var(--lcars-panel);
+  border: 1px solid rgba(255,153,0,.15);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+.panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--lcars-orange), var(--lcars-gold), transparent);
+}
+
+/* ── LCARS Header ───────────────────────────────────── */
+header { flex-shrink: 0; }
+.header-top {
+  display: flex;
+  align-items: stretch;
+  height: 52px;
+}
+.header-elbow-l {
+  width: 180px;
+  background: var(--lcars-orange);
+  border-radius: 24px 0 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.header-elbow-l span {
+  color: #000;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .2em;
+}
+.header-bar-l { flex: 1; background: var(--lcars-orange); height: 12px; align-self: flex-start; }
+.header-title {
+  background: var(--lcars-panel);
+  border-top: 3px solid var(--lcars-orange);
+  flex-shrink: 0;
+  padding: 6px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.header-title h1 {
+  color: var(--lcars-gold);
+  font-family: 'Orbitron', monospace;
+  font-size: 22px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+.header-title .subtitle {
+  color: var(--lcars-cyan);
+  font-size: 14px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+.header-bar-r { flex: 1; background: var(--lcars-gold); height: 12px; align-self: flex-start; }
+.header-elbow-r {
+  width: 120px;
+  background: var(--lcars-purple);
+  border-radius: 0 24px 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 12px;
+  flex-shrink: 0;
+}
+.header-elbow-r .time-display { color: #000; font-size: 12px; font-weight: 700; letter-spacing: .1em; }
+.header-elbow-r .stardate { color: rgba(0,0,0,.6); font-size: 10px; }
+.header-rail {
+  display: flex;
+  height: 4px;
+}
+.header-rail-fill { width: 12px; background: var(--lcars-orange); flex-shrink: 0; }
+.header-rail-gap  { width: 8px; flex-shrink: 0; }
+.header-rail-line { flex: 1; background: rgba(255,153,0,.2); }
+
+/* ── Body Layout ────────────────────────────────────── */
+.body-wrap { display: flex; flex: 1; min-height: 0; }
+.left-rail {
+  width: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+.left-rail-seg { flex: 1; }
+.left-rail-seg.orange { background: var(--lcars-orange); }
+.left-rail-seg.gold   { background: var(--lcars-gold); height: 64px; flex: none; }
+.left-rail-seg.purple { background: var(--lcars-purple); height: 48px; flex: none; }
+.left-rail-seg.blue   { background: var(--lcars-blue); height: 32px; flex: none; }
+.main-content { flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; min-width: 0; }
+
+/* ── Stats Bar ──────────────────────────────────────── */
+.stats-bar { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+.stat-cell { padding: 10px 12px; text-align: center; }
+.stat-value { font-size: 20px; font-weight: 700; line-height: 1; }
+.stat-label { font-size: 9px; color: rgba(255,204,102,.4); text-transform: uppercase; letter-spacing: .15em; margin-top: 4px; }
+
+/* ── Tab Nav ────────────────────────────────────────── */
+.tab-nav { display: flex; gap: 4px; }
+.tab-btn {
+  padding: 6px 16px;
+  font-size: 11px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: rgba(255,204,102,.4);
+  cursor: pointer;
+  transition: color .2s, border-color .2s;
+  font-family: 'Antonio', sans-serif;
+}
+.tab-btn:hover { color: rgba(255,204,102,.7); }
+.tab-btn.active { color: var(--lcars-orange); border-bottom-color: var(--lcars-orange); background: rgba(255,153,0,.08); border-radius: 4px 4px 0 0; }
+
+/* ── Tab Panes ──────────────────────────────────────── */
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* ── Grid Helpers ───────────────────────────────────── */
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.grid-2 { display: grid; grid-template-columns: 3fr 2fr; gap: 12px; }
+.grid-7-5 { display: grid; grid-template-columns: 7fr 5fr; gap: 12px; }
+.col-span-1 { grid-column: span 1; }
+.col-span-2 { grid-column: span 2; }
+.space-y > * + * { margin-top: 12px; }
+
+/* ── Agent Card ─────────────────────────────────────── */
+.agent-card { padding: 14px; cursor: pointer; transition: box-shadow .2s; }
+.agent-card.selected { box-shadow: 0 0 0 1px var(--lcars-orange); }
+.agent-card:hover { background: #131325; }
+.agent-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.agent-id-wrap { display: flex; align-items: center; gap: 8px; }
+.status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.status-dot.active  { background: var(--lcars-green); animation: pulse 2s ease-in-out infinite; }
+.status-dot.idle    { background: var(--lcars-amber); }
+.status-dot.seeding { background: var(--lcars-cyan); animation: pulse 1s ease-in-out infinite; }
+.status-dot.error   { background: var(--lcars-red); }
+.status-dot.offline { background: #555; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 4px currentColor; } 50% { box-shadow: 0 0 12px currentColor; } }
+.agent-id { color: var(--lcars-orange); font-weight: 700; font-size: 16px; letter-spacing: .1em; }
+.status-badge {
+  padding: 2px 8px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .15em;
+  border-radius: 3px;
+  border: 1px solid;
+}
+.status-badge.active  { color: var(--lcars-green);  border-color: rgba(102,255,102,.3); background: rgba(102,255,102,.08); }
+.status-badge.idle    { color: var(--lcars-amber);  border-color: rgba(255,204,0,.3);  background: rgba(255,204,0,.08); }
+.status-badge.seeding { color: var(--lcars-cyan);   border-color: rgba(153,204,255,.3);background: rgba(153,204,255,.08); }
+.status-badge.error   { color: var(--lcars-red);    border-color: rgba(204,102,102,.3);background: rgba(204,102,102,.08); }
+.status-badge.offline { color: #777;               border-color: rgba(120,120,120,.3);background: rgba(120,120,120,.08); }
+.agent-name { color: var(--lcars-gold); font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.agent-platform { color: rgba(153,204,255,.6); font-size: 11px; margin-bottom: 8px; }
+.agent-mission { color: rgba(255,204,102,.65); font-size: 11px; line-height: 1.4; margin-bottom: 8px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.target-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+.chip {
+  padding: 1px 6px;
+  background: rgba(255,153,0,.1);
+  color: var(--lcars-orange);
+  font-size: 10px;
+  border-radius: 3px;
+  border: 1px solid rgba(255,153,0,.2);
+}
+.agent-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; text-align: center; }
+.agent-stat-val { font-size: 18px; font-weight: 700; color: var(--lcars-cyan); line-height: 1; }
+.agent-stat-lbl { font-size: 9px; color: rgba(255,204,102,.4); text-transform: uppercase; }
+.progress-wrap { margin-bottom: 8px; }
+.progress-label { display: flex; justify-content: space-between; font-size: 10px; color: rgba(255,204,102,.4); margin-bottom: 3px; }
+.progress-bar { height: 4px; background: rgba(255,255,255,.08); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--lcars-orange), var(--lcars-green)); transition: width .6s ease; }
+.evidence-bar  { height: 4px; background: rgba(255,255,255,.08); border-radius: 2px; overflow: hidden; }
+.agent-actions { display: flex; gap: 6px; }
+.btn {
+  flex: 1;
+  padding: 5px 0;
+  font-size: 10px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  border-radius: 4px;
+  border: 1px solid;
+  cursor: pointer;
+  background: none;
+  font-family: 'Antonio', sans-serif;
+  transition: background .2s, opacity .2s;
+}
+.btn:disabled { opacity: .35; cursor: default; }
+.btn-activate  { color: var(--lcars-green);  border-color: rgba(102,255,102,.3); }
+.btn-activate:hover:not(:disabled)  { background: rgba(102,255,102,.12); }
+.btn-deactivate{ color: var(--lcars-amber);  border-color: rgba(255,204,0,.3); }
+.btn-deactivate:hover:not(:disabled){ background: rgba(255,204,0,.1); }
+.btn-seed      { color: var(--lcars-cyan);   border-color: rgba(153,204,255,.3); }
+.btn-seed:hover:not(:disabled)      { background: rgba(153,204,255,.1); }
+
+/* ── QPI Chart ──────────────────────────────────────── */
+.qpi-chart { padding: 14px; }
+.section-title { font-size: 11px; font-weight: 700; letter-spacing: .2em; color: var(--lcars-orange); text-transform: uppercase; margin-bottom: 12px; }
+.qpi-value-big { font-size: 36px; font-weight: 700; font-family: 'Orbitron', monospace; }
+.qpi-label { font-size: 11px; color: rgba(255,204,102,.4); text-transform: uppercase; letter-spacing: .1em; }
+.qpi-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px; }
+.qpi-delta { font-size: 13px; }
+.chart-area { background: rgba(0,0,0,.4); border: 1px solid rgba(255,153,0,.1); border-radius: 4px; padding: 8px; margin-bottom: 12px; }
+.chart-area svg { width: 100%; display: block; }
+.chart-time-labels { display: flex; justify-content: space-between; font-size: 9px; color: rgba(255,204,102,.3); margin-top: 4px; }
+.sparklines { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sparkline-item { display: flex; align-items: center; gap: 8px; }
+.sparkline-label { width: 56px; }
+.sparkline-lbl-name { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; }
+.sparkline-lbl-val  { font-size: 13px; font-weight: 700; }
+.qpi-formula { background: rgba(0,0,0,.4); border: 1px solid rgba(255,153,0,.1); border-radius: 4px; padding: 8px; text-align: center; margin-top: 10px; }
+.qpi-formula p { font-size: 10px; color: rgba(255,204,102,.4); margin-bottom: 4px; }
+.qpi-formula .weights span { font-size: 10px; margin: 0 4px; }
+
+/* ── Artifact Feed ──────────────────────────────────── */
+.artifact-feed-panel { padding: 14px; display: flex; flex-direction: column; height: 100%; }
+.artifact-list { overflow-y: auto; flex: 1; max-height: 440px; }
+.artifact-item { padding: 8px; border-radius: 4px; border: 1px solid rgba(255,153,0,.08); background: rgba(0,0,0,.2); margin-bottom: 6px; transition: border-color .2s; }
+.artifact-item:hover { border-color: rgba(255,153,0,.2); }
+.artifact-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.artifact-type-badge {
+  font-size: 9px; text-transform: uppercase; letter-spacing: .15em;
+  padding: 1px 6px; border-radius: 2px; border: 1px solid;
+}
+.artifact-type-badge.literature-summary   { color: #9999FF; border-color: rgba(153,153,255,.3); background: rgba(153,153,255,.08); }
+.artifact-type-badge.candidate-analysis   { color: var(--lcars-green); border-color: rgba(102,255,102,.3); background: rgba(102,255,102,.08); }
+.artifact-type-badge.grant-language       { color: var(--lcars-gold); border-color: rgba(255,204,102,.3); background: rgba(255,204,102,.08); }
+.artifact-type-badge.architecture-insight { color: var(--lcars-cyan); border-color: rgba(153,204,255,.3); background: rgba(153,204,255,.08); }
+.artifact-type-badge.simulation-result    { color: var(--lcars-purple); border-color: rgba(204,153,204,.3); background: rgba(204,153,204,.08); }
+.artifact-score { font-size: 11px; }
+.artifact-title { font-size: 11px; color: rgba(255,204,102,.8); line-height: 1.4; margin-bottom: 4px; }
+.artifact-agent { font-size: 10px; color: rgba(153,204,255,.5); margin-bottom: 4px; }
+.artifact-status-badge {
+  font-size: 9px; text-transform: uppercase; letter-spacing: .1em;
+  padding: 1px 5px; border-radius: 2px; border: 1px solid;
+}
+.artifact-status-badge.ingested   { color: var(--lcars-green);  border-color: rgba(102,255,102,.3); }
+.artifact-status-badge.validating { color: var(--lcars-cyan);   border-color: rgba(153,204,255,.3); }
+.artifact-status-badge.review     { color: var(--lcars-amber);  border-color: rgba(255,204,0,.3); }
+.artifact-status-badge.flagged    { color: var(--lcars-red);    border-color: rgba(204,102,102,.3); }
+.artifact-sigs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px; }
+.artifact-sig { font-size: 9px; color: rgba(255,204,102,.4); line-height: 1.3; }
+.artifact-sig span { display: block; }
+.artifact-sig .sig-label { color: rgba(255,204,102,.3); }
+
+/* ── Biomarker Tracker ──────────────────────────────── */
+.bm-item { padding: 10px 12px; border-radius: 4px; border: 1px solid rgba(255,153,0,.08); background: rgba(0,0,0,.25); margin-bottom: 6px; }
+.bm-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.bm-symbol { color: var(--lcars-orange); font-weight: 700; font-size: 14px; }
+.bm-name   { color: rgba(255,204,102,.6); font-size: 11px; margin-left: 8px; }
+.bm-status-badge {
+  font-size: 9px; text-transform: uppercase; padding: 1px 6px; border-radius: 2px; border: 1px solid;
+}
+.bm-status-badge.validated  { color: var(--lcars-green);  border-color: rgba(102,255,102,.3); background: rgba(102,255,102,.08); }
+.bm-status-badge.in-progress{ color: var(--lcars-amber);  border-color: rgba(255,204,0,.3);  background: rgba(255,204,0,.08); }
+.bm-status-badge.pending    { color: #888;               border-color: rgba(128,128,128,.3);background: rgba(128,128,128,.08); }
+.bm-arch-row { display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 6px; }
+.bm-arch { color: rgba(153,204,255,.7); }
+.bm-weight { color: rgba(255,204,102,.5); }
+.bm-weight strong { color: var(--lcars-gold); }
+.evidence-track { margin-bottom: 6px; }
+.evidence-track-labels { display: flex; justify-content: space-between; font-size: 9px; color: rgba(255,204,102,.35); margin-bottom: 3px; }
+.evidence-bar { height: 5px; background: rgba(255,255,255,.06); border-radius: 3px; overflow: hidden; }
+.evidence-fill { height: 100%; border-radius: 3px; transition: width .8s ease; }
+.bm-sigs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 10px; }
+.bm-sig-label { color: rgba(255,204,102,.35); }
+.sig-amplified { color: var(--lcars-red); }
+.sig-elevated  { color: var(--lcars-orange); }
+.sig-variable  { color: var(--lcars-amber); }
+.sig-decohered { color: var(--lcars-blue); }
+.sig-declined  { color: var(--lcars-cyan); }
+.sig-impaired  { color: var(--lcars-purple); }
+
+/* ── Query Tracker ──────────────────────────────────── */
+.query-panel { padding: 14px; }
+.query-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.query-meta { display: flex; gap: 12px; font-size: 11px; }
+.query-item { display: flex; align-items: flex-start; gap: 10px; padding: 7px 8px; border-radius: 4px; border: 1px solid; margin-bottom: 6px; }
+.query-item.completed  { border-color: rgba(102,255,102,.1); background: rgba(102,255,102,.04); }
+.query-item.in-progress{ border-color: rgba(255,204,0,.2);  background: rgba(255,204,0,.04); }
+.query-item.pending    { border-color: rgba(80,80,80,.3);   background: rgba(0,0,0,.2); }
+.query-icon { font-family: monospace; font-size: 11px; margin-top: 1px; flex-shrink: 0; width: 20px; }
+.query-icon.completed  { color: var(--lcars-green); }
+.query-icon.in-progress{ color: var(--lcars-amber); animation: blink 1.2s ease-in-out infinite; }
+.query-icon.pending    { color: #444; }
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+.query-text { flex: 1; font-size: 11px; line-height: 1.4; }
+.query-text.completed   { color: rgba(255,204,102,.65); }
+.query-text.in-progress { color: var(--lcars-gold); }
+.query-text.pending     { color: rgba(255,204,102,.3); }
+.query-num { color: rgba(255,153,0,.4); margin-right: 4px; font-size: 10px; }
+.query-papers { font-size: 9px; color: rgba(153,204,255,.5); white-space: nowrap; margin-top: 2px; flex-shrink: 0; }
+
+/* ── Webhook Panel ──────────────────────────────────── */
+.webhook-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.webhook-panel { padding: 14px; }
+.webhook-field { margin-bottom: 10px; }
+.webhook-field label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: .15em; color: rgba(255,204,102,.5); margin-bottom: 4px; }
+.webhook-input {
+  width: 100%;
+  background: rgba(0,0,0,.4);
+  border: 1px solid rgba(255,153,0,.2);
+  border-radius: 4px;
+  padding: 7px 10px;
+  color: var(--lcars-gold);
+  font-family: monospace;
+  font-size: 12px;
+  outline: none;
+  transition: border-color .2s;
+}
+.webhook-input:focus { border-color: var(--lcars-orange); }
+.webhook-status-row { display: flex; align-items: center; gap: 8px; padding: 8px; background: rgba(0,0,0,.3); border-radius: 4px; border: 1px solid rgba(255,153,0,.1); margin-bottom: 10px; }
+.webhook-status-dot { width: 8px; height: 8px; border-radius: 50%; background: #444; }
+.webhook-status-dot.connected    { background: var(--lcars-green); animation: pulse 2s ease-in-out infinite; }
+.webhook-status-dot.connecting   { background: var(--lcars-amber); animation: pulse .8s ease-in-out infinite; }
+.webhook-status-dot.disconnected { background: var(--lcars-red); }
+.webhook-status-text { font-size: 11px; color: rgba(255,204,102,.7); flex: 1; }
+.webhook-status-time { font-size: 10px; color: rgba(255,204,102,.35); }
+.code-block {
+  background: rgba(0,0,0,.5);
+  border: 1px solid rgba(255,153,0,.1);
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-family: monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  overflow-x: auto;
+  white-space: pre;
+}
+.c-comment { color: rgba(255,204,102,.35); }
+.c-green    { color: var(--lcars-green); }
+.c-cyan     { color: var(--lcars-cyan); }
+.c-orange   { color: var(--lcars-orange); }
+.webhook-log { margin-top: 10px; }
+.webhook-log-entry { font-family: monospace; font-size: 10px; padding: 3px 0; border-bottom: 1px solid rgba(255,153,0,.05); }
+.webhook-log-entry.incoming { color: var(--lcars-green); }
+.webhook-log-entry.error    { color: var(--lcars-red); }
+.webhook-log-entry.info     { color: rgba(153,204,255,.6); }
+
+/* ── Activity Log ───────────────────────────────────── */
+.activity-log { padding: 10px 14px; }
+.log-scroll { font-family: monospace; font-size: 11px; max-height: 100px; overflow-y: auto; }
+.log-entry { padding: 1px 0; }
+.log-entry.latest { color: var(--lcars-green); }
+.log-entry.old    { color: rgba(255,204,102,.35); }
+
+/* ── Footer ─────────────────────────────────────────── */
+footer { display: flex; align-items: stretch; height: 20px; margin-top: 8px; flex-shrink: 0; }
+.footer-rail-l { width: 12px; background: var(--lcars-orange); }
+.footer-bar-l  { flex: 1; background: var(--lcars-orange); align-self: flex-end; height: 8px; }
+.footer-info   { background: var(--lcars-panel); padding: 0 20px; display: flex; align-items: center; gap: 20px; }
+.footer-info span { font-size: 9px; letter-spacing: .15em; text-transform: uppercase; }
+.footer-bar-r  { flex: 1; background: var(--lcars-gold); align-self: flex-end; height: 8px; }
+.footer-cap    { width: 80px; background: var(--lcars-purple); border-radius: 0 0 16px 0; }
+
+/* ── Scanline animation ─────────────────────────────── */
+.scanline { position: relative; overflow: hidden; }
+.scanline::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: rgba(153,204,255,.06);
+  animation: scanline 5s linear infinite;
+  pointer-events: none;
+}
+@keyframes scanline { 0% { top: -2px; } 100% { top: 100%; } }
+
+/* ── Misc ───────────────────────────────────────────── */
+.text-orange { color: var(--lcars-orange); }
+.text-gold   { color: var(--lcars-gold); }
+.text-cyan   { color: var(--lcars-cyan); }
+.text-green  { color: var(--lcars-green); }
+.text-red    { color: var(--lcars-red); }
+.text-amber  { color: var(--lcars-amber); }
+.text-purple { color: var(--lcars-purple); }
+.text-muted  { color: rgba(255,204,102,.4); }
+.text-xs     { font-size: 11px; }
+.flex-between{ display: flex; align-items: center; justify-content: space-between; }
+.divider { height: 1px; background: rgba(255,153,0,.08); margin: 8px 0; }
+
+/* ── Ingestion Pipeline ─────────────────────────────── */
+.pipeline-panel { padding: 14px; }
+.pipeline-steps { display: flex; align-items: center; gap: 6px; }
+.pipeline-step {
+  flex: 1;
+  text-align: center;
+  padding: 8px 4px;
+  border-radius: 4px;
+  border: 1px solid;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  position: relative;
+}
+.pipeline-step.done    { color: var(--lcars-green); border-color: rgba(102,255,102,.3); background: rgba(102,255,102,.06); }
+.pipeline-step.active  { color: var(--lcars-amber); border-color: rgba(255,204,0,.4);  background: rgba(255,204,0,.08); animation: step-pulse 1.5s ease-in-out infinite; }
+.pipeline-step.pending { color: rgba(255,204,102,.25); border-color: rgba(255,204,102,.08); }
+@keyframes step-pulse { 0%,100% { box-shadow: none; } 50% { box-shadow: 0 0 8px rgba(255,204,0,.3); } }
+.pipeline-arrow { color: rgba(255,153,0,.3); font-size: 14px; flex-shrink: 0; }
+.pipeline-step-count { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+
+/* ── Swarm Topology (simplified node map) ─────────────── */
+.topology-panel { padding: 14px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════ HEADER -->
+<header>
+  <div class="header-top">
+    <div class="header-elbow-l"><span>LCARS 47</span></div>
+    <div class="header-bar-l"></div>
+    <div class="header-title">
+      <h1>Quantum Distillery</h1>
+      <span class="subtitle">Swarm Monitor</span>
+    </div>
+    <div class="header-bar-r"></div>
+    <div class="header-elbow-r">
+      <span class="time-display" id="clock">--:--:--</span>
+      <span class="stardate" id="stardate">SD ---.--</span>
+    </div>
+  </div>
+  <div class="header-rail">
+    <div class="header-rail-fill"></div>
+    <div class="header-rail-gap"></div>
+    <div class="header-rail-line"></div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════ BODY -->
+<div class="body-wrap">
+  <div class="left-rail">
+    <div class="left-rail-seg orange" style="border-radius:0 0 0 16px;"></div>
+    <div class="left-rail-seg gold"></div>
+    <div class="left-rail-seg purple"></div>
+    <div class="left-rail-seg blue"></div>
+    <div class="left-rail-seg orange" style="border-radius:0 0 0 16px;"></div>
+  </div>
+
+  <div class="main-content">
+
+    <!-- Stats Bar -->
+    <div class="stats-bar" id="stats-bar">
+      <!-- rendered by JS -->
+    </div>
+
+    <!-- Tab Nav -->
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="overview">Overview</button>
+      <button class="tab-btn" data-tab="biomarkers">Biomarkers</button>
+      <button class="tab-btn" data-tab="queries">Queries</button>
+      <button class="tab-btn" data-tab="webhook">Webhook</button>
+    </div>
+
+    <!-- ── OVERVIEW TAB ── -->
+    <div class="tab-pane active" id="tab-overview">
+      <div class="grid-3">
+        <!-- Agent Roster -->
+        <div class="space-y">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.2em;color:var(--lcars-orange);text-transform:uppercase;">Agent Roster</div>
+          <div id="agent-cards"><!-- rendered by JS --></div>
+        </div>
+
+        <!-- QPI Chart + Pipeline -->
+        <div class="space-y">
+          <div class="panel qpi-chart scanline" id="qpi-panel"><!-- rendered by JS --></div>
+          <div class="panel pipeline-panel" id="pipeline-panel"><!-- rendered by JS --></div>
+        </div>
+
+        <!-- Artifact Feed -->
+        <div class="panel artifact-feed-panel">
+          <div class="section-title">Artifact Feed</div>
+          <div class="artifact-list" id="artifact-list"><!-- rendered by JS --></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── BIOMARKERS TAB ── -->
+    <div class="tab-pane" id="tab-biomarkers">
+      <div class="grid-7-5">
+        <div class="panel" style="padding:14px;">
+          <div class="section-title">Biomarker Candidates</div>
+          <div id="biomarker-list"><!-- rendered by JS --></div>
+        </div>
+        <div class="space-y">
+          <div class="panel qpi-chart scanline" id="qpi-panel-2"><!-- rendered by JS --></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── QUERIES TAB ── -->
+    <div class="tab-pane" id="tab-queries">
+      <div class="grid-7-5">
+        <div class="panel query-panel">
+          <div class="query-header-row">
+            <div class="section-title" style="margin-bottom:0;">Priority Queries</div>
+            <div class="query-meta">
+              <span class="text-green" id="q-complete-count"></span>
+              <span class="text-cyan" id="q-papers-count"></span>
+            </div>
+          </div>
+          <div class="progress-bar" style="margin-bottom:14px;">
+            <div class="progress-fill" id="query-progress-fill"></div>
+          </div>
+          <div id="query-list"><!-- rendered by JS --></div>
+        </div>
+        <div class="panel artifact-feed-panel">
+          <div class="section-title">Artifact Feed</div>
+          <div class="artifact-list" id="artifact-list-2"><!-- rendered by JS --></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── WEBHOOK TAB ── -->
+    <div class="tab-pane" id="tab-webhook">
+      <div class="webhook-grid">
+        <!-- Config Panel -->
+        <div class="panel webhook-panel">
+          <div class="section-title">Webhook Configuration</div>
+          <div class="webhook-status-row">
+            <div class="webhook-status-dot" id="webhook-dot"></div>
+            <span class="webhook-status-text" id="webhook-status-text">No webhook connected — demo data active</span>
+            <span class="webhook-status-time" id="webhook-last-received"></span>
+          </div>
+
+          <div class="webhook-field">
+            <label>Webhook Endpoint URL (your server → this dashboard)</label>
+            <input class="webhook-input" id="webhook-url" type="text" placeholder="https://your-server.com/api/push" value="">
+          </div>
+          <div class="webhook-field">
+            <label>Bearer Token (optional)</label>
+            <input class="webhook-input" id="webhook-token" type="password" placeholder="secret-token-here">
+          </div>
+          <div class="webhook-field">
+            <label>Polling Interval (seconds)</label>
+            <input class="webhook-input" id="webhook-interval" type="number" value="10" min="5" max="300" style="width:100px;">
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:14px;">
+            <button class="btn btn-activate" id="btn-connect" style="flex:none;padding:6px 16px;">Connect</button>
+            <button class="btn btn-deactivate" id="btn-disconnect" style="flex:none;padding:6px 16px;" disabled>Disconnect</button>
+            <button class="btn btn-seed" id="btn-test-payload" style="flex:none;padding:6px 16px;">Inject Demo</button>
+          </div>
+
+          <div class="section-title" style="margin-bottom:8px;">Supported Payload Formats</div>
+          <div class="code-block"><span class="c-comment"># JSON mode</span>
+<span class="c-green">POST /api/webhooks/ingest</span>
+<span class="c-cyan">Content-Type: application/json</span>
+<span class="c-orange">{
+  "agentId": "SC-001",
+  "artifacts": [{
+    "title": "...",
+    "type": "literature-summary",
+    "relevanceScore": 5,
+    "status": "ingested"
+  }]
+}</span>
+
+<span class="c-comment"># Raw YAML mode</span>
+<span class="c-green">POST /api/webhooks/ingest</span>
+<span class="c-cyan">Content-Type: application/json</span>
+<span class="c-orange">{
+  "text": "---\ntitle: ...\ntype: ...",
+  "agentId": "SC-001"
+}</span></div>
+
+          <div class="divider"></div>
+          <div style="font-size:10px;color:rgba(255,204,102,.4);line-height:1.6;">
+            Set <span style="color:var(--lcars-amber);">SWARM_WEBHOOK_SECRET</span> env variable for Bearer token auth.<br>
+            Dashboard polls the configured URL and merges incoming artifacts into the live feed.<br>
+            When no webhook is connected, simulated demo data updates every 8 seconds.
+          </div>
+        </div>
+
+        <!-- Live Log Panel -->
+        <div class="panel webhook-panel">
+          <div class="section-title">Live Webhook Log</div>
+          <div id="webhook-log" style="max-height:300px;overflow-y:auto;margin-bottom:12px;">
+            <!-- rendered by JS -->
+          </div>
+
+          <div class="section-title" style="margin-top:12px;">Incoming Artifact Preview</div>
+          <div id="webhook-preview" style="background:rgba(0,0,0,.4);border:1px solid rgba(255,153,0,.1);border-radius:4px;padding:10px;font-family:monospace;font-size:11px;color:rgba(255,204,102,.6);min-height:120px;white-space:pre-wrap;word-break:break-all;">
+Awaiting webhook payload...
+          </div>
+
+          <div class="divider"></div>
+          <div class="section-title" style="margin-bottom:8px;">Swarm Topology</div>
+          <div id="topology-svg" style="background:rgba(0,0,0,.3);border:1px solid rgba(255,153,0,.1);border-radius:4px;padding:8px;">
+            <!-- rendered by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activity Log -->
+    <div class="panel activity-log">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.2em;color:var(--lcars-orange);text-transform:uppercase;margin-bottom:6px;">System Log</div>
+      <div class="log-scroll" id="activity-log"><!-- rendered by JS --></div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /body-wrap -->
+
+<!-- Footer -->
+<footer>
+  <div class="footer-rail-l"></div>
+  <div class="footer-bar-l"></div>
+  <div class="footer-info">
+    <span style="color:rgba(255,204,102,.4);">Quantum Distillery v1.1</span>
+    <span style="color:rgba(153,204,255,.4);">ARPA-H Delphi Submission</span>
+    <span style="color:rgba(102,255,102,.4);">Webhook: /api/webhooks/ingest</span>
+    <span style="color:rgba(204,153,204,.4);" id="footer-agent-status">Active Agents: --</span>
+  </div>
+  <div class="footer-bar-r"></div>
+  <div class="footer-cap"></div>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════ SCRIPT -->
+<script>
+// ────────────────────────────────── DATA ──────────────────────────────────
+const AGENTS = [
+  {
+    id: "SC-001", name: "ScienceClaw x Infinite", platform: "MIT Buehler Lab",
+    status: "active",
+    mission: "Mine quantum biology + oncology + geroscience for opposing cancer/aging signatures across 4 architectures",
+    targets: ["NADH", "FAD", "ATP", "GSH"],
+    constraints: "Peer-reviewed, 2015-2026, evidence score >= 0.6",
+    artifactsProduced: 23, lastActivity: new Date().toISOString(),
+    uptimeHours: 127.4, queriesCompleted: 5, totalQueries: 7, evidenceScore: 0.78,
+  },
+  {
+    id: "SC-002", name: "DeepMine Quantum", platform: "Quantum Distillery",
+    status: "idle",
+    mission: "Cross-validate QPI model predictions against published cohort datasets",
+    targets: ["Complex I", "CoQ10", "CytC"],
+    constraints: "Human studies only, 2018-2026",
+    artifactsProduced: 0, lastActivity: "—",
+    uptimeHours: 0, queriesCompleted: 0, totalQueries: 5, evidenceScore: 0,
+  },
+  {
+    id: "SC-003", name: "GrantForge AI", platform: "Quantum Distillery",
+    status: "offline",
+    mission: "Generate and refine ARPA-H Delphi submission language from vault artifacts",
+    targets: ["ARPA-H Delphi", "Grant Language"],
+    constraints: "Must reference vault citations only",
+    artifactsProduced: 0, lastActivity: "—",
+    uptimeHours: 0, queriesCompleted: 0, totalQueries: 3, evidenceScore: 0,
+  },
+];
+
+const ARTIFACTS = [
+  {
+    id: "SA-SC001-20260325-001", agentId: "SC-001", type: "architecture-insight",
+    targetFolder: "05-Architecture", title: "FMO coherence in NADH fluorescence: quantum signatures in cancer metabolism",
+    relevanceScore: 5, architectureAlignment: ["FMO coherence", "ETC quantum transfer"],
+    status: "ingested", timestamp: "2026-03-25T14:22:00Z",
+    cancerSignature: "FMO-like coherence detected in cancer NADH signals",
+    agingSignature: "Coherence time reduces 40% in aged mitochondria",
+  },
+  {
+    id: "SA-SC001-20260325-002", agentId: "SC-001", type: "literature-summary",
+    targetFolder: "06-Literature", title: "GSH/GSSG redox ratio as universal cancer biomarker: meta-analysis of 847 samples",
+    relevanceScore: 5, architectureAlignment: ["Enzyme tunneling", "ETC quantum transfer"],
+    status: "ingested", timestamp: "2026-03-25T10:05:00Z",
+    cancerSignature: "GSH amplified in 89% of solid tumors (p<0.001)",
+    agingSignature: "GSH declines 2.3% per year after age 40",
+  },
+  {
+    id: "SA-SC001-20260324-001", agentId: "SC-001", type: "candidate-analysis",
+    targetFolder: "02-Candidates", title: "Complex I dysfunction as unified aging-cancer nexus: electron tunneling impairment",
+    relevanceScore: 4, architectureAlignment: ["ETC quantum transfer", "Enzyme tunneling"],
+    status: "ingested", timestamp: "2026-03-24T09:30:00Z",
+    cancerSignature: "Complex I hyperactivity in glioblastoma",
+    agingSignature: "Progressive Complex I decline >60y with impaired electron tunneling",
+  },
+  {
+    id: "SA-SC001-20260324-002", agentId: "SC-001", type: "literature-summary",
+    targetFolder: "06-Literature", title: "Probius QES validation: NADH fluorescence lifetime in human plasma",
+    relevanceScore: 5, architectureAlignment: ["FMO coherence", "ETC quantum transfer"],
+    status: "ingested", timestamp: "2026-03-24T11:15:00Z",
+    cancerSignature: "Discriminates cancer plasma from healthy with AUC 0.82",
+    agingSignature: "Age-dependent signal decay correlates with NAD+ decline",
+  },
+  {
+    id: "SA-SC001-20260323-001", agentId: "SC-001", type: "candidate-analysis",
+    targetFolder: "02-Candidates", title: "ATP energy charge as metabolic health indicator across cancer types",
+    relevanceScore: 3, architectureAlignment: ["ETC quantum transfer", "Enzyme tunneling"],
+    status: "review", timestamp: "2026-03-23T10:00:00Z",
+    cancerSignature: "Warburg effect elevates glycolytic ATP production",
+    agingSignature: "Mitochondrial ATP output declines with age",
+  },
+  {
+    id: "SA-SC001-20260323-002", agentId: "SC-001", type: "grant-language",
+    targetFolder: "03-Grants", title: "ARPA-H Delphi innovation narrative: quantum biology angle",
+    relevanceScore: 4, architectureAlignment: ["FMO coherence", "Enzyme tunneling", "ETC quantum transfer", "Cryptochrome spin coherence"],
+    status: "ingested", timestamp: "2026-03-23T14:30:00Z",
+    cancerSignature: "—", agingSignature: "—",
+  },
+];
+
+const BIOMARKERS = [
+  { name: "GSH Redox Defense", symbol: "GSH", architectureLink: "ALL (Keystone)",
+    qpiWeight: 0.25, weightRank: 1, cancerSignal: "amplified", agingSignal: "decohered",
+    evidenceLevel: 0.90, papersFound: 11, transform: "log-ratio", status: "validated" },
+  { name: "NADH Redox State", symbol: "NADH", architectureLink: "ETC + Tunneling",
+    qpiWeight: 0.30, weightRank: 2, cancerSignal: "amplified", agingSignal: "declined",
+    evidenceLevel: 0.85, papersFound: 8, transform: "log-ratio", status: "validated" },
+  { name: "FAD Flavoprotein State", symbol: "FAD", architectureLink: "Cryptochrome + ETC",
+    qpiWeight: 0.15, weightRank: 3, cancerSignal: "elevated", agingSignal: "declined",
+    evidenceLevel: 0.72, papersFound: 5, transform: "z-score", status: "in-progress" },
+  { name: "ATP Energy Charge", symbol: "ATP", architectureLink: "ETC + Tunneling",
+    qpiWeight: 0.10, weightRank: 4, cancerSignal: "variable", agingSignal: "declined",
+    evidenceLevel: 0.60, papersFound: 4, transform: "log-ratio", status: "in-progress" },
+  { name: "Complex I (NADH Dehydrogenase)", symbol: "CI", architectureLink: "ETC quantum transfer",
+    qpiWeight: 0.10, weightRank: 5, cancerSignal: "amplified", agingSignal: "impaired",
+    evidenceLevel: 0.68, papersFound: 6, transform: "z-score", status: "in-progress" },
+  { name: "SIRT3 Mitochondrial Sirtuin", symbol: "SIRT3", architectureLink: "ETC + Tunneling",
+    qpiWeight: 0.01, weightRank: 6, cancerSignal: "variable", agingSignal: "declined",
+    evidenceLevel: 0.48, papersFound: 3, transform: "z-score", status: "pending" },
+  { name: "Coenzyme Q10", symbol: "CoQ10", architectureLink: "ETC quantum transfer",
+    qpiWeight: 0.05, weightRank: 7, cancerSignal: "elevated", agingSignal: "declined",
+    evidenceLevel: 0.55, papersFound: 3, transform: "z-score", status: "pending" },
+  { name: "Cytochrome C", symbol: "CytC", architectureLink: "ETC quantum transfer",
+    qpiWeight: 0.03, weightRank: 8, cancerSignal: "elevated", agingSignal: "declined",
+    evidenceLevel: 0.50, papersFound: 2, transform: "z-score", status: "pending" },
+  { name: "NRF2 Antioxidant Master", symbol: "NRF2", architectureLink: "Enzyme tunneling",
+    qpiWeight: 0.01, weightRank: 9, cancerSignal: "amplified", agingSignal: "declined",
+    evidenceLevel: 0.45, papersFound: 2, transform: "z-score", status: "pending" },
+];
+
+const PRIORITY_QUERIES = [
+  { id: 1, query: "NADH/FAD ratio changes in cancer vs healthy tissue (2020-2026)", status: "completed", papers: 8 },
+  { id: 2, query: "GSH/GSSG redox state as cancer biomarker in blood/plasma", status: "completed", papers: 11 },
+  { id: 3, query: "Complex I dysfunction in aging (human studies preferred)", status: "completed", papers: 6 },
+  { id: 4, query: "Cryptochrome CRY1/CRY2 expression in cancer tissue vs normal", status: "completed", papers: 4 },
+  { id: 5, query: "Probius QES or similar quantum emission spectroscopy validation", status: "completed", papers: 2 },
+  { id: 6, query: "Competing quantum biology diagnostic platforms", status: "in-progress", papers: 1 },
+  { id: 7, query: "ARPA-H Delphi program requirements and funded examples", status: "pending", papers: 0 },
+];
+
+// ────────────────────────────────── STATE ─────────────────────────────────
+let agents = JSON.parse(JSON.stringify(AGENTS));
+let artifacts = JSON.parse(JSON.stringify(ARTIFACTS));
+let log = [
+  `[${ts()}] SWARM MONITOR INITIALIZED`,
+  `[${ts()}] SC-001 ScienceClaw x Infinite — STATUS: ACTIVE`,
+  `[${ts()}] Monitoring 7 priority queries...`,
+  `[${ts()}] Webhook endpoint ready: /api/webhooks/ingest`,
+];
+let selectedAgentId = AGENTS[0].id;
+let qpiReadings = generateQPITimeSeries(48);
+let webhookConnected = false;
+let webhookLastTs = null;
+let webhookLogEntries = [
+  { cls: "info", msg: `[${ts()}] Demo mode active — simulated data streaming` },
+  { cls: "info", msg: `[${ts()}] No live webhook configured` },
+];
+
+// ────────────────────────────────── HELPERS ───────────────────────────────
+function ts() {
+  return new Date().toISOString().slice(11, 19);
+}
+function noise() { return (Math.random() - 0.5) * 0.08; }
+function generateQPITimeSeries(hours) {
+  const readings = [];
+  const now = Date.now();
+  for (let i = hours; i >= 0; i--) {
+    const t = new Date(now - i * 3600000).toISOString();
+    readings.push({
+      timestamp: t,
+      qpi: +(0.72 + noise()).toFixed(3),
+      fmo: +(0.30 + noise()).toFixed(3),
+      tunnel: +(0.25 + noise()).toFixed(3),
+      etc: +(0.30 + noise()).toFixed(3),
+      spin: +(0.15 + noise()).toFixed(3),
+    });
+  }
+  return readings;
+}
+function svgSparkline(data, color, w, h) {
+  const min = Math.min(...data), max = Math.max(...data);
+  const range = max - min || 0.01;
+  const pts = data.map((v, i) =>
+    `${(i/(data.length-1)*w).toFixed(1)},${(h - (v-min)/range*h).toFixed(1)}`
+  ).join(' ');
+  return `<svg width="${w}" height="${h}" style="overflow:visible;display:block;">
+    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function fmtDate(iso) {
+  if (!iso || iso === '—') return '—';
+  try { return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+  catch(e) { return iso; }
+}
+
+// ────────────────────────────────── CLOCK ─────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toLocaleTimeString('en-US', {hour12: false});
+  const start = new Date(now.getFullYear(), 0, 1);
+  const day = (now - start) / 86400000 + 1;
+  document.getElementById('stardate').textContent =
+    `SD ${now.getFullYear()-1900}.${day.toFixed(1)}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ────────────────────────────────── STATS BAR ─────────────────────────────
+function renderStats() {
+  const active = agents.filter(a => a.status === 'active').length;
+  const total = agents.length;
+  const totalArtifacts = agents.reduce((s,a) => s+a.artifactsProduced, 0);
+  const scores = agents.filter(a => a.evidenceScore > 0);
+  const avgEvidence = scores.length ? scores.reduce((s,a) => s+a.evidenceScore, 0) / scores.length : 0;
+  const totalUptime = agents.reduce((s,a) => s+a.uptimeHours, 0);
+
+  const stats = [
+    { label: 'Active Agents', value: `${active}/${total}`,
+      color: active > 0 ? 'var(--lcars-green)' : 'var(--lcars-red)' },
+    { label: 'Artifacts', value: totalArtifacts,
+      color: 'var(--lcars-cyan)' },
+    { label: 'Avg Evidence', value: `${(avgEvidence*100).toFixed(0)}%`,
+      color: avgEvidence > 0.7 ? 'var(--lcars-green)' : 'var(--lcars-amber)' },
+    { label: 'Total Uptime', value: `${totalUptime.toFixed(0)}h`,
+      color: 'var(--lcars-gold)' },
+    { label: 'Delphi Due', value: '12 Days',
+      color: 'var(--lcars-red)' },
+    { label: 'Swarm Status', value: active > 0 ? 'NOMINAL' : 'STANDBY',
+      color: active > 0 ? 'var(--lcars-green)' : 'var(--lcars-amber)' },
+  ];
+  document.getElementById('stats-bar').innerHTML = stats.map(s =>
+    `<div class="panel stat-cell">
+      <div class="stat-value" style="color:${s.color}">${esc(s.value)}</div>
+      <div class="stat-label">${esc(s.label)}</div>
+    </div>`
+  ).join('');
+  document.getElementById('footer-agent-status').textContent = `Active Agents: ${active}/${total}`;
+}
+
+// ────────────────────────────────── AGENT CARDS ───────────────────────────
+function agentAction(action, id) {
+  const a = agents.find(ag => ag.id === id);
+  if (!a) return;
+  if (action === 'activate') {
+    a.status = 'seeding';
+    addLog(`ACTIVATING agent ${id}...`);
+    renderAgentCards();
+    setTimeout(() => {
+      const ag = agents.find(x => x.id === id);
+      if (ag) { ag.status = 'active'; ag.lastActivity = new Date().toISOString(); }
+      addLog(`Agent ${id} is now ACTIVE`);
+      renderAll();
+    }, 2000);
+  } else if (action === 'deactivate') {
+    a.status = 'idle';
+    addLog(`Agent ${id} PAUSED`);
+    renderAll();
+  } else if (action === 'seed') {
+    a.status = 'seeding';
+    addLog(`SEEDING agent ${id} with master prompt...`);
+    renderAgentCards();
+    setTimeout(() => {
+      const ag = agents.find(x => x.id === id);
+      if (ag) ag.status = 'idle';
+      addLog(`Agent ${id} SEEDED — ready to activate`);
+      renderAll();
+    }, 3000);
+  } else if (action === 'select') {
+    selectedAgentId = id;
+    renderAgentCards();
+  }
+}
+
+function renderAgentCards() {
+  const container = document.getElementById('agent-cards');
+  if (!container) return;
+  container.innerHTML = agents.map(a => {
+    const progress = a.totalQueries > 0 ? (a.queriesCompleted / a.totalQueries * 100) : 0;
+    const canActivate = a.status === 'idle';
+    const canDeactivate = a.status === 'active';
+    const canSeed = a.status === 'idle' || a.status === 'offline';
+    return `<div class="panel agent-card ${a.id === selectedAgentId ? 'selected' : ''}"
+              onclick="agentAction('select','${a.id}')">
+      <div class="agent-header">
+        <div class="agent-id-wrap">
+          <div class="status-dot ${a.status}"></div>
+          <span class="agent-id">${esc(a.id)}</span>
+        </div>
+        <span class="status-badge ${a.status}">${esc(a.status)}</span>
+      </div>
+      <div class="agent-name">${esc(a.name)}</div>
+      <div class="agent-platform">${esc(a.platform)}</div>
+      <div class="agent-mission">${esc(a.mission)}</div>
+      <div class="target-chips">${a.targets.map(t => `<span class="chip">${esc(t)}</span>`).join('')}</div>
+      <div class="agent-stats">
+        <div><div class="agent-stat-val">${a.artifactsProduced}</div><div class="agent-stat-lbl">Artifacts</div></div>
+        <div><div class="agent-stat-val" style="color:var(--lcars-gold)">${a.uptimeHours.toFixed(0)}h</div><div class="agent-stat-lbl">Uptime</div></div>
+        <div><div class="agent-stat-val" style="color:var(--lcars-amber)">${(a.evidenceScore*100).toFixed(0)}%</div><div class="agent-stat-lbl">Evidence</div></div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>QUERIES</span><span>${a.queriesCompleted}/${a.totalQueries}</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:${progress}%"></div>
+        </div>
+      </div>
+      <div class="agent-actions">
+        <button class="btn btn-activate" ${canActivate?'':'disabled'}
+          onclick="event.stopPropagation();agentAction('activate','${a.id}')">Activate</button>
+        <button class="btn btn-deactivate" ${canDeactivate?'':'disabled'}
+          onclick="event.stopPropagation();agentAction('deactivate','${a.id}')">Pause</button>
+        <button class="btn btn-seed" ${canSeed?'':'disabled'}
+          onclick="event.stopPropagation();agentAction('seed','${a.id}')">Seed</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ────────────────────────────────── QPI CHART ─────────────────────────────
+function renderQPIChart(containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const readings = qpiReadings;
+  if (!readings.length) return;
+  const latest = readings[readings.length - 1];
+  const qpiVals = readings.map(r => r.qpi);
+  const min = Math.min(...qpiVals), max = Math.max(...qpiVals);
+  const range = max - min || 0.01;
+  const W = 460, H = 100;
+  const pts = readings.map((r, i) => {
+    const x = (i / (readings.length - 1) * W).toFixed(1);
+    const y = (H - (r.qpi - min) / range * H).toFixed(1);
+    return `${x},${y}`;
+  });
+  const qpiColor = latest.qpi >= 0.70 ? '#66FF66' : latest.qpi >= 0.60 ? '#FFCC00' : '#CC6666';
+  const thresholds = [
+    { value: 0.75, color: '#66FF66', label: 'STRONG' },
+    { value: 0.65, color: '#FFCC00', label: 'MODERATE' },
+    { value: 0.55, color: '#CC6666', label: 'WEAK' },
+  ];
+  const thresholdLines = thresholds.map(t => {
+    const y = (H - (t.value - min) / range * H).toFixed(1);
+    if (y < 0 || y > H) return '';
+    return `<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="${t.color}" stroke-width="0.5" stroke-dasharray="4,4" opacity="0.3"/>
+            <text x="${W-4}" y="${parseFloat(y)-3}" fill="${t.color}" font-size="6" text-anchor="end" opacity="0.5">${t.label}</text>`;
+  }).join('');
+  const areaPoints = `0,${H} ${pts.join(' ')} ${W},${H}`;
+
+  const last20 = readings.slice(-20);
+  const sparkData = {
+    fmo: last20.map(r => r.fmo),
+    tunnel: last20.map(r => r.tunnel),
+    etc: last20.map(r => r.etc),
+    spin: last20.map(r => r.spin),
+  };
+
+  el.innerHTML = `
+    <div class="section-title flex-between" style="margin-bottom:8px;">
+      <span>QPI Monitor</span>
+      <span style="font-size:9px;color:rgba(255,204,102,.4);">48h window</span>
+    </div>
+    <div class="qpi-header">
+      <div class="qpi-value-big" style="color:${qpiColor}">${latest.qpi.toFixed(3)}</div>
+      <div>
+        <div class="qpi-label">Quantum Prot. Index</div>
+      </div>
+    </div>
+    <div class="chart-area" style="margin-top:8px;">
+      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="height:100px;width:100%;overflow:visible;">
+        <defs>
+          <linearGradient id="qpiGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="${qpiColor}"/>
+            <stop offset="100%" stop-color="transparent"/>
+          </linearGradient>
+        </defs>
+        ${thresholdLines}
+        <polygon points="${areaPoints}" fill="url(#qpiGrad)" opacity="0.15"/>
+        <polyline points="${pts.join(' ')}" fill="none" stroke="${qpiColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="${W}" cy="${(H - (latest.qpi - min)/range*H).toFixed(1)}" r="3" fill="${qpiColor}" style="animation:pulse 2s ease-in-out infinite;"/>
+      </svg>
+      <div class="chart-time-labels"><span>-48h</span><span>-36h</span><span>-24h</span><span>-12h</span><span>NOW</span></div>
+    </div>
+    <div class="sparklines">
+      <div class="sparkline-item">
+        <div class="sparkline-label">
+          <div class="sparkline-lbl-name" style="color:#FF9900">A_FMO</div>
+          <div class="sparkline-lbl-val" style="color:#FF9900">${latest.fmo.toFixed(3)}</div>
+        </div>
+        ${svgSparkline(sparkData.fmo, '#FF9900', 110, 28)}
+      </div>
+      <div class="sparkline-item">
+        <div class="sparkline-label">
+          <div class="sparkline-lbl-name" style="color:#66FF66">A_TUNNEL</div>
+          <div class="sparkline-lbl-val" style="color:#66FF66">${latest.tunnel.toFixed(3)}</div>
+        </div>
+        ${svgSparkline(sparkData.tunnel, '#66FF66', 110, 28)}
+      </div>
+      <div class="sparkline-item">
+        <div class="sparkline-label">
+          <div class="sparkline-lbl-name" style="color:#9999FF">A_ETC</div>
+          <div class="sparkline-lbl-val" style="color:#9999FF">${latest.etc.toFixed(3)}</div>
+        </div>
+        ${svgSparkline(sparkData.etc, '#9999FF', 110, 28)}
+      </div>
+      <div class="sparkline-item">
+        <div class="sparkline-label">
+          <div class="sparkline-lbl-name" style="color:#CC99CC">A_SPIN</div>
+          <div class="sparkline-lbl-val" style="color:#CC99CC">${latest.spin.toFixed(3)}</div>
+        </div>
+        ${svgSparkline(sparkData.spin, '#CC99CC', 110, 28)}
+      </div>
+    </div>
+    <div class="qpi-formula">
+      <p>QPI = α·A_FMO + β·A_TUNNEL + γ·A_ETC + δ·A_SPIN</p>
+      <div class="weights">
+        <span style="color:#FF9900">α=0.30</span>
+        <span style="color:#66FF66">β=0.25</span>
+        <span style="color:#9999FF">γ=0.30</span>
+        <span style="color:#CC99CC">δ=0.15</span>
+      </div>
+    </div>`;
+}
+
+// ────────────────────────────────── INGESTION PIPELINE ────────────────────
+function renderPipeline() {
+  const el = document.getElementById('pipeline-panel');
+  if (!el) return;
+  const steps = [
+    { label: 'Webhook Recv', count: 6, state: 'done' },
+    { label: 'YAML Parse', count: 6, state: 'done' },
+    { label: 'Validate', count: 4, state: 'active' },
+    { label: 'Embed', count: 2, state: 'pending' },
+    { label: 'Vault Write', count: 0, state: 'pending' },
+  ];
+  el.innerHTML = `
+    <div class="section-title">Ingestion Pipeline</div>
+    <div class="pipeline-steps">
+      ${steps.map((s,i) => `
+        <div class="pipeline-step ${s.state}">
+          <div class="pipeline-step-count">${s.count}</div>
+          <div>${esc(s.label)}</div>
+        </div>
+        ${i < steps.length-1 ? '<div class="pipeline-arrow">›</div>' : ''}
+      `).join('')}
+    </div>`;
+}
+
+// ────────────────────────────────── ARTIFACT FEED ─────────────────────────
+function renderArtifactFeed(containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const typeLabels = {
+    'literature-summary': 'Lit. Summary',
+    'candidate-analysis': 'Candidate',
+    'architecture-insight': 'Architecture',
+    'grant-language': 'Grant',
+    'simulation-result': 'Simulation',
+  };
+  el.innerHTML = artifacts.map(a => `
+    <div class="artifact-item">
+      <div class="artifact-top">
+        <span class="artifact-type-badge ${a.type}">${esc(typeLabels[a.type] || a.type)}</span>
+        <span class="artifact-score" style="color:${a.relevanceScore>=4?'var(--lcars-green)':a.relevanceScore>=3?'var(--lcars-amber)':'var(--lcars-red)'}">
+          ${'★'.repeat(a.relevanceScore)}${'☆'.repeat(5-a.relevanceScore)}
+        </span>
+      </div>
+      <div class="artifact-title">${esc(a.title)}</div>
+      <div class="artifact-agent">${esc(a.agentId)} · ${esc(a.targetFolder)} · <span class="artifact-status-badge ${a.status}">${esc(a.status)}</span></div>
+      ${a.cancerSignature !== '—' ? `
+        <div class="artifact-sigs">
+          <div class="artifact-sig"><span class="sig-label">CANCER:</span><span>${esc(a.cancerSignature)}</span></div>
+          <div class="artifact-sig"><span class="sig-label">AGING:</span><span>${esc(a.agingSignature)}</span></div>
+        </div>` : ''}
+    </div>`
+  ).join('');
+}
+
+// ────────────────────────────────── BIOMARKERS ────────────────────────────
+function renderBiomarkers() {
+  const el = document.getElementById('biomarker-list');
+  if (!el) return;
+  el.innerHTML = BIOMARKERS.map(bm => {
+    const pct = (bm.evidenceLevel * 100).toFixed(0);
+    const fillColor = bm.evidenceLevel > 0.7 ? 'var(--lcars-green)'
+                    : bm.evidenceLevel > 0.5 ? 'var(--lcars-amber)' : 'var(--lcars-red)';
+    return `<div class="bm-item">
+      <div class="bm-header">
+        <div><span class="bm-symbol">${esc(bm.symbol)}</span><span class="bm-name">${esc(bm.name)}</span></div>
+        <span class="bm-status-badge ${bm.status}">${esc(bm.status)}</span>
+      </div>
+      <div class="bm-arch-row">
+        <span class="bm-arch">${esc(bm.architectureLink)}</span>
+        <span class="bm-weight">QPI: <strong>${(bm.qpiWeight*100).toFixed(0)}%</strong> <span style="opacity:.5">(#${bm.weightRank})</span></span>
+      </div>
+      <div class="evidence-track">
+        <div class="evidence-track-labels"><span>EVIDENCE</span><span>${pct}% (${bm.papersFound} papers)</span></div>
+        <div class="evidence-bar"><div class="evidence-fill" style="width:${pct}%;background:${fillColor};"></div></div>
+      </div>
+      <div class="bm-sigs">
+        <div><span class="bm-sig-label">CANCER: </span><span class="sig-${bm.cancerSignal}">${esc(bm.cancerSignal)}</span></div>
+        <div><span class="bm-sig-label">AGING: </span><span class="sig-${bm.agingSignal}">${esc(bm.agingSignal)}</span></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ────────────────────────────────── QUERIES ───────────────────────────────
+function renderQueries() {
+  const completed = PRIORITY_QUERIES.filter(q => q.status === 'completed').length;
+  const total = PRIORITY_QUERIES.length;
+  const totalPapers = PRIORITY_QUERIES.reduce((s,q) => s+q.papers, 0);
+  const el = document.getElementById('query-list');
+  const cc = document.getElementById('q-complete-count');
+  const pc = document.getElementById('q-papers-count');
+  const pf = document.getElementById('query-progress-fill');
+  if (cc) cc.textContent = `${completed}/${total} complete`;
+  if (pc) pc.textContent = `${totalPapers} papers`;
+  if (pf) pf.style.width = `${(completed/total*100).toFixed(0)}%`;
+  if (!el) return;
+  const icons = { completed: '//', 'in-progress': '>>', pending: '..' };
+  el.innerHTML = PRIORITY_QUERIES.map(q => `
+    <div class="query-item ${q.status}">
+      <span class="query-icon ${q.status}">${icons[q.status]}</span>
+      <div class="query-text ${q.status}"><span class="query-num">Q${q.id}.</span>${esc(q.query)}</div>
+      ${q.papers > 0 ? `<span class="query-papers">${q.papers} papers</span>` : ''}
+    </div>`
+  ).join('');
+}
+
+// ────────────────────────────────── ACTIVITY LOG ──────────────────────────
+function addLog(msg) {
+  log = [`[${ts()}] ${msg}`, ...log].slice(0, 50);
+  renderLog();
+}
+function renderLog() {
+  const el = document.getElementById('activity-log');
+  if (!el) return;
+  el.innerHTML = log.map((e, i) =>
+    `<div class="log-entry ${i===0?'latest':'old'}">${esc(e)}</div>`
+  ).join('');
+}
+
+// ────────────────────────────────── WEBHOOK ───────────────────────────────
+function renderWebhookLog() {
+  const el = document.getElementById('webhook-log');
+  if (!el) return;
+  el.innerHTML = webhookLogEntries.slice(0, 30).map(e =>
+    `<div class="webhook-log-entry ${e.cls}">${esc(e.msg)}</div>`
+  ).join('');
+}
+
+function addWebhookLog(cls, msg) {
+  webhookLogEntries = [{ cls, msg: `[${ts()}] ${msg}` }, ...webhookLogEntries].slice(0, 50);
+  renderWebhookLog();
+}
+
+function updateWebhookStatus() {
+  const dot = document.getElementById('webhook-dot');
+  const txt = document.getElementById('webhook-status-text');
+  const lastTs = document.getElementById('webhook-last-received');
+  if (!dot) return;
+  if (webhookConnected) {
+    dot.className = 'webhook-status-dot connected';
+    txt.textContent = 'Webhook connected — live data streaming';
+    if (webhookLastTs) lastTs.textContent = `Last: ${webhookLastTs}`;
+  } else {
+    dot.className = 'webhook-status-dot disconnected';
+    txt.textContent = 'No webhook connected — demo data active';
+    lastTs.textContent = '';
+  }
+}
+
+function renderTopology() {
+  const el = document.getElementById('topology-svg');
+  if (!el) return;
+  const W = 340, H = 160;
+  const nodes = [
+    { id: 'SWARM', x: 170, y: 80, color: '#FF9900', r: 22 },
+    { id: 'SC-001', x: 60, y: 40, color: '#66FF66', r: 16, status: agents.find(a=>a.id==='SC-001')?.status || 'offline' },
+    { id: 'SC-002', x: 60, y: 120, color: '#FFCC00', r: 16, status: agents.find(a=>a.id==='SC-002')?.status || 'offline' },
+    { id: 'SC-003', x: 280, y: 40, color: '#CC6666', r: 16, status: agents.find(a=>a.id==='SC-003')?.status || 'offline' },
+    { id: 'VAULT', x: 280, y: 120, color: '#9999FF', r: 16 },
+    { id: 'API', x: 170, y: 145, color: '#99CCFF', r: 12 },
+  ];
+  const edges = [
+    ['SC-001','SWARM'], ['SC-002','SWARM'], ['SC-003','SWARM'],
+    ['SWARM','VAULT'], ['SWARM','API'],
+  ];
+  const statusColors = { active:'#66FF66', idle:'#FFCC00', seeding:'#99CCFF', error:'#CC6666', offline:'#444' };
+  el.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="width:100%;display:block;">
+    ${edges.map(([a,b]) => {
+      const n1 = nodes.find(n=>n.id===a), n2 = nodes.find(n=>n.id===b);
+      return `<line x1="${n1.x}" y1="${n1.y}" x2="${n2.x}" y2="${n2.y}" stroke="rgba(255,153,0,.2)" stroke-width="1.5" stroke-dasharray="4,4"/>`;
+    }).join('')}
+    ${nodes.map(n => {
+      const col = n.status ? (statusColors[n.status] || n.color) : n.color;
+      return `<g>
+        <circle cx="${n.x}" cy="${n.y}" r="${n.r}" fill="${col}" fill-opacity="0.15" stroke="${col}" stroke-width="1.5"/>
+        <text x="${n.x}" y="${n.y+4}" text-anchor="middle" fill="${col}" font-size="9" font-family="Antonio,sans-serif" font-weight="700">${n.id}</text>
+      </g>`;
+    }).join('')}
+  </svg>`;
+}
+
+// ────────────────────────────────── DEMO INJECTION ────────────────────────
+const DEMO_ARTIFACTS = [
+  {
+    id: null, agentId: "SC-001", type: "literature-summary",
+    targetFolder: "06-Literature",
+    title: "Quantum coherence in photosynthesis: implications for mitochondrial electron transport",
+    relevanceScore: 4, architectureAlignment: ["FMO coherence"],
+    status: "ingested", timestamp: new Date().toISOString(),
+    cancerSignature: "Coherence-enhanced energy transfer in cancer mitochondria",
+    agingSignature: "Coherence times decrease 35% in aging tissue",
+  },
+  {
+    id: null, agentId: "SC-001", type: "candidate-analysis",
+    targetFolder: "02-Candidates",
+    title: "NRF2 activation as cancer-aging dual intervention point",
+    relevanceScore: 4, architectureAlignment: ["Enzyme tunneling"],
+    status: "validating", timestamp: new Date().toISOString(),
+    cancerSignature: "NRF2 overexpression in 73% of NSCLC",
+    agingSignature: "NRF2 signaling declines with age",
+  },
+];
+let demoIdx = 0;
+
+function injectDemoPayload() {
+  const art = JSON.parse(JSON.stringify(DEMO_ARTIFACTS[demoIdx % DEMO_ARTIFACTS.length]));
+  art.id = `SA-DEMO-${Date.now()}`;
+  art.timestamp = new Date().toISOString();
+  demoIdx++;
+
+  artifacts = [art, ...artifacts];
+  // Update preview
+  const preview = document.getElementById('webhook-preview');
+  if (preview) preview.textContent = JSON.stringify({ agentId: art.agentId, artifacts: [art] }, null, 2);
+  // Update agent count
+  const agent = agents.find(a => a.id === art.agentId);
+  if (agent) agent.artifactsProduced++;
+  webhookLastTs = ts();
+
+  addWebhookLog('incoming', `Artifact ingested: ${art.title.slice(0,50)}...`);
+  addLog(`Webhook: Artifact ingested from ${art.agentId}`);
+  renderAll();
+}
+
+// ────────────────────────────────── CONNECT/DISCONNECT ────────────────────
+let pollInterval = null;
+document.getElementById('btn-connect').addEventListener('click', () => {
+  const url = document.getElementById('webhook-url').value.trim();
+  if (!url) {
+    addWebhookLog('error', 'Error: No webhook URL configured');
+    return;
+  }
+  webhookConnected = true;
+  const secs = parseInt(document.getElementById('webhook-interval').value) || 10;
+  document.getElementById('btn-connect').disabled = true;
+  document.getElementById('btn-disconnect').disabled = false;
+  addWebhookLog('info', `Connected to ${url} (polling every ${secs}s)`);
+  addLog(`Webhook connected: ${url}`);
+  updateWebhookStatus();
+
+  pollInterval = setInterval(() => {
+    addWebhookLog('info', `Polling ${url}...`);
+    // In a real deployment, fetch the URL here. For demo, inject simulated data.
+    if (Math.random() > 0.4) injectDemoPayload();
+  }, secs * 1000);
+});
+
+document.getElementById('btn-disconnect').addEventListener('click', () => {
+  webhookConnected = false;
+  clearInterval(pollInterval);
+  pollInterval = null;
+  document.getElementById('btn-connect').disabled = false;
+  document.getElementById('btn-disconnect').disabled = true;
+  addWebhookLog('info', 'Webhook disconnected');
+  addLog('Webhook disconnected — demo data mode');
+  updateWebhookStatus();
+});
+
+document.getElementById('btn-test-payload').addEventListener('click', () => {
+  injectDemoPayload();
+  addLog('Demo payload injected');
+});
+
+// ────────────────────────────────── TABS ──────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    // Re-render QPI for newly visible panel
+    if (btn.dataset.tab === 'biomarkers') renderQPIChart('qpi-panel-2');
+  });
+});
+
+// ────────────────────────────────── RENDER ALL ────────────────────────────
+function renderAll() {
+  renderStats();
+  renderAgentCards();
+  renderQPIChart('qpi-panel');
+  renderQPIChart('qpi-panel-2');
+  renderPipeline();
+  renderArtifactFeed('artifact-list');
+  renderArtifactFeed('artifact-list-2');
+  renderBiomarkers();
+  renderQueries();
+  renderLog();
+  renderWebhookLog();
+  updateWebhookStatus();
+  renderTopology();
+}
+
+// ────────────────────────────────── LIVE QPI UPDATE ───────────────────────
+setInterval(() => {
+  qpiReadings = [...qpiReadings.slice(1), {
+    timestamp: new Date().toISOString(),
+    qpi: +(0.72 + noise()).toFixed(3),
+    fmo: +(0.30 + noise()).toFixed(3),
+    tunnel: +(0.25 + noise()).toFixed(3),
+    etc: +(0.30 + noise()).toFixed(3),
+    spin: +(0.15 + noise()).toFixed(3),
+  }];
+  renderQPIChart('qpi-panel');
+  renderQPIChart('qpi-panel-2');
+}, 5000);
+
+// Demo auto-inject (simulates swarm activity when no webhook connected)
+setInterval(() => {
+  if (!webhookConnected && Math.random() > 0.7) {
+    addLog('SC-001 — background activity detected');
+    renderLog();
+  }
+}, 8000);
+
+// Initial render
+renderAll();
+</script>
+</body>
+</html>
