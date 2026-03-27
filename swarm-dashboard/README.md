@@ -55,14 +55,19 @@ Or connect the repository in the [Vercel dashboard](https://vercel.com/new) and 
 |---|---|
 | `SWARM_WEBHOOK_SECRET` | Bearer token for securing the `/api/webhooks/ingest` endpoint (optional) |
 
+> **Vercel secret setup:** The `vercel.json` references `@swarm_webhook_secret`. Before deploying, add this secret via the Vercel CLI: `vercel secrets add swarm_webhook_secret your-secret-value`, or set it in the Vercel project dashboard under Settings → Environment Variables.
+
 ---
 
 ## Architecture
 
 ```
 swarm-dashboard/
-├── swarm-dashboard.html          # Self-contained static export (single file)
+├── swarm-dashboard.html          # Self-contained static export (single file, no server needed)
 ├── vercel.json                   # Vercel deployment configuration
+├── README.md                     # This file
+│
+│   ── Next.js source (swarm-dashboard-standalone branch) ──
 ├── package.json
 ├── next.config.js
 ├── src/
@@ -91,8 +96,10 @@ swarm-dashboard/
 │   └── lib/
 │       ├── swarm-data.ts         # Mock data, types, QPI generator
 │       └── artifact-parser.ts    # YAML/JSON artifact parser
-└── README.md
+└── ...
 ```
+
+> **Note:** `swarm-dashboard.html` is a complete standalone export of the dashboard. The Next.js source files (listed above) are available on the `swarm-dashboard-standalone` branch and are required only for the full server-side deployment with live API routes.
 
 ---
 
@@ -223,11 +230,11 @@ The dashboard uses the Star Trek LCARS (Library Computer Access/Retrieval System
 
 ---
 
-## Local SQLite Persistence
+## Local SQLite Persistence (Next.js app only)
 
-The Next.js app uses SQLite (`better-sqlite3`) for artifact persistence. The database file is created automatically at `./swarm.db` on first run.
+The Next.js server-side app uses SQLite (`better-sqlite3`) for artifact persistence. The database file is created automatically at `./swarm.db` on first run.
 
-The static HTML version uses in-memory state only — data resets on page reload.
+> The static HTML version (`swarm-dashboard.html`) uses in-memory state only — data resets on page reload. For persistent storage, use the full Next.js deployment.
 
 ---
 

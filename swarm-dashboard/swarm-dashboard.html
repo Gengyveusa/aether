@@ -855,8 +855,8 @@ function updateClock() {
   const now = new Date();
   document.getElementById('clock').textContent =
     now.toLocaleTimeString('en-US', {hour12: false});
-  const start = new Date(now.getFullYear(), 0, 0);
-  const day = (now - start) / 86400000;
+  const start = new Date(now.getFullYear(), 0, 1);
+  const day = (now - start) / 86400000 + 1;
   document.getElementById('stardate').textContent =
     `SD ${now.getFullYear()-1900}.${day.toFixed(1)}`;
 }
@@ -1119,7 +1119,7 @@ function renderArtifactFeed(containerId) {
     <div class="artifact-item">
       <div class="artifact-top">
         <span class="artifact-type-badge ${a.type}">${esc(typeLabels[a.type] || a.type)}</span>
-        <span class="artifact-score" style="color:${'★'.length && a.relevanceScore>=4?'var(--lcars-green)':a.relevanceScore>=3?'var(--lcars-amber)':'var(--lcars-red)'}">
+        <span class="artifact-score" style="color:${a.relevanceScore>=4?'var(--lcars-green)':a.relevanceScore>=3?'var(--lcars-amber)':'var(--lcars-red)'}">
           ${'★'.repeat(a.relevanceScore)}${'☆'.repeat(5-a.relevanceScore)}
         </span>
       </div>
