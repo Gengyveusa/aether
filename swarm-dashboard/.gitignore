@@ -1,0 +1,14 @@
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# Database
+swarm.db
+swarm.db-wal
+swarm.db-shm
+
+# Environment
+.env
+.env.local
