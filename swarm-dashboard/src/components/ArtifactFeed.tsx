@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import type { SwarmArtifact } from "@/lib/swarm-data";
 import { ARTIFACTS } from "@/lib/swarm-data";
 
@@ -40,70 +40,47 @@ function RelevanceBar({ score }: { score: number }) {
   );
 }
 
-export default function ArtifactFeed() {
+interface ArtifactFeedProps {
+  refreshTrigger?: number; // increment to force refresh from DB
+}
+
+export default function ArtifactFeed({ refreshTrigger }: ArtifactFeedProps) {
   const [artifacts, setArtifacts] = useState<SwarmArtifact[]>(ARTIFACTS);
   const [filter, setFilter] = useState<string>("all");
+  const [isLive, setIsLive] = useState(true);
   const feedRef = useRef<HTMLDivElement>(null);
 
-  // Simulate new artifacts arriving
-  useEffect(() => {
-    const newArtifactTemplates: Partial<SwarmArtifact>[] = [
-      {
-        type: "literature-summary",
-        targetFolder: "06-Literature",
-        title: "Quantum tunneling rates in human liver Complex I: age-dependent decline",
-        relevanceScore: 4,
-        architectureAlignment: ["Enzyme tunneling", "ETC quantum transfer"],
-        cancerSignature: "Preserved tunneling efficiency in hepatocellular carcinoma",
-        agingSignature: "30% decline in tunneling rate >70y",
-      },
-      {
-        type: "candidate-analysis",
-        targetFolder: "02-Candidates",
-        title: "CoQ10 supplementation restores ETC quantum efficiency in aged mice",
-        relevanceScore: 3,
-        architectureAlignment: ["ETC quantum transfer"],
-        cancerSignature: "No significant effect on tumor models",
-        agingSignature: "Partial restoration of electron transfer rates",
-      },
-      {
-        type: "architecture-insight",
-        targetFolder: "01-Core-Thesis",
-        title: "Radical pair mechanism in human retinal cryptochrome: first direct measurement",
-        relevanceScore: 5,
-        architectureAlignment: ["Cryptochrome spin coherence"],
-        cancerSignature: "Unknown",
-        agingSignature: "Spin coherence lifetime decreases with age",
-      },
-    ];
-
-    let idx = 0;
-    const interval = setInterval(() => {
-      if (idx >= newArtifactTemplates.length) {
-        idx = 0; // Loop
+  // Fetch artifacts from the database
+  const fetchArtifacts = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/artifacts?type=${filter}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.artifacts && data.artifacts.length > 0) {
+          setArtifacts(data.artifacts);
+        }
       }
-      const template = newArtifactTemplates[idx];
-      const now = new Date();
-      const newArtifact: SwarmArtifact = {
-        id: `SA-SC001-${now.toISOString().slice(0, 10).replace(/-/g, "")}-${String(artifacts.length + 1).padStart(3, "0")}`,
-        agentId: "SC-001",
-        type: template.type!,
-        targetFolder: template.targetFolder!,
-        title: template.title!,
-        relevanceScore: template.relevanceScore!,
-        architectureAlignment: template.architectureAlignment!,
-        status: "validating",
-        timestamp: now.toISOString(),
-        cancerSignature: template.cancerSignature!,
-        agingSignature: template.agingSignature!,
-      };
+    } catch {
+      // Fallback to static data on error
+    }
+  }, [filter]);
 
-      setArtifacts((prev) => [newArtifact, ...prev]);
-      idx++;
-    }, 15000); // New artifact every 15s
+  // Initial load + periodic polling
+  useEffect(() => {
+    fetchArtifacts();
 
-    return () => clearInterval(interval);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (isLive) {
+      const interval = setInterval(fetchArtifacts, 5000); // Poll every 5s
+      return () => clearInterval(interval);
+    }
+  }, [fetchArtifacts, isLive]);
+
+  // Refresh when triggered by parent (e.g., after manual submission)
+  useEffect(() => {
+    if (refreshTrigger && refreshTrigger > 0) {
+      fetchArtifacts();
+    }
+  }, [refreshTrigger, fetchArtifacts]);
 
   const filtered = filter === "all" ? artifacts : artifacts.filter((a) => a.type === filter);
 
@@ -121,7 +98,19 @@ export default function ArtifactFeed() {
         <h2 className="text-lcars-orange font-bold text-sm tracking-[0.2em] uppercase">
           Artifact Ingestion Feed
         </h2>
-        <span className="text-lcars-cyan text-xs">{artifacts.length} total</span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsLive(!isLive)}
+            className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${
+              isLive
+                ? "bg-lcars-green/20 text-lcars-green border-lcars-green/30"
+                : "text-lcars-gold/30 border-lcars-gold/10"
+            }`}
+          >
+            {isLive ? "LIVE" : "PAUSED"}
+          </button>
+          <span className="text-lcars-cyan text-xs">{artifacts.length} total</span>
+        </div>
       </div>
 
       {/* Filters */}
@@ -147,18 +136,18 @@ export default function ArtifactFeed() {
           const statusBadge = STATUS_BADGE[artifact.status];
           return (
             <div
-              key={artifact.id}
+              key={artifact.id + "-" + i}
               className={`p-3 rounded border border-lcars-orange/10 bg-black/30 hover:bg-lcars-panel-light transition-all duration-300 ${
                 i === 0 ? "animate-fade-in" : ""
               }`}
             >
               {/* Top row */}
               <div className="flex items-start justify-between gap-2 mb-1.5">
-                <span className={`text-[10px] px-1.5 py-0.5 rounded border ${TYPE_COLORS[artifact.type]}`}>
-                  {artifact.type.replace("-", " ").toUpperCase()}
+                <span className={`text-[10px] px-1.5 py-0.5 rounded border ${TYPE_COLORS[artifact.type] || "text-lcars-gold border-lcars-gold/30"}`}>
+                  {artifact.type.replace(/-/g, " ").toUpperCase()}
                 </span>
-                <span className={`text-[10px] px-1.5 py-0.5 rounded ${statusBadge.color}`}>
-                  {statusBadge.label}
+                <span className={`text-[10px] px-1.5 py-0.5 rounded ${statusBadge?.color || "bg-gray-500/20 text-gray-400"}`}>
+                  {statusBadge?.label || artifact.status.toUpperCase()}
                 </span>
               </div>
 
@@ -183,16 +172,18 @@ export default function ArtifactFeed() {
               </div>
 
               {/* Signatures */}
-              <div className="grid grid-cols-2 gap-2 mt-2 text-[10px]">
-                <div>
-                  <span className="text-lcars-red/60">CANCER: </span>
-                  <span className="text-lcars-gold/50">{artifact.cancerSignature}</span>
+              {(artifact.cancerSignature || artifact.agingSignature) && (
+                <div className="grid grid-cols-2 gap-2 mt-2 text-[10px]">
+                  <div>
+                    <span className="text-lcars-red/60">CANCER: </span>
+                    <span className="text-lcars-gold/50">{artifact.cancerSignature || "—"}</span>
+                  </div>
+                  <div>
+                    <span className="text-lcars-blue/60">AGING: </span>
+                    <span className="text-lcars-gold/50">{artifact.agingSignature || "—"}</span>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-lcars-blue/60">AGING: </span>
-                  <span className="text-lcars-gold/50">{artifact.agingSignature}</span>
-                </div>
-              </div>
+              )}
 
               <div className="text-[9px] text-lcars-gold/30 mt-1.5 text-right">
                 {formatTime(artifact.timestamp)}

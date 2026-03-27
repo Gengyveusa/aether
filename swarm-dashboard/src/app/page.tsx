@@ -9,18 +9,22 @@ import QPIChart from "@/components/QPIChart";
 import QueryTracker from "@/components/QueryTracker";
 import SwarmStats from "@/components/SwarmStats";
 import IngestionPipeline from "@/components/IngestionPipeline";
+import ArtifactSubmitForm from "@/components/ArtifactSubmitForm";
+import SeedingPromptPanel from "@/components/SeedingPromptPanel";
 import { AGENTS, type SwarmAgent } from "@/lib/swarm-data";
 
-type TabKey = "overview" | "biomarkers" | "queries";
+type TabKey = "overview" | "biomarkers" | "queries" | "ingest";
 
 export default function SwarmDashboard() {
   const [agents, setAgents] = useState<SwarmAgent[]>(AGENTS);
   const [selectedAgent, setSelectedAgent] = useState<SwarmAgent | null>(AGENTS[0]);
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [log, setLog] = useState<string[]>([
     `[${new Date().toISOString().slice(11, 19)}] SWARM MONITOR INITIALIZED`,
     `[${new Date().toISOString().slice(11, 19)}] SC-001 ScienceClaw x Infinite — STATUS: ACTIVE`,
     `[${new Date().toISOString().slice(11, 19)}] Monitoring 7 priority queries...`,
+    `[${new Date().toISOString().slice(11, 19)}] Webhook endpoint ready: /api/webhooks/ingest`,
   ]);
 
   const addLog = useCallback((msg: string) => {
@@ -78,8 +82,13 @@ export default function SwarmDashboard() {
     setSelectedAgent(agent);
   }, []);
 
+  const handleArtifactSubmitted = useCallback(() => {
+    setRefreshTrigger((prev) => prev + 1);
+  }, []);
+
   const tabs: { key: TabKey; label: string }[] = [
     { key: "overview", label: "OVERVIEW" },
+    { key: "ingest", label: "INGEST" },
     { key: "biomarkers", label: "BIOMARKERS" },
     { key: "queries", label: "QUERIES" },
   ];
@@ -150,7 +159,55 @@ export default function SwarmDashboard() {
 
               {/* Right: Artifact Feed */}
               <div className="col-span-4">
-                <ArtifactFeed />
+                <ArtifactFeed refreshTrigger={refreshTrigger} />
+              </div>
+            </div>
+          )}
+
+          {activeTab === "ingest" && (
+            <div className="grid grid-cols-12 gap-4">
+              {/* Left: Submit + Seed */}
+              <div className="col-span-5 space-y-4">
+                <ArtifactSubmitForm onSubmitted={handleArtifactSubmitted} onLog={addLog} />
+
+                {/* Webhook info panel */}
+                <div className="lcars-panel p-4">
+                  <h2 className="text-lcars-orange font-bold text-sm tracking-[0.2em] uppercase mb-2">
+                    Webhook Endpoint
+                  </h2>
+                  <div className="space-y-2 text-xs">
+                    <div className="p-2 bg-black/40 rounded border border-lcars-orange/10 font-mono">
+                      <div className="text-lcars-cyan">POST /api/webhooks/ingest</div>
+                    </div>
+                    <div className="text-lcars-gold/50 leading-relaxed">
+                      Point ScienceClaw, Claude, or any agent&apos;s webhook output at this endpoint.
+                      Accepts raw YAML text or structured JSON.
+                    </div>
+                    <div className="p-2 bg-black/40 rounded border border-lcars-orange/10 font-mono text-[10px]">
+                      <div className="text-lcars-gold/40 mb-1"># Raw YAML mode:</div>
+                      <div className="text-lcars-green">curl -X POST /api/webhooks/ingest \</div>
+                      <div className="text-lcars-green pl-2">-H &quot;Content-Type: application/json&quot; \</div>
+                      <div className="text-lcars-green pl-2">-d &apos;&#123;&quot;text&quot;: &quot;...yaml...&quot;, &quot;agentId&quot;: &quot;SC-001&quot;&#125;&apos;</div>
+                      <div className="text-lcars-gold/40 mt-2 mb-1"># Structured JSON mode:</div>
+                      <div className="text-lcars-green">curl -X POST /api/webhooks/ingest \</div>
+                      <div className="text-lcars-green pl-2">-H &quot;Content-Type: application/json&quot; \</div>
+                      <div className="text-lcars-green pl-2">-d &apos;&#123;&quot;artifacts&quot;: [&#123;...&#125;]&#125;&apos;</div>
+                    </div>
+                    <div className="text-lcars-gold/40 text-[10px]">
+                      Set <span className="text-lcars-amber">SWARM_WEBHOOK_SECRET</span> env var for Bearer token auth.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Center: Seeding prompt */}
+              <div className="col-span-4">
+                <SeedingPromptPanel onLog={addLog} />
+              </div>
+
+              {/* Right: Live feed */}
+              <div className="col-span-3">
+                <ArtifactFeed refreshTrigger={refreshTrigger} />
               </div>
             </div>
           )}
@@ -172,7 +229,7 @@ export default function SwarmDashboard() {
                 <QueryTracker />
               </div>
               <div className="col-span-5">
-                <ArtifactFeed />
+                <ArtifactFeed refreshTrigger={refreshTrigger} />
               </div>
             </div>
           )}
@@ -201,8 +258,9 @@ export default function SwarmDashboard() {
         <div className="w-12 bg-lcars-orange" />
         <div className="flex-1 bg-lcars-orange h-2 self-end" />
         <div className="bg-lcars-panel px-6 py-1 flex items-center gap-4">
-          <span className="text-lcars-gold/40 text-[10px] tracking-widest">QUANTUM DISTILLERY v1.0</span>
+          <span className="text-lcars-gold/40 text-[10px] tracking-widest">QUANTUM DISTILLERY v1.1</span>
           <span className="text-lcars-cyan/40 text-[10px]">ARPA-H DELPHI SUBMISSION</span>
+          <span className="text-lcars-green/40 text-[10px]">WEBHOOK: /api/webhooks/ingest</span>
         </div>
         <div className="flex-1 bg-lcars-gold h-2 self-end" />
         <div className="w-24 bg-lcars-purple lcars-bracket-right h-6" />
